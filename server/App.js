@@ -31,17 +31,12 @@ var fs = require('fs');
 var Raven = require('raven');
 
 var Core = require('./Core');
-var GameController = require('./app/live/game/GameManager');
 var MongoUtils = require('./app/mongo/MongoUtils');
 var RedisUtils = require('./app/redis/RedisUtils');
 var Router = require('./app/router/Router');
 var PathLibrary = require('./PathLibrary');
 var UserModelManager = require('./app/model/user/UserModelManager');
 var SessionModelManager = require('./app/model/session/SessionModelManager');
-var GameModelManager = require('./app/model/game/GameModelManager');
-var GameTeamModelManager = require('./app/model/gameteam/GameTeamModelManager');
-var GameUserModelManager = require('./app/model/gameuser/GameUserModelManager');
-var FactoryModelManager = require('./app/model/factory/FactoryModelManager');
 var RealTime = require('./app/realtime/RealTime');
 var PortUtils = require('./app/util/PortUtils');
 var EventLoopMonitor = require('./app/latency/EventLoopMonitor');
