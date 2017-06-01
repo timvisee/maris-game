@@ -19,3 +19,5 @@ The project is currently developed and maintained by [Tim Visée](https://github
 
 ## License
 This project is released under the GNU GPL-3.0 license. Check out the [LICENSE](LICENSE) file for more information.
+
+This project contains parts from the [Dworek](https://github.com/timvisee/dworek) project.
