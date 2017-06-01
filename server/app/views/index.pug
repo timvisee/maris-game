@@ -1,0 +1,11 @@
+extends page
+
+block content
+    p Welcome to #{app.name}.
+
+    - var nextParam = next !== undefined ? '?next=' + next : '';
+
+    br
+    .button-list
+        a.ui-btn.ui-btn-raised.clr-primary(href='/login' + nextParam, title='Login') Login
+        a.ui-btn.ui-btn-raised.clr-primary(href='/register' + nextParam, title='Register') Register

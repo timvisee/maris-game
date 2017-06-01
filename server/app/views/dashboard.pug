@@ -1,0 +1,27 @@
+extends page
+
+block tabs
+    ul(data-role='nd2tabs' data-swipe=true)
+        - var fadeDelay = 0;
+        li.wow.fadeInUp(data-tab='dashboard', data-wow-delay=(fadeDelay += 0.1) + 's') Dashboard
+        li.wow.fadeInUp(data-tab='games', data-wow-delay=(fadeDelay += 0.1) + 's') Games
+
+block content
+    div(data-role='nd2tab', data-tab='dashboard')
+        p Welcome #{session.user.name}!
+
+        p.
+            You're using an early prototype of #{app.name}, which is still an unfinished product.<br>
+            <br>
+            #{app.name} is currently in the pre-alpha stage and is still prone to bugs, glitches and other unwanted behaviour.<br>
+            <br>
+            Please contribute to the project and support the development on GitHub.
+
+        .button-list
+            a.ui-btn(href='https://github.com/timvisee/maris-game', title='Support on GitHub') View on GitHub
+            a.ui-btn(href='/about', title='About') About
+            a.ui-btn.clr-warning(href='/logout', title='Logout') Logout
+
+    div(data-role='nd2tab', data-tab='games')
+        p.
+            Show some other content here...!
