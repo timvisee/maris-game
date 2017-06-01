@@ -288,6 +288,18 @@ config.session.cookieName = 'session_token';
  ******************************************************************************/
 
 /**
+ * Minimum number of username characters.
+ * @type {int}
+ */
+config.validation.usernameMinLength = 3;
+
+/**
+ * Maximum number of username characters.
+ * @type {int}
+ */
+config.validation.usernameMaxLength = 128;
+
+/**
  * Minimum number of password characters.
  * @type {int}
  */
@@ -303,7 +315,7 @@ config.validation.passwordMaxLength = 128;
  * Minimum number of name characters.
  * @type {int}
  */
-config.validation.nameMinLength = 2;
+config.validation.nameMinLength = 1;
 
 /**
  * Maximum number of name characters.

@@ -34,6 +34,45 @@ var config = require('../../config');
 var Validator = function() {};
 
 /**
+ * Format the the given username.
+ *
+ * @param {string} username Username of a user.
+ *
+ * @return {string} The formatted username.
+ */
+Validator.formatUsername = function(username) {
+    // Trim the username
+    return username.trim();
+};
+
+/**
+ * Check whether the given username is valid.
+ *
+ * @param {string} username Username.
+ *
+ * @return {boolean} True if the username is valid, false if not.
+ */
+Validator.isValidUsername = function(username) {
+    // Make sure the username isn't undefined or null
+    if(username === undefined || username === null)
+        return false;
+
+    // Trim the username
+    username = username.trim();
+
+    // The username must match the regex
+    // TODO: Validate this, is this correct?
+    if(!validator.matches(username, /^[0-9a-z]+$/i))
+        return false;
+
+    // Count the number of characters
+    const charCount = username.length;
+
+    // Make sure the length is within bounds
+    return charCount >= config.validation.usernameMinLength && charCount <= config.validation.usernameMaxLength;
+};
+
+/**
  * Format the given mail address.
  *
  * @param {string} mail Mail address.
@@ -73,79 +112,37 @@ Validator.isValidPassword = function(password) {
 };
 
 /**
- * Format the the given first name.
+ * Format the the given name.
  *
- * @param {string} firstName First name of a user.
+ * @param {string} name Name of a user.
  *
- * @return {string} The formatted first name.
+ * @return {string} The formatted name.
  */
-Validator.formatFirstName = function(firstName) {
-    // Trim the first name
-    firstName = firstName.trim();
+Validator.formatName = function(name) {
+    // Trim the name
+    name = name.trim();
 
-    // Capitalize the first character, and return
-    return firstName[0].toUpperCase() + firstName.slice(1).toLowerCase();
+    // Capitalize the character, and return
+    return name[0].toUpperCase() + name.slice(1).toLowerCase();
 };
 
 /**
- * Check whether the given first name is valid.
+ * Check whether the given name is valid.
  *
- * @param {string} firstName First name.
+ * @param {string} name Name.
  *
- * @return {boolean} True if the first name is valid, false if not.
+ * @return {boolean} True if the name is valid, false if not.
  */
-Validator.isValidFirstName = function(firstName) {
-    // Make sure the first name isn't undefined or null
-    if(firstName === undefined || firstName === null)
+Validator.isValidName = function(name) {
+    // Make sure the name isn't undefined or null
+    if(name === undefined || name === null)
         return false;
 
-    // Trim the first name
-    firstName = firstName.trim();
+    // Trim the name
+    name = name.trim();
 
     // Count the number of characters
-    const charCount = firstName.length;
-
-    // Make sure the length is within bounds
-    return charCount >= config.validation.nameMinLength && charCount <= config.validation.nameMaxLength;
-};
-
-/**
- * Format the given last name.
- *
- * @param {string} lastName
- *
- * @return {string} The formatted last name.
- */
-Validator.formatLastName = function(lastName) {
-    // Trim the last name
-    lastName = lastName.trim();
-
-    // Determine the character position of the last word
-    const charPos = lastName.lastIndexOf(' ') + 1;
-
-    // Format and return the last name
-    return lastName.substring(0, charPos).toLowerCase() +
-        lastName.charAt(charPos).toUpperCase() +
-        lastName.substring(charPos + 1).toLowerCase();
-};
-
-/**
- * Check whether the given last name is valid.
- *
- * @param {string} lastName Last name.
- *
- * @return {boolean} True if the last name is valid, false if not.
- */
-Validator.isValidLastName = function(lastName) {
-    // Make sure the last name isn't undefined or null
-    if(lastName === undefined || lastName === null)
-        return false;
-
-    // Trim the last name
-    lastName = lastName.trim();
-
-    // Count the number of characters
-    const charCount = lastName.length;
+    const charCount = name.length;
 
     // Make sure the length is within bounds
     return charCount >= config.validation.nameMinLength && charCount <= config.validation.nameMaxLength;
