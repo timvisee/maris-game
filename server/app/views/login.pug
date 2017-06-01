@@ -1,0 +1,21 @@
+extends page
+
+block content
+    p Enter your username and password to login.
+
+    br
+
+    - var nextParam = next !== undefined ? '?next=' + next : '';
+
+    form#form-login(method='POST', action='/login/' + nextParam + '#')
+
+        label(for='field-username') Username:
+        input(type='text', name='field-username', id='field-username', value='', data-clear-btn='true')
+
+        label(for='field-password') Password:
+        input(type='password', name='field-password', id='field-password', value='', data-clear-btn='true')
+
+        br
+        .button-list
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Login
+            a.ui-btn(href='/register' + nextParam, title='Register') Don't have an account?
