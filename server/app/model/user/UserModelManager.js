@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) Dworek 2016. All rights reserved.                            *
+ * Copyright (c) Maris Game 2017. All rights reserved.                        *
  *                                                                            *
  * @author Tim Visee                                                          *
  * @website http://timvisee.com/                                              *
@@ -157,27 +157,27 @@ UserModelManager.prototype.isValidUserId = function(id, callback) {
  */
 
 /**
- * Get a user by it's mail address.
+ * Get a user by it's username.
  *
- * @param {string} mail Mail address of the user.
- * @param {UserModelManager~getUserByMailCallback} callback Callback with the user.
+ * @param {string} username Username of the user.
+ * @param {UserModelManager~getUserByUsernameCallback} callback Callback with the user.
  */
-UserModelManager.prototype.getUserByMail = function(mail, callback) {
+UserModelManager.prototype.getUserByUsername = function(username, callback) {
     // Store the current instance
     const self = this;
 
-    // Make sure the mail address is valid
-    if(!Validator.isValidMail(mail)) {
+    // Make sure the username is valid
+    if(!Validator.isValidUsername(username)) {
         // Call back
-        callback(new Error('Invalid mail address given.'));
+        callback(new Error('Invalid username given.'));
         return;
     }
 
-    // Format the mail address
-    mail = Validator.formatMail(mail);
+    // Format the username
+    username = Validator.formatUsername(username);
 
     // Return some user data
-    UserDatabase.layerFetchFieldsFromDatabase({mail}, {_id: true}, function(err, data) {
+    UserDatabase.layerFetchFieldsFromDatabase({username}, {_id: true}, function(err, data) {
         // Pass along errors
         if(err !== null) {
             callback(err, null);
@@ -204,30 +204,30 @@ UserModelManager.prototype.getUserByMail = function(mail, callback) {
 /**
  * Called with the user, or when an error occurred.
  *
- * @callback UserManager~getUserByMailCallback
+ * @callback UserManager~getUserByUsernameCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
  * @param {UserModel|null} User instance, or null if no user was found.
  */
 
 /**
- * Check whether a user with the given mail address exists.
+ * Check whether a user with the given username exists.
  *
- * @param {string} mail Mail address of the user.
- * @param {UserModelManager~isUserWithMailCallback} callback Callback with the result or when an error occurred.
+ * @param {string} username Username of the user.
+ * @param {UserModelManager~isUserWithUsernameCallback} callback Callback with the result or when an error occurred.
  */
-UserModelManager.prototype.isUserWithMail = function(mail, callback) {
-    // Make sure the mail address is valid
-    if(!Validator.isValidMail(mail)) {
+UserModelManager.prototype.isUserWithUsername = function(username, callback) {
+    // Make sure the username is valid
+    if(!Validator.isValidUsername(username)) {
         // Call back
-        callback(new Error('Invalid mail address given.'), false);
+        callback(new Error('Invalid username given.'), false);
         return;
     }
 
-    // Format the mail address
-    mail = Validator.formatMail(mail);
+    // Format the username
+    username = Validator.formatUsername(username);
 
     // Return some user data
-    UserDatabase.layerFetchFieldsFromDatabase({mail}, {_id: true}, function(err, data) {
+    UserDatabase.layerFetchFieldsFromDatabase({username}, {_id: true}, function(err, data) {
         // Pass along errors
         if(err !== null) {
             callback(err, null);
@@ -242,23 +242,23 @@ UserModelManager.prototype.isUserWithMail = function(mail, callback) {
 /**
  * Called with the result or when an error occurred.
  *
- * @callback UserManager~isUserWithMailCallback
+ * @callback UserManager~isUserWithUsernameCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {boolean} True if the mail address is used and exists, false if not.
+ * @param {boolean} True if the username is used and exists, false if not.
  */
 
 /**
  * Get the user by it's credentials.
- * This may be used to validate user credentials such as it's mail address and password.
+ * This may be used to validate user credentials such as it's username and password.
  * If one of the fields is missing, null will be returned.
  *
- * @param mail Mail address of the user.
+ * @param username Username of the user.
  * @param password Password of the user. (not hashed)
  * @param {UserModelManager~getUserByCredentialsCallback} callback Callback with the user, or null if the credentials were invalid.
  */
-UserModelManager.prototype.getUserByCredentials = function(mail, password, callback) {
+UserModelManager.prototype.getUserByCredentials = function(username, password, callback) {
     // Make sure all fields are given
-    if(mail === undefined || password === undefined || callback === undefined) {
+    if(username === undefined || password === undefined || callback === undefined) {
         // Call the callback with nullif available
         if(callback !== undefined)
             callback(new Error('Invalid user credentials given.'), null);
@@ -274,22 +274,22 @@ UserModelManager.prototype.getUserByCredentials = function(mail, password, callb
         return;
     }
 
-    // Make sure the mail is valid
-    if(!Validator.isValidMail(mail)) {
+    // Make sure the username is valid
+    if(!Validator.isValidUsername(username)) {
         // Call back with an error
-        callback(new Error('Invalid mail address given.'));
+        callback(new Error('Invalid username given.'));
         return;
     }
 
-    // Format the mail address
-    mail = Validator.formatMail(mail);
+    // Format the username
+    username = Validator.formatUsername(username);
 
     // Store the current instance
     const self = this;
 
     // Return some user data
     UserDatabase.layerFetchFieldsFromDatabase({
-        mail
+        username
     }, {
         _id: true,
         password_hash: true
