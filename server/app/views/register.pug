@@ -1,0 +1,44 @@
+extends page
+
+block content
+    - var nextParam = next !== undefined ? '?next=' + next : '';
+
+    unless success
+        p Enter your preferred username and password to register.
+
+        br
+        form(method='POST', action='/register/' + nextParam + '#')
+
+            label(for='field-username') Username:
+            input(type='text', name='field-username', id='field-username', value='', data-clear-btn='true')
+
+            label(for='field-password') Password:
+            input(type='password', name='field-password', id='field-password', value='', data-clear-btn='true', autocomplete='off')
+
+            label(for='field-password-verify') Password verification:
+            input(type='password', name='field-password-verify', id='field-password-verify', value='', data-clear-btn='true', autocomplete='off')
+
+            label(for='field-first-name') First name:
+            input(type='text', name='field-first-name', id='field-first-name', value='', data-clear-btn='true')
+
+            label(for='field-last-name') Last name:
+            input(type='text', name='field-last-name', id='field-last-name', value='', data-clear-btn='true')
+
+            br
+            .button-list
+                button.ui-btn.ui-btn-raised.clr-primary(type='submit') Register
+                a.ui-btn(href='/login' + nextParam, title='Login') Already have an account?
+
+    else
+        //- Print the success message
+        p: +format(message)
+
+        //- Show the dashboard/continue buttons
+        br
+        if next == undefined
+            a.ui-btn.ui-btn-raised.clr-primary(href='/', data-icon='home', title='Go to your dashboard', data-ajax='false') Dashboard
+
+        else
+            .button-list
+                a.ui-btn.ui-btn-raised.clr-primary(href=next, data-icon='arrow-right', title='Continue', data-ajax='false') Continue
+                a.ui-btn(href='/', data-icon='home', title='Go to your dashboard', data-ajax='false') Dashboard

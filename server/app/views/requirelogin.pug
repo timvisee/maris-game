@@ -1,0 +1,15 @@
+extends page
+
+block content
+    p.
+        You need to be logged in to visit this page.#[br]
+        #[br]
+        Please login or register to continue, or go to the front page.
+
+    - var nextParam = next !== undefined ? '?next=' + next : '';
+
+    br
+    .button-list
+        a.ui-btn.ui-btn-raised.clr-primary(href='/login' + nextParam, title='Go to the login page') Login
+        a.ui-btn.ui-btn-raised.clr-primary(href='/register' + nextParam, title='Go to the registration page') Register
+        a.ui-btn(href='/' + nextParam, title='Go to the front page') Front page

@@ -1,0 +1,62 @@
+extends layout
+
+block page
+    //- Page block
+    div(data-role='page')
+        //- Page header
+        div(data-role='header')
+            //- Left page button
+            case page.leftButton
+                when 'menu'
+                    //- Menu button
+                    a.ui-btn.ui-btn-left.wow.fadeIn(href='#leftpanel', data-wow-delay='0.4s')
+                        i.zmdi.zmdi-menu
+
+                when 'back'
+                    //- Back button
+                    a.ui-btn.ui-btn-left.wow.fadeIn(href='#', data-rel='back', data-direction='reverse', data-wow-delay='0.4s')
+                        i.zmdi.zmdi-arrow-back
+
+            //- Right page button
+            case page.rightButton
+                when 'options'
+                    //- Options button
+                    a.ui-btn.ui-btn-right.wow.fadeIn(href='#optionspanel', data-wow-delay='0.4s')
+                        i.zmdi.zmdi-more-vert
+
+            //- Device status button
+            a.ui-btn.ui-btn-right.ui-btn-right-2.wow.fadeIn.action-device-status(href='#', data-wow-delay='0.4s')
+                i.zmdi.zmdi-check.status-icon.infinite
+                //- TODO: Animate the above icon with: .animated.infinite.flash
+
+            //- Header title
+            h1.wow.fadeIn= page.title
+
+            //- Tabs section
+            block tabs
+
+        //- Sidebar
+        include sidebar
+
+        //- Page content
+        div.ui-content(data-role='main')
+            block content
+
+        //- Option panel
+        #optionspanel.ui-bottom-sheet-list(data-role="panel", data-animate="false", data-position='bottom', data-display="overlay")
+            .row.around-xs
+                .col-xs-auto
+                    a.ui-bottom-sheet-link.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href='#', onclick='toggleFullScreen()', data-ajax='false')
+                        i.zmdi.zmdi-fullscreen.zmd-2x
+                        strong Toggle fullscreen
+
+                .col-xs-auto
+                    a.ui-bottom-sheet-link.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url, data-ajax='false')
+                        i.zmdi.zmdi-refresh.zmd-2x
+                        strong Reload application
+
+        //- Page footer
+        //- div(data-role='footer')
+        //-     //- Footer title
+        //-     //- h4: a(href='/about', title='About') Copyright © Tim Visée 2016
+        //-     h4 Copyright © Tim Visée 2016
