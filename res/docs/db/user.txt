@@ -1,0 +1,9 @@
+# user
+# This collection contains all the registered users.
+
+_id : ID                        User ID.
+username : String               User's username to login.
+password_hash : String          User password hash.
+name : String                   User's display name.
+create_date : Date              User creation date and time.
+[is_admin : bool = false]       True if the user is an administrator, false if not.
