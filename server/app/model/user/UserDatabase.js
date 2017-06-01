@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) Dworek 2016. All rights reserved.                            *
+ * Copyright (c) Maris Game 2017. All rights reserved.                        *
  *                                                                            *
  * @author Tim Visee                                                          *
  * @website http://timvisee.com/                                              *
@@ -41,20 +41,19 @@ UserDatabase.DB_COLLECTION_NAME = 'user';
 /**
  * Add an user to the database.
  *
- * @param {String} mail Mail address.
+ * @param {String} username Username.
  * @param {String} password Password.
- * @param {String} firstName First name.
- * @param {String} lastName Last name.
+ * @param {String} name Name.
  * @param {function} callback (err, {UserModel} userId) Callback.
  */
-UserDatabase.addUser = function(mail, password, firstName, lastName, callback) {
+UserDatabase.addUser = function(username, password, name, callback) {
     // Get the database instance
     var db = MongoUtil.getConnection();
 
-    // Validate the mail address
-    if(!Validator.isValidMail(mail)) {
+    // Validate the username
+    if(!Validator.isValidUsername(username)) {
         // Call back with an error
-        callback(new Error('Unable to create user, invalid mail address given.'));
+        callback(new Error('Unable to create user, invalid username given.'));
         return;
     }
 
@@ -65,19 +64,16 @@ UserDatabase.addUser = function(mail, password, firstName, lastName, callback) {
         return;
     }
 
-    // Validate the first and last name
-    if(!Validator.isValidFirstName(firstName) || !Validator.isValidLastName(lastName)) {
+    // Validate the name
+    if(!Validator.isValidName(firstName)) {
         // Call back with an error
         callback(new Error('Unable to create user, invalid name given.'));
         return;
     }
 
-    // TODO: Make sure a user with this mail address doesn't already exist (prevent circular dependency)
-
     // Format everything
-    mail = Validator.formatMail(mail);
-    firstName = Validator.formatFirstName(firstName);
-    lastName = Validator.formatLastName(lastName);
+    username = Validator.formatUsername(username);
+    name = Validator.formatName(name);
 
     // Create a callback latch
     var latch = new CallbackLatch();
@@ -105,11 +101,9 @@ UserDatabase.addUser = function(mail, password, firstName, lastName, callback) {
     latch.then(function() {
         // Create the object to insert
         var insertObject = {
-            mail,
+            username,
             password_hash: password,
-            first_name: firstName,
-            last_name: lastName,
-            nickname: '',
+            name,
             create_date: createDate
         };
 

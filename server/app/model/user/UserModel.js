@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) Dworek 2016. All rights reserved.                            *
+ * Copyright (c) Maris Game 2017. All rights reserved.                        *
  *                                                                            *
  * @author Tim Visee                                                          *
  * @website http://timvisee.com/                                              *
@@ -50,7 +50,7 @@ var UserModel = function(id) {
             collection: UserDatabase.DB_COLLECTION_NAME
         },
         fields: {
-            mail: {},
+            username: {},
             password_hash: {
                 cache: {
                     enabled: false
@@ -59,9 +59,7 @@ var UserModel = function(id) {
                     enabled: false
                 }
             },
-            first_name: {},
-            last_name: {},
-            nickname: {},
+            name: {},
             create_date: {
                 redis: {
                     from: ConversionFunctions.dateFromRedis,
@@ -70,14 +68,8 @@ var UserModel = function(id) {
             },
             is_admin: {
                 redis: {
-                    from: (isAdmin) => isAdmin != '0',
+                    from: (isAdmin) => isAdmin !== '0',
                     to: (isAdmin) => isAdmin ? '1' : '0'
-                }
-            },
-            is_pro: {
-                redis: {
-                    from: (isPro) => isPro != '0',
-                    to: (isPro) => isPro ? '1' : '0'
                 }
             }
         }
@@ -156,30 +148,30 @@ UserModel.prototype.setFields = function(fields, callback) {
  */
 
 /**
- * Get the mail address for a user.
+ * Get the username of this user.
  *
- * @param {UserModel~getMailCallback} callback Called with mail address or when an error occurred.
+ * @param {UserModel~getUsernameCallback} callback Called with username or when an error occurred.
  */
-UserModel.prototype.getMail = function(callback) {
-    this.getField('mail', callback);
+UserModel.prototype.getUsername = function(callback) {
+    this.getField('username', callback);
 };
 
 /**
- * Called with the mail address or when an error occurred.
+ * Called with the username or when an error occurred.
  *
- * @callback UserModel~getMailCallback
+ * @callback UserModel~getUsernameCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {String} Mail address of the user.
+ * @param {String} Username of the user.
  */
 
 /**
- * Set the mail address of the user.
+ * Set the username of the user.
  *
- * @param {String} mail Mail address.
+ * @param {String} username Username.
  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
-UserModel.prototype.setMail = function(mail, callback) {
-    this.setField('mail', mail, callback);
+UserModel.prototype.setUsername = function(username, callback) {
+    this.setField('username', username, callback);
 };
 
 /**
@@ -210,120 +202,30 @@ UserModel.prototype.setPasswordHash = function(passwordHash, callback) {
 };
 
 /**
- * Get the first name of the user.
+ * Get the name of the user.
  *
- * @param {UserModel~getFirstNameCallback} callback Called with the first name of the user or when an error occurred.
+ * @param {UserModel~getNameCallback} callback Called with the name of the user or when an error occurred.
  */
-UserModel.prototype.getFirstName = function(callback) {
-    this.getField('first_name', callback);
+UserModel.prototype.getName = function(callback) {
+    this.getField('name', callback);
 };
 
 /**
- * Called with the first name of the user or when an error occurred.
+ * Called with the name of the user or when an error occurred.
  *
- * @callback UserModel~getFirstNameCallback
+ * @callback UserModel~getNameCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {String} First name of the user.
+ * @param {String} Name of the user.
  */
 
 /**
- * Set the first name of the user.
+ * Set the name of the user.
  *
- * @param {String} firstName First name.
+ * @param {String} name Name.
  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
-UserModel.prototype.setFirstName = function(firstName, callback) {
-    this.setField('first_name', firstName, callback);
-};
-
-/**
- * Get the last name of the user.
- *
- * @param {UserModel~getLastNameCallback} callback Called with the last name of the user or when an error occurred.
- */
-UserModel.prototype.getLastName = function(callback) {
-    this.getField('last_name', callback);
-};
-
-/**
- * Called with the last name of the user or when an error occurred.
- *
- * @callback UserModel~getLastNameCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {String} Last name of the user.
- */
-
-/**
- * Set the last name of the user.
- *
- * @param {String} lastName Last name.
- * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
- */
-UserModel.prototype.setLastName = function(lastName, callback) {
-    this.setField('last_name', lastName, callback);
-};
-
-/**
- * Get the nickname of the user.
- *
- * @param {UserModel~getNicknameCallback} callback Called with the nickname of the user or when an error occurred.
- */
-UserModel.prototype.getNickname = function(callback) {
-    this.getField('nickname', callback);
-};
-
-/**
- * Called with the nickname of the user or when an error occurred.
- *
- * @callback UserModel~getNicknameCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {String} Nickname of the user.
- */
-
-/**
- * Check whether the user has a custom nickname.
- *
- * @param {UserModel~hasNicknameCallback} callback Called with the result or when an error occurred.
- */
-UserModel.prototype.hasNickname = function(callback) {
-    this.getNickname(function(err, nickname) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Determine the result, and call back
-        callback(null, nickname.trim().length > 0)
-    });
-};
-
-/**
- * Called with the nickname of the user or when an error occurred.
- *
- * @callback UserModel~hasNicknameCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {boolean=} True if the user has a nickname, false if not.
- */
-
-/**
- * Set the nickname of the user.
- *
- * @param {String} nickname Nickname.
- * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
- */
-UserModel.prototype.setNickname = function(nickname, callback) {
-    this.setField('nickname', nickname, callback);
-};
-
-/**
- * Reset the nickname of the user.
- * This will remove the nickname of the user if any is set.
- *
- * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
- */
-UserModel.prototype.resetNickname = function(callback) {
-    this.setNickname('', callback);
+UserModel.prototype.setName = function(name, callback) {
+    this.setField('name', name, callback);
 };
 
 /**
@@ -377,25 +279,8 @@ UserModel.prototype.isAdmin = function(callback) {
  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
 UserModel.prototype.setCreateDate = function(isAdmin, callback) {
-    this.setField('is?admin', isAdmin, callback);
+    this.setField('is_admin', isAdmin, callback);
 };
-
-/**
- * Check whether this user is pro.
- *
- * @param {UserModel~isProCallback} callback Called with the result or when an error occurred.
- */
-UserModel.prototype.isPro = function(callback) {
-    this.getField('is_pro', callback);
-};
-
-/**
- * Called with the result or when an error occurred.
- *
- * @callback UserModel~isProCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {boolean} True if the user is pro, false if not.
- */
 
 /**
  * Set whether the user is pro.
@@ -404,123 +289,8 @@ UserModel.prototype.isPro = function(callback) {
  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
 UserModel.prototype.setCreateDate = function(isPro, callback) {
-    this.setField('is?pro', isPro, callback);
+    this.setField('is_pro', isPro, callback);
 };
-
-/**
- * Get the game state for the given game.
- *
- * @param {GameModel} game Game.
- * @param {GameModelManager~getGameStateCallback} callback Called with the result or when an error occurred.
- */
-UserModel.prototype.getGameState = function(game, callback) {
-    Core.model.gameUserModelManager.getUserGameState(game, this, callback);
-};
-
-/**
- * @typedef {Object} UserGameState
- * @property {boolean} player True if the user is a player in a team, false if not.
- * @property {boolean} special True if the user is a special player in the game, false if not.
- * @property {boolean} spectator True if the user is a spectator, false if not.
- * @property {boolean} requested True if the user requested to join this game, false if not.
- */
-
-/**
- * Called with the user's game state or when an error occurred.
- *
- * @callback GameModelManager~getGameStateCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {UserGameState=} User's game state.
- */
-
-/**
- * Get the display name of the user.
- *
- * @param {UserModel~getDisplayNameCallback} callback Called with the display name or when an error occurred.
- */
-UserModel.prototype.getDisplayName = function(callback) {
-    // Create a callback latch
-    var latch = new CallbackLatch();
-
-    // Create a variable for the first name, last name and nickname
-    var firstName, lastName, nickname;
-
-    // Make sure we only call back once
-    var calledBack = false;
-
-    // Get the first name
-    latch.add();
-    this.getFirstName(function(err, result) {
-        // Call back errors
-        if(err !== null) {
-            if(!calledBack)
-                callback(err);
-            calledBack = true;
-            return;
-        }
-
-        // Set the first name
-        firstName = result;
-
-        // Resolve the latch
-        latch.resolve();
-    });
-
-    // Get the last name
-    latch.add();
-    this.getLastName(function(err, result) {
-        // Call back errors
-        if(err !== null) {
-            if(!calledBack)
-                callback(err);
-            calledBack = true;
-            return;
-        }
-
-        // Set the last name
-        lastName = result;
-
-        // Resolve the latch
-        latch.resolve();
-    });
-
-    // Get the nickname
-    latch.add();
-    this.getNickname(function(err, result) {
-        // Call back errors
-        if(err !== null) {
-            if(!calledBack)
-                callback(err);
-            calledBack = true;
-            return;
-        }
-
-        // Set the nickname
-        nickname = result;
-
-        // Resolve the latch
-        latch.resolve();
-    });
-
-    // Call back the name
-    latch.then(function() {
-        // Combine the name
-        var name = firstName + ' ' + lastName;
-        if(nickname.trim().length > 0)
-            name = firstName + ' \'' + nickname + '\' ' + lastName;
-
-        // Call back the name
-        callback(null, name);
-    });
-};
-
-/**
- * Called with the display name or when an error occurred.
- *
- * @callback UserModel~getDisplayNameCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {string=} Display name.
- */
 
 // Export the user class
 module.exports = UserModel;
