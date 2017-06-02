@@ -28,7 +28,6 @@ var login = require('./login');
 var logout = require('./logout');
 var register = require('./register');
 var about = require('./about');
-var status = require('./status');
 
 var appInfo = require('../../appInfo');
 var Core = require('../../Core');
@@ -67,8 +66,7 @@ router.use('/register', register);
 // About page
 router.use('/about', about);
 
-// Status page
-router.use('/status', status);
+// TODO: Add (back) status route
 
 // Export the router
 module.exports = router;
