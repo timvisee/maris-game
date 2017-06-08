@@ -71,6 +71,13 @@ Core.expressApp = null;
 Core.router = null;
 
 /**
+ * Game manager instance.
+ *
+ * @type {GameManager|null} Game manager instance, or null if the core hasn't been initialized.
+ */
+Core.gameManager = null;
+
+/**
  * Real time server instance.
  *
  * @type {RealTime}
