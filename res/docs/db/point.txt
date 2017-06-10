@@ -1,0 +1,8 @@
+# point
+# Collection containing all created factories
+
+_id : ID                Point ID.
+name : string           Point name.
+game_id : ID            ID of the game this point is part of.
+user_id : ID            ID of the user that created this point.
+location : Object       Coordinate object defining the location.
