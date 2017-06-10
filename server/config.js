@@ -349,6 +349,17 @@ config.validation.gameNameMaxLength = 128;
 
 
 /******************************************************************************
+ * Game configuration.                                                        *
+ ******************************************************************************/
+
+/**
+ * The range of a point in a game as radius from the center in meters.
+ * @type {number}
+ */
+config.game.pointRange = 10;
+
+
+/******************************************************************************
  * Sentry error monitoring configuration.                                     *
  ******************************************************************************/
 
