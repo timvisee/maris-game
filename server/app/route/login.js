@@ -67,17 +67,17 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their mail address
         if(username.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'Your username is missing.\n\n' +
-                'Please go back and fill in your username.'
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'Uw gebruikersnaam mist.\n\n' +
+                'Ga alstublieft terug en vul uw gebruikersnaam in.'
             });
             return;
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'The username you\'ve entered doesn\'t seem to be valid.\n\n' +
-            'Please go back and check your username.'
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'De gebruikersnaam die u heeft ingevult is ongeldig.\n\n' +
+            'Ga alstublieft terug en vul een andere gebruikersnaam in.'
         });
         return;
     }
@@ -86,8 +86,8 @@ router.post('/', function(req, res, next) {
     if(password.length === 0) {
         // Show an error page
         LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'Your password is missing.\n\n' +
-            'Please go back and fill in your password.'
+            message: 'Uw wachtwoord mist.\n\n' +
+            'Ga alstublieft terug en vul uw wachtwoord in.'
         });
         return;
     }
@@ -103,8 +103,8 @@ router.post('/', function(req, res, next) {
         // Show an error page if no user was found
         if(user === null) {
             LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'Your username and password combination is invalid.\n\n' +
-                'Please go back, verify your user credentials, and try to login again.'
+                message: 'De combinatie van deze gebruikersnaam en dit wachtwoord is onbekend.\n\n' +
+                'Ga alstublieft terug, en verifieer uw gegevens.'
             });
             return;
         }

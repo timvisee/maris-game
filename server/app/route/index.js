@@ -51,7 +51,7 @@ router.get('/', function(req, res, next) {
     }
 
     // Render the dashboard
-    LayoutRenderer.render(req, res, next, 'dashboard', appInfo.APP_NAME, options);
+    LayoutRenderer.render(req, res, next, 'dashboard', appInfo.APP_NAME);
 });
 
 // Login page
