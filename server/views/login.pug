@@ -1,7 +1,7 @@
 extends page
 
 block content
-    p Enter your username and password to login.
+    p Vul uw gebruikersnaam en wachtwoord in om in te loggen.
 
     br
 
@@ -9,13 +9,13 @@ block content
 
     form#form-login(method='POST', action='/login/' + nextParam + '#')
 
-        label(for='field-username') Username:
+        label(for='field-username') Gebruikersnaam:
         input(type='text', name='field-username', id='field-username', value='', data-clear-btn='true')
 
-        label(for='field-password') Password:
+        label(for='field-password') Wachtwoord:
         input(type='password', name='field-password', id='field-password', value='', data-clear-btn='true')
 
         br
         .button-list
-            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Login
-            a.ui-btn(href='/register' + nextParam, title='Register') Don't have an account?
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Inloggen
+            a.ui-btn(href='/register' + nextParam, title='Register') Heeft u geen account?

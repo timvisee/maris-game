@@ -4,27 +4,30 @@ block content
     - var nextParam = next !== undefined ? '?next=' + next : '';
 
     unless success
-        p Enter your preferred username and password to register.
+        p.
+            Vul uw geprefereerde gebruikersnaam en wachtwoord in om te registreren.#[br]
+            #[br]
+            Noot: Op dit moment is registratie alleen mogelijk met een speciale registratiecode.
 
         br
         form(method='POST', action='/register/' + nextParam + '#')
 
-            label(for='field-username') Username:
+            label(for='field-username') Gebruikersnaam:
             input(type='text', name='field-username', id='field-username', value='', data-clear-btn='true')
 
-            label(for='field-password') Password:
+            label(for='field-password') Wachtwoord:
             input(type='password', name='field-password', id='field-password', value='', data-clear-btn='true', autocomplete='off')
 
-            label(for='field-password-verify') Password verification:
+            label(for='field-password-verify') Wachtwoord verificatie:
             input(type='password', name='field-password-verify', id='field-password-verify', value='', data-clear-btn='true', autocomplete='off')
 
-            label(for='field-name') Name:
+            label(for='field-name') Naam:
             input(type='text', name='field-name', id='field-name', value='', data-clear-btn='true')
 
             br
             .button-list
-                button.ui-btn.ui-btn-raised.clr-primary(type='submit') Register
-                a.ui-btn(href='/login' + nextParam, title='Login') Already have an account?
+                button.ui-btn.ui-btn-raised.clr-primary(type='submit') Registreren
+                a.ui-btn(href='/login' + nextParam, title='Login') Heeft u al een account?
 
     else
         //- Print the success message
@@ -37,5 +40,5 @@ block content
 
         else
             .button-list
-                a.ui-btn.ui-btn-raised.clr-primary(href=next, data-icon='arrow-right', title='Continue', data-ajax='false') Continue
+                a.ui-btn.ui-btn-raised.clr-primary(href=next, data-icon='arrow-right', title='Continue', data-ajax='false') Doorgaan
                 a.ui-btn(href='/', data-icon='home', title='Go to your dashboard', data-ajax='false') Dashboard
