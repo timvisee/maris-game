@@ -149,6 +149,40 @@ Validator.isValidName = function(name) {
 };
 
 /**
+ * Format the the given point name.
+ *
+ * @param {string} pointName Point name.
+ *
+ * @return {string} The formatted point name.
+ */
+Validator.formatPointName = function(pointName) {
+    // Trim the point name, and return
+    return pointName.trim();
+};
+
+/**
+ * Check whether the given point name is valid.
+ *
+ * @param {string} pointName Point name.
+ *
+ * @return {boolean} True if the point name is valid, false if not.
+ */
+Validator.isValidPointName = function(pointName) {
+    // Make sure the point name isn't undefined or null
+    if(pointName === undefined || pointName === null)
+        return false;
+
+    // Trim the point name
+    pointName = pointName.trim();
+
+    // Count the number of characters
+    const charCount = pointName.length;
+
+    // Make sure the length is within bounds
+    return (charCount >= config.validation.pointNameMinLength && charCount <= config.validation.pointNameMaxLength);
+};
+
+/**
  * Format the the given game name.
  *
  * @param {string} gameName Game name.
