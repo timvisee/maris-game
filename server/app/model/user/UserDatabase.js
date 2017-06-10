@@ -65,7 +65,7 @@ UserDatabase.addUser = function(username, password, name, callback) {
     }
 
     // Validate the name
-    if(!Validator.isValidName(firstName)) {
+    if(!Validator.isValidName(name)) {
         // Call back with an error
         callback(new Error('Unable to create user, invalid name given.'));
         return;
