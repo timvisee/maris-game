@@ -184,186 +184,65 @@ module.exports = {
      * Data:
      * - game: ID of the game the data is for.
      * - data: The actual game data.
-     * - data.factory.canBuild: True if the user can build a factory, false if not.
-     * - data.factory.cost: New factory cost
+     * - data.point.canBuild: True if the user can build a point, false if not.
+     * - data.point.cost: New point cost
      */
     GAME_DATA: 15,
 
     /**
-     * Request from a client to the server to build a factory.
+     * Request from a client to the server to build a point.
      *
      * Data:
      * - game: ID of the game.
-     * - name: Factory name.
+     * - name: Point name.
      */
-    FACTORY_BUILD_REQUEST: 16,
+    POINT_BUILD_REQUEST: 16,
 
     /**
-     * Response from the server to a client that a factory is build.
+     * Response from the server to a client that a point is build.
      *
      * Data:
      * - game: ID of the game.
-     * - factory: ID of the factory that is build.
+     * - point: ID of the point that is build.
      */
-    FACTORY_BUILD_RESPONSE: 17,
+    POINT_BUILD_RESPONSE: 17,
 
     /**
-     * Request from a client for the latest factory data.
+     * Request from a client for the latest point data.
      *
      * Data:
-     * - factory: ID of the factory.
+     * - point: ID of the point.
      */
-    FACTORY_DATA_REQUEST: 18,
+    POINT_DATA_REQUEST: 18,
 
     /**
-     * Response from the server to a client with the latest factory data.
+     * Response from the server to a client with the latest point data.
      *
      * Data:
      * - game: ID of the game.
-     * - factory: ID of the factory.
-     * - data: Factory data.
-     * - data.name: Factory name.
-     * - data.level: Factory level.
+     * - point: ID of the point.
+     * - data: Point data.
+     * - data.name: Point name.
+     * - data.level: Point level.
      * - data.creatorName: Creator name.
      * - data.teamName: Team name.
      * - data.defence: Defence value.
      * - data.in: In value.
      * - data.out: Out value.
      */
-    FACTORY_DATA: 19,
+    POINT_DATA: 19,
 
     /**
-     * Send from a client to the server to buy defence for a factory.
-     *
-     * Data:
-     * - factory: ID of the factory
-     * - index: Index of the upgrade to buy
-     * - cost: Cost of the upgrade (check)
-     * - defence: Defence level of the upgrade (check)
-     */
-    FACTORY_DEFENCE_BUY: 20,
-
-    /**
-     * Send from a client to the server to upgrade a factory.
-     *
-     * Data:
-     * - factory: ID of the factory
-     * - cost: Cost of the upgrade (check)
-     */
-    FACTORY_LEVEL_BUY: 21,
-
-    /**
-     * Send from a client to the server to deposit goods.
-     *
-     * Data:
-     * - factory: ID of the factory
-     * - goodType: Type of goods to deposit, 'in' or 'out'.
-     * - [amount]: Deposit amount.
-     * - [all]: True to deposit all, false if not.
-     */
-    FACTORY_DEPOSIT: 22,
-
-    /**
-     * Send from a client to the server to withdraw goods.
-     *
-     * Data:
-     * - factory: ID of the factory.
-     * - goodType: Type of goods to withdraw, 'in' or 'out'.
-     * - [amount]: Withdrawal amount.
-     * - [all]: True to withdraw all, false if not.
-     */
-    FACTORY_WITHDRAW: 23,
-
-    /**
-     * Send from a client to the server to buy in goods.
-     *
-     * Data:
-     * - shop: ID of the shop.
-     * - moneyAmount: Amount of money to spend on in.
-     * - [all]: True to buy as much as possible, false if not. Setting this to true will ignore the moneyAmount value.
-     */
-    SHOP_SELL_IN: 24,
-
-    /**
-     * Send from a client to the server to sell out goods.
-     *
-     * Data:
-     * - shop: ID of the shop.
-     * - outAmount: Amount of out to sell.
-     * - [all]: True to sell all out, false if not. Setting this to true will ignore the outAmount value.
-     */
-    SHOP_BUY_OUT: 25,
-
-    /**
-     * Buy a player strength upgrade.
-     *
-     * Data:
-     * - index: Index of the upgrade to buy
-     * - cost: Cost of the upgrade (check)
-     * - defence: Defence level of the upgrade (check)
-     */
-    PLAYER_STRENGTH_BUY: 26,
-
-    /**
-     * Attack a factory.
-     *
-     * Data:
-     * - game: ID of the current game.
-     * - factory: ID of the factory to attack.
-     */
-    FACTORY_ATTACK: 28,
-
-    /**
-     * Update because a factory has been build.
+     * Update because a point has been build.
      * Send from the server to clients.
      *
      * Data:
-     * - factory: ID of the factory to attack.
-     * - factoryName: Name of the factory.
-     * - self: True if the user this packet is send to build the factory.
-     * - userName: Name of the user that captured the factory.
+     * - point: ID of the point to attack.
+     * - pointName: Name of the point.
+     * - self: True if the user this packet is send to build the point.
+     * - userName: Name of the user that captured the point.
      */
-    FACTORY_BUILD: 29,
-
-    /**
-     * Update because a factory has been captured.
-     * Send from the server to clients.
-     *
-     * Data:
-     * - factory: ID of the factory to attack.
-     * - factoryName: Name of the factory.
-     * - self: True if the user this packet is send to captured the factory.
-     * - userName: Name of the user that captured the factory.
-     * - teamName: Name of the team of the user that captured this factory.
-     * - ally: True if the factory was captured from the user's current team.
-     * - enemy: True if the factory was captured by an enemy, false if not.
-     */
-    FACTORY_CAPTURED: 30,
-
-    /**
-     * Update because a factory has been destroyed.
-     * Send from the server to clients.
-     *
-     * Data:
-     * - factory: ID of the factory to attack.
-     * - factoryName: Name of the factory.
-     * - self: True if the user that this packet was send to destroyed the factory.
-     * - userName: Name of the user that destroyed the factory.
-     * - teamName: Name of the team of the user that destroyed this factory.
-     * - ally: True if the factory was captured from the user's current team.
-     * - enemy: True if the factory was destroyed by an enemy, false if not.
-     */
-    FACTORY_DESTROYED: 31,
-
-    /**
-     * Buy and execute a ping.
-     *
-     * Data:
-     * - game: ID of the current game.
-     * - pingId: ID of the ping to buy
-     * - cost: Cost of the ping (check)
-     */
-    PING_BUY: 32,
+    POINT_BUILD: 29,
 
     /**
      * Request an application status update packet.
