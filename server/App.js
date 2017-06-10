@@ -38,6 +38,7 @@ var Router = require('./app/router/Router');
 var PathLibrary = require('./PathLibrary');
 var UserModelManager = require('./app/model/user/UserModelManager');
 var SessionModelManager = require('./app/model/session/SessionModelManager');
+var GameModelManager = require('./app/model/game/GameModelManager');
 var RealTime = require('./app/realtime/RealTime');
 var PortUtils = require('./app/util/PortUtils');
 var EventLoopMonitor = require('./app/latency/EventLoopMonitor');
@@ -406,6 +407,7 @@ App.prototype._initModelManagers = function(callback) {
     // Instantiate the model managers
     modelManagers.push(Core.model.userModelManager = new UserModelManager());
     modelManagers.push(Core.model.sessionModelManager = new SessionModelManager());
+    modelManagers.push(Core.model.gameModelManager = new GameModelManager());
 
     // Create an interval to clear all internal model caches
     setInterval(function() {
