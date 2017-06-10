@@ -53,7 +53,7 @@ router.get('/', function(req, res, next) {
         pageVars.next = req.param('next');
 
     // Show the registration page
-    LayoutRenderer.render(req, res, next, 'register', 'Registration', pageVars);
+    LayoutRenderer.render(req, res, next, 'register', 'Registreren', pageVars);
 });
 
 // Register index
@@ -69,17 +69,17 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their username
         if(username.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'Your username is missing.\n\n' +
-                'Please go back and fill in your username.'
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'Uw gebruikersnaam mist.\n\n' +
+                'Ga alstublieft terug en vul uw gebruikersnaam in.'
             });
             return;
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'The username you\'ve entered doesn\'t seem to be valid.\n\n' +
-            'Please go back and check your username.'
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'De gebruikersnaam die u heeft ingevuld is ongeldig.\n\n' +
+            'Ga alstublieft terug en controleer uw gebruikersnaam.'
         });
         return;
     }
@@ -87,9 +87,9 @@ router.post('/', function(req, res, next) {
     // Compare passwords
     if(password !== passwordVerify) {
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'The passwords you\'ve entered do not equal.\n\n' +
-            'Please go back and check both passwords.'
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'De wachtwoorden die u heeft ingevuld komen niet overeen.\n\n' +
+            'Ga alstublieft terug en verifieer uw wachtwoorden.'
         });
         return;
     }
@@ -99,9 +99,9 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their password
         if(password.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'Your password is missing.\n\n' +
-                'Please go back and fill in your password.'
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'Uw wachtwoord mist.\n\n' +
+                'Ga alstublieft terug en vul uw wachtwoord in.'
             });
             return;
         }
@@ -111,10 +111,10 @@ router.post('/', function(req, res, next) {
         const max = config.validation.passwordMaxLength;
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'The password you\'ve entered doesn\'t meet our requirements.\n\n' +
-            'Your password must be between ' + min + ' and ' + max + ' characters long.\n\n' +
-            'Please go back and choose a different password.'
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'Het wachtwoord wat u heeft ingevuld voldoet niet aan onze eisen.\n\n' +
+            'Uw wachtwoord moet tussen de ' + min + ' en ' + max + ' karakters lang zijn.\n\n' +
+            'Ga alstublieft terug en kies een ander wachtwoord.'
         });
         return;
     }
@@ -124,17 +124,17 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their name
         if(name.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'Your name is missing.\n\n' +
-                'Please go back and fill in your name.'
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'Uw naam mist.\n\n' +
+                'Ga alstublieft terug en vul uw naam in.'
             });
             return;
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: 'The name you\'ve entered doesn\'t seem to be valid.\n\n' +
-            'Please go back and enter your real name.'
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'De naam die u heeft ingevuld lijkt niet geldig te zijn.\n\n' +
+            'Ga alstublieft terug en vul uw echte naam in.'
         });
         return;
     }
@@ -149,9 +149,9 @@ router.post('/', function(req, res, next) {
 
         // Show an error page if the username is already used
         if(result) {
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-                message: 'It looks like you\'ve already registered with this username.\n\n' +
-                'Please continue to the login page.',
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'Deze gebruikersnaam is al gebruikt.\n\n' +
+                'Login of kies een andere gebruikersnaam.',
                 hideBackButton: true,
                 showLoginButton: true
             });
@@ -197,23 +197,23 @@ router.post('/', function(req, res, next) {
                     };
 
                     // Set the page message
-                    pageVars.message = 'Welcome ' + name + '!\n\n' +
-                        'You\'ve successfully been registered.';
+                    pageVars.message = 'Welkom ' + name + '!\n\n' +
+                        'U bent succesvol geregistreerd!';
 
                     // Add the proper follow up message, and set the next URL if there is any
                     if(!_.isString(req.param('next')))
                         pageVars.message += '\n\n' +
-                            'Please click the button below to login and continue to your dashboard.';
+                            'Klik alstublieft op de knop hieronder om in te loggen en naar uw dashboard te gaan.';
                     else {
                         pageVars.message += '\n\n' +
-                            'Please click the button below to continue to the page you wanted to visit.';
+                            'Klik alstublieft op de knop hieronder om in te loggen zodat u de pagina kunt bekijken.';
 
                         // Set the next parameter
                         pageVars.next = req.param('next');
                     }
 
                     // Show registration success page
-                    LayoutRenderer.render(req, res, next, 'register', 'Success', pageVars);
+                    LayoutRenderer.render(req, res, next, 'register', 'Succes', pageVars);
                 });
             });
         });
