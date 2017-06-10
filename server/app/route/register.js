@@ -151,8 +151,9 @@ router.post('/', function(req, res, next) {
         if(result) {
             LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                 message: 'Deze gebruikersnaam is al gebruikt.\n\n' +
-                'Login of kies een andere gebruikersnaam.',
-                hideBackButton: true,
+                'Als u al een account heeft met deze gebruikersnaam kunt u inloggen door op de onderstaande knop te drukken.\n\n' +
+                'Ga anders alstublieft terug en kies een andere gebruikersnaam.',
+                hideBackButton: false,
                 showLoginButton: true
             });
             return;
