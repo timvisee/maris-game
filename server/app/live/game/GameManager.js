@@ -33,7 +33,6 @@ var GameModel = require('../../model/game/GameModel');
 var User = require('../user/User');
 var UserModel = require('../../model/user/UserModel');
 var CallbackLatch = require('../../util/CallbackLatch');
-var gameConfig = require('../../../gameConfig');
 
 /**
  * GameManager class.
@@ -201,19 +200,6 @@ GameManager.prototype.load = function(callback) {
 
     // Determine whether we called back
     var calledBack = false;
-
-    // Start the game tick
-    setInterval(function() {
-        // Run a game tick
-        self.tick(gameConfig.game.tickInterval, function(err) {
-            // Report errors
-            if(err !== null) {
-                console.error(err);
-                console.error('An error occurred while invoking a game tick, ignoring.')
-            }
-        });
-
-    }, gameConfig.game.tickInterval);
 
     // Load all active games
     Core.model.gameModelManager.getGamesWithStage(1, function(err, games) {
@@ -642,23 +628,23 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                             return;
                         }
 
-                        // Make sure the factory is visible
+                        // Make sure the point is visible
                         if(!visibilityData.visible) {
                             gameLatch.resolve();
                             return;
                         }
 
-                        // Create a factory latch
+                        // Create a point latch
                         var factoryLatch = new CallbackLatch();
 
-                        // Create a factory object
+                        // Create a point object
                         var factoryObject = {
                             factory: liveFactory.getIdHex(),
                             ally: visibilityData.ally,
                             inRange: visibilityData.inRange
                         };
 
-                        // Get the name of the factory
+                        // Get the name of the point
                         factoryLatch.add();
                         liveFactory.getName(function(err, name) {
                             // Call back errors
@@ -670,14 +656,14 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                                 return;
                             }
 
-                            // Set the factory name
+                            // Set the point name
                             factoryObject.name = name;
 
-                            // Resolve the factory latch
+                            // Resolve the point latch
                             factoryLatch.resolve();
                         });
 
-                        // Get the factory location
+                        // Get the point location
                         factoryLatch.add();
                         liveFactory.getFactoryModel().getLocation(function(err, location) {
                             // Call back errors
@@ -692,11 +678,11 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                             // Set the location
                             factoryObject.location = location;
 
-                            // Resolve the factory latch
+                            // Resolve the point latch
                             factoryLatch.resolve();
                         });
 
-                        // Get the factory range
+                        // Get the point range
                         factoryLatch.add();
                         liveFactory.getRange(liveUser, function(err, range) {
                             // Call back errors
@@ -711,11 +697,11 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                             // Set the range
                             factoryObject.range = range;
 
-                            // Resolve the factory latch
+                            // Resolve the point latch
                             factoryLatch.resolve();
                         });
 
-                        // Add the factory object when we're done
+                        // Add the point object when we're done
                         factoryLatch.then(function() {
                             // Create a user object and add it to the list
                             factories.push(factoryObject);
@@ -985,7 +971,7 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                         return;
                     }
 
-                    // Get the factory cost
+                    // Get the point cost
                     latch.add();
                     liveGame.calculateFactoryCost(team, function(err, cost) {
                         // Call back errors
@@ -1011,7 +997,7 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                 latch.resolve();
             });
 
-            // Add the factory data
+            // Add the point data
             latch.add();
             liveGame.factoryManager.getVisibleFactories(user, function(err, factories) {
                 // Call back errors
@@ -1024,16 +1010,16 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
 
                 // Loop through the factories
                 factories.forEach(function(factory) {
-                    // Create a factory latch
+                    // Create a point latch
                     latch.add();
                     var factoryLatch = new CallbackLatch();
 
-                    // Create a factory object
+                    // Create a point object
                     var factoryObject = {
                         id: factory.getIdHex()
                     };
 
-                    // Get the factory name
+                    // Get the point name
                     factoryLatch.add();
                     factory.getName(function(err, name) {
                         // Call back errors
@@ -1044,16 +1030,16 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                             return;
                         }
 
-                        // Set the factory name
+                        // Set the point name
                         factoryObject.name = name;
 
-                        // Resolve the factory latch
+                        // Resolve the point latch
                         factoryLatch.resolve();
                     });
 
-                    // Add the factory data when we're done and resolve the regular latch
+                    // Add the point data when we're done and resolve the regular latch
                     factoryLatch.then(function() {
-                        // Add the factory object
+                        // Add the point object
                         gameData.factories.push(factoryObject);
 
                         // Resolve the latch
@@ -1117,7 +1103,7 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                                 return;
                             }
 
-                            // Set the name in the factory object
+                            // Set the name in the point object
                             gameData.shops.push({
                                 token: liveShop.getToken(),
                                 name: liveShopName,
@@ -1410,7 +1396,7 @@ GameManager.prototype.tick = function(scheduleTime, callback) {
     this.games.forEach(function(liveGame) {
         // Loop through the factories
         liveGame.factoryManager.factories.forEach(function(liveFactory) {
-            // Add a latch for this factory
+            // Add a latch for this point
             latch.add();
 
             // Define a function to invoke the tick
