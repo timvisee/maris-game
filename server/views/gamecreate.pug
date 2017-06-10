@@ -1,0 +1,26 @@
+extends page
+
+block content
+    unless created
+        p Vul alstublieft een naam in voor het spel dat u wilt aanmaken.
+
+        br
+        form(method='POST', action=page.url + '/#')
+            label(for='field-game-name') Spelnaam:
+            input(type='text', name='field-game-name', id='field-game-name', value='', data-clear-btn='true', data-randomize='true')
+
+            br
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Spel aanmaken
+
+    else
+        p Het spel is succesvol aangemaakt.
+
+        div(align="center")
+            table.table-list.ui-responsive
+                tr: td Spel
+                    td= game.name
+
+        p Klik op de onderstaande knop om het spel te bekijken.
+
+        br
+        a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id, title='Bekijk het spel') Spel bekijken
