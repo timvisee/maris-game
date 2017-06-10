@@ -13,26 +13,26 @@ include base
                 .col-xs-8
                     .box.profile-text
                         strong= session.user.name
-                        span.subline Player
+                        span.subline Speler
 
     else
-        h4 Dworek
+        h4 #{app.name}
 
     ul(data-role='listview')
-        li(data-role='list-divider') Pages
+        li(data-role='list-divider') Pagina's
 
         - var nextParam = next !== undefined ? '?next=' + next : '';
 
         unless session.valid
-            li: a(href='/' + nextParam) Front page
-            li: a.clr-primary(href='/login' + nextParam) Login
-            li: a.clr-primary(href='/register' + nextParam) Register
+            li: a(href='/' + nextParam) Hoofdpagina
+            li: a.clr-primary(href='/login' + nextParam) Inloggen
+            li: a.clr-primary(href='/register' + nextParam) Registreren
         else
             li: a(href='/') Dashboard
-            li: a(href='/games') Games
+            li: a(href='/games') Spellen
             li: a.clr-warning(href='/logout')
                 i.zmdi.zmdi-lock &nbsp;&nbsp;
-                span Logout
+                span Uitloggen
 
         //div(data-role='collapsible', data-inset=false, data-collapsed-icon='carat-d', data-expanded-icon='carat-d', data-iconpos='right')
         //    h3 Basic Elements
@@ -41,6 +41,6 @@ include base
         //        li: a(href='/') Item 2
 
         hr.inset
-        li(data-role='list-divider') Information
-        li: a(href='/about') About
-        li: a(href='/status') Application status
+        li(data-role='list-divider') Informatie
+        li: a(href='/about') Over
+        li: a(href='/status') Applicatie status
