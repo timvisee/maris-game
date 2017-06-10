@@ -323,6 +323,18 @@ config.validation.nameMinLength = 1;
  */
 config.validation.nameMaxLength = 128;
 
+/**
+ * Minimum number of game name characters.
+ * @type {int}
+ */
+config.validation.gameNameMinLength = 2;
+
+/**
+ * Maximum number of game name characters.
+ * @type {int}
+ */
+config.validation.gameNameMaxLength = 128;
+
 
 /******************************************************************************
  * Sentry error monitoring configuration.                                     *
