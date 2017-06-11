@@ -98,14 +98,7 @@ module.exports = {
                 return;
             }
 
-            // Create a callback latch
-            var latch = new CallbackLatch();
-
-            // Create a flag that defines whether the user has a nickname
-            var hasNickname = false;
-
-            // Determine whether the user has a nickname
-            latch.add();
+            // Make the request to join the game
             GameUserDatabase.addGameUserRequest(game, user, function(err) {
                 // Call back errors
                 if(err !== null) {
@@ -115,36 +108,11 @@ module.exports = {
                     return;
                 }
 
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Check whether the user has a nickname configured
-            latch.add();
-            user.hasNickname(function(err, result) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Store the result and resolve the latch
-                hasNickname = result;
-                latch.resolve();
-            });
-
-            // Render the page when we're done
-            latch.then(function() {
                 // Render the game page
                 LayoutRenderer.render(req, res, next, 'gamejoin', 'Aangevraagd', {
                     page: {
                         leftButton: 'none',
                         rightButton: 'none'
-                    },
-                    user: {
-                        hasNickname
                     }
                 });
             });

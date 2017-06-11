@@ -50,42 +50,33 @@ GameUserDatabase.addGameUser = function(game, user, callback) {
     // Get the database instance
     const db = MongoUtil.getConnection();
 
-    // Get the game configuration.
-    game.getConfig(function(err, gameConfig) {
-        // Call back errors
+    // Create the object to insert
+    // TODO: Dynamically get the proper field names from the model configuration
+    const insertObject = {
+        game_id: game.getId(),
+        user_id: user.getId(),
+    };
+
+    // Insert the game user into the database
+    db.collection(GameUserDatabase.DB_COLLECTION_NAME).insertOne(insertObject, function(err) {
+        // Handle errors and make sure the status is ok
         if(err !== null) {
+            // Show a warning and call back with the error
+            console.warn('Unable to create new game user, failed to insert game user into database.');
             callback(err, null);
             return;
         }
 
-        // Create the object to insert
-        // TODO: Dynamically get the proper field names from the model configuration
-        const insertObject = {
-            game_id: game.getId(),
-            user_id: user.getId(),
-        };
-
-        // Insert the game user into the database
-        db.collection(GameUserDatabase.DB_COLLECTION_NAME).insertOne(insertObject, function(err) {
-            // Handle errors and make sure the status is ok
+        // Flush the model manager cache
+        Core.model.gameUserModelManager.flushCache(function(err) {
+            // Call back errors
             if(err !== null) {
-                // Show a warning and call back with the error
-                console.warn('Unable to create new game user, failed to insert game user into database.');
-                callback(err, null);
+                callback(err);
                 return;
             }
 
-            // Flush the model manager cache
-            Core.model.gameUserModelManager.flushCache(function(err) {
-                // Call back errors
-                if(err !== null) {
-                    callback(err);
-                    return;
-                }
-
-                // Call back with the inserted ID
-                callback(null, Core.model.gameUserModelManager._instanceManager.create(insertObject._id));
-            });
+            // Call back with the inserted ID
+            callback(null, Core.model.gameUserModelManager._instanceManager.create(insertObject._id));
         });
     });
 };
