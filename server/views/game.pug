@@ -3,13 +3,20 @@ extends page
 block tabs
     ul(data-role='nd2tabs' data-swipe=true)
         - var fadeDelay = 0;
-        li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
         if game.stage >= 1
             li.wow.fadeInUp(data-tab='map', data-wow-delay=(fadeDelay += 0.1) + 's') Kaart
         if game.stage == 1
             li.wow.fadeInUp(data-tab='actions', data-wow-delay=(fadeDelay += 0.1) + 's') Acties
+        li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
 
 block content
+    div(data-role='nd2tab', data-tab='map')
+        #map-container
+
+    div(data-role='nd2tab', data-tab='actions')
+        .game-actions-list
+            div(align='center')
+                p.game-data-load-label: i Loading...
     div(data-role='nd2tab', data-tab='info')
         if (user.isHost || user.isAdmin)
             if game.usersCount.requested > 0
@@ -87,11 +94,3 @@ block content
                 .row.between-xs: .col-xs-12: .box
                     a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/info', data-transition='slide') Meer info
                     a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players', data-transition='slide') Deelnemers
-
-    div(data-role='nd2tab', data-tab='map')
-        #map-container
-
-    div(data-role='nd2tab', data-tab='actions')
-        .game-actions-list
-            div(align='center')
-                p.game-data-load-label: i Loading...
