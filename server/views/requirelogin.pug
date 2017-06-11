@@ -2,14 +2,14 @@ extends page
 
 block content
     p.
-        You need to be logged in to visit this page.#[br]
+        Je moet ingelogd zijn om deze pagina te kunnen bekijken.#[br]
         #[br]
-        Please login or register to continue, or go to the front page.
+        Log alstublieft in, registreer een account of ga naar de hoofdpagin.
 
     - var nextParam = next !== undefined ? '?next=' + next : '';
 
     br
     .button-list
-        a.ui-btn.ui-btn-raised.clr-primary(href='/login' + nextParam, title='Go to the login page') Login
-        a.ui-btn.ui-btn-raised.clr-primary(href='/register' + nextParam, title='Go to the registration page') Register
-        a.ui-btn(href='/' + nextParam, title='Go to the front page') Front page
+        a.ui-btn.ui-btn-raised.clr-primary(href='/login' + nextParam, title='Bezoek de inlog pagin') Inloggen
+        a.ui-btn.ui-btn-raised.clr-primary(href='/register' + nextParam, title='Bezoek de registratie pagina') Registreren
+        a.ui-btn(href='/' + nextParam, title='Bezoek de hoofdpagina') Hoofdpagina
