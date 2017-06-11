@@ -1,0 +1,92 @@
+extends page
+
+block content
+    - var fadeDelay = -0.1;
+
+    if game.users.category == null
+        ul(data-role='listview')
+            if game.users.count.requested > 0
+                li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Wachtende gebruikers
+                li: a.wow.fadeInUp(href=page.url + '/requested', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Wachtend op goedkeuring...
+                    span.ui-li-count()= game.users.count.requested
+
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Geaccepteerde gebruikers
+            li: a.wow.fadeInUp(href=page.url + '/players', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Deelnemers...
+                span.ui-li-count()= game.users.count.players
+            li: a.wow.fadeInUp(href=page.url + '/spectators', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Toeschouwers...
+                span.ui-li-count()= game.users.count.spectators
+
+            if game.users.count.requested == 0
+                li: a.wow.fadeInUp(href=page.url + '/requested', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Aanvragen...
+                    span.ui-li-count()= game.users.count.requested
+
+    else
+        //- Change user role popup
+        #popupChangeUserRole(data-role='popup')
+            div(data-role='header')
+                a.ui-btn.ui-btn-left.wow.fadeIn(href='#', data-rel='back', data-direction='reverse', data-wow-delay='0.4s')
+                    i.zmdi.zmdi-close
+                h1.nd-title Rol instellen
+
+            div(data-role='content')
+                p Selecteer alstublieft de rol van de geselecteerde gebruikers.
+
+                //- Flip switches to define the user rol
+                br
+                .row
+                    .col-xs: .box
+                        //- Flip switch for regular players
+                        label(for='field-special') Deelnemer
+                        select(name='field-player', id='field-special', data-role='flipswitch', selected='selected')
+                            option(value='false') NEE
+                            option(value='true') JA
+
+                    .col-xs: .box
+                        //- Flip switch for spectators
+                        label(for='field-spectator') Toeschouwer
+                        select(name='field-spectator', id='field-spectator', data-role='flipswitch', selected='selected')
+                            option(value='false') NEE
+                            option(value='true') JA
+
+                //- Game ID
+                input(type='hidden', name='field-game', value=game.id)
+
+                //- Action buttons
+                br
+                .button-list
+                    a.ui-btn.clr-primary.action-apply(href='#', data-inline='true')
+                        i.zmdi.zmdi-check
+                        | &nbsp;&nbsp;Toepassen
+                    a.ui-btn.action-cancel(href='#', data-rel='back', data-inline='true')
+                        i.zmdi.zmdi-cancel
+                        | &nbsp;Annuleren
+
+
+
+        h1.header.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's') Gebruikers
+
+        //- Users list
+        .user-list
+            if game.users.users.length > 0
+                each entry in game.users.users
+                    .wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's')
+                        //- Checkbox, enabled or disabled based on the users' rights
+                        if user.hasPermission
+                            input(type='checkbox', name='checkbox-user-' + entry.id, id='checkbox-user-' + entry.id)
+                        else
+                            input(type='checkbox', name='checkbox-user-' + entry.id, id='checkbox-user-' + entry.id, disabled='disabled')
+
+                        //- Label with the avatar
+                        label(for='checkbox-user-' + entry.id)
+                            img.ui-thumbnail.ui-thumbnail-square(src=entry.avatarUrl)
+                            | #{entry.name}
+
+            else
+                p.wow.fadeInUp.no-users(data-wow-delay=(fadeDelay += 0.1) + 's')
+                    i Geen gebruikers...
+
+        //- Show the change roles button if the user has proper rights
+        if game.users.users.length > 0
+            br
+            if user.hasPermission
+                a.ui-btn.ui-btn-raised.clr-primary.action-change-user-roles.wow.fadeInUp(href='#popupChangeUserRole', data-rel='popup', data-position-to='window', data-transition='pop', data-wow-delay=(fadeDelay += 0.1) + 's') Rol aanpassen

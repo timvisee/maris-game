@@ -27,10 +27,8 @@ var config = require('../../config');
 
 var pageJoin = require('./game/join');
 var pageInfo = require('./game/info');
-// TODO: Remove this?
-// var pagePlayers = require('./game/players');
+var pagePlayers = require('./game/players');
 var pageManage = require('./game/manage');
-// var pageFactory = require('./game/factory');
 
 var Core = require('../../Core');
 var CallbackLatch = require('../util/CallbackLatch');
@@ -206,15 +204,11 @@ pageJoin.route(router);
 // Route the game info page
 pageInfo.route(router);
 
-// TODO: Remove this?
-// // Route the game players page
-// pagePlayers.route(router);
+// Route the game players page
+pagePlayers.route(router);
 
 // Route the game management page
 pageManage.route(router);
-
-// // Route the factory page
-// pageFactory.route(router);
 
 // Export the module
 module.exports = router;
