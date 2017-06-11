@@ -420,23 +420,6 @@ GameModel.prototype.getTeams = function(callback) {
  */
 
 /**
- * Get the number of teams for this game.
- *
- * @param {GameModel~getTeamCountCallback} callback Called back with the number of teams or when an error occurred.
- */
-GameModel.prototype.getTeamCount = function(callback) {
-    Core.model.gameTeamModelManager.getGameTeamCount(this, callback);
-};
-
-/**
- * Called back with the number of teams or when an error occurred.
- *
- * @callback GameModel~getTeamCountCallback
- * @param {Error|null} Error instance if an error occurred, null if not.
- * @param {Number} Number of teams in this game.
- */
-
-/**
  * Check whether the given user has permission to manage this game.
  * A user will have permission if it's the host of the game, or if the user is administrator.
  *
