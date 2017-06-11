@@ -5,11 +5,9 @@ block tabs
         - var fadeDelay = 0;
         li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
         if game.stage >= 1
-            li.wow.fadeInUp(data-tab='me', data-wow-delay=(fadeDelay += 0.1) + 's') Me
+            li.wow.fadeInUp(data-tab='map', data-wow-delay=(fadeDelay += 0.1) + 's') Kaart
         if game.stage == 1
-            li.wow.fadeInUp(data-tab='actions', data-wow-delay=(fadeDelay += 0.1) + 's') Actions
-        if game.stage >= 1
-            li.wow.fadeInUp(data-tab='map', data-wow-delay=(fadeDelay += 0.1) + 's') Map
+            li.wow.fadeInUp(data-tab='actions', data-wow-delay=(fadeDelay += 0.1) + 's') Acties
 
 block content
     div(data-role='nd2tab', data-tab='info')
@@ -17,141 +15,83 @@ block content
             if game.usersCount.requested > 0
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text
-                        h3.card-primary-title Users awaiting approval
+                        h3.card-primary-title Gebruikers die wachten op goedkeuring
 
                     .card-supporting-text.has-action.has-title.
-                        #{game.usersCount.requested} user#{game.usersCount.requested == 1 ? '' : 's'} requested to join this game and are awaiting your approval.
-                        Click the button below to visit the user approval page.
+                        #{game.usersCount.requested} gebruiker#{game.usersCount.requested == 1 ? '' : 's'} hebben gevraagd mee te doen aan dit spel, en wachten op goedkeuring.
+                        Klik op de onderstaande knop om gebruikers goed te keuren.
 
                     .card-action
                         .row.between-xs: .col-xs-12: .box
-                            a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players/requested', data-transition='slide') Approve users
+                            a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players/requested', data-transition='slide') Gebruikers goedkeuren
 
             .nd2-card.wow.fadeInUp
                 .card-title.has-supporting-text
-                    h3.card-primary-title Game management
+                    h3.card-primary-title Spelbeheer
 
                 .card-supporting-text.has-action.has-title.
-                    Visit the management page to start the game.
+                    Bezoek de beheerpagina om het spel te starten.
 
                 .card-action
                     .row.between-xs: .col-xs-12: .box
-                        a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/manage', data-transition='slide') Management
+                        a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/manage', data-transition='slide') Beheer
 
         //- Show a proper card if the user hasn't joined this game
         unless game.userState.player || game.userState.spectator || game.userState.special
             if game.userState.requested
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text
-                        h3.card-primary-title Requested to join
+                        h3.card-primary-title Deelname aangevraagd
 
                     .card-supporting-text.has-action.has-title.
-                        You've requested to join this game.
-                        Please wait for the game host to accept your request.
+                        Je hebt aangevraagd om deel te nemen aan dit spel.
+                        Wacht alstublieft op een docent om je deelname te accepteren.
 
             else
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text
-                        h3.card-primary-title Open game
+                        h3.card-primary-title Beschikbaar spel
 
                     .card-supporting-text.has-action.has-title.
-                        You aren't part of this game yet, and it's still open.
-                        Click the button below to request to join the game.
+                        Je doet nog niet mee aan dit spel, en u kunt een aanvraag doen om deel te nemen aan het spel.
 
                     .card-action
                         .row.between-xs: .col-xs-12: .box
-                            a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/join', data-transition='slide') Request to join
+                            a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/join', data-transition='slide') Deelname aanvragen
 
         .nd2-card.wow.fadeInUp
             .card-title.has-supporting-text
-                h3.card-primary-title Game information
+                h3.card-primary-title Spelinformatie
 
             .card-supporting-text.has-action.has-title
                 table.table-list.ui-responsive
-                    tr: td Name
+                    tr: td Naam
                         td= game.name
-                    tr: td Stage
+                    tr: td Staat
                         case game.stage
                             when 0
-                                td Not yet started
+                                td Nog niet gestart
                             when 1
-                                td Started
+                                td(style="color: green;") Gestart
                             when 2
-                                td Finished
-                    tr: td Participants
+                                td Afgerond
+                    tr: td Deelnemers
                         td= game.usersCount.totalAccepted
-                            span.gray  user#{game.usersCount.totalAccepted == 1 ? '' : 's'}
+                            span.gray  gebruiker#{game.usersCount.totalAccepted == 1 ? '' : 's'}
                     if game.usersCount.requested > 0
-                        tr: td Requested
+                        tr: td Aangevraagd
                             td= game.usersCount.requested
-                                span.gray  user#{game.usersCount.requested == 1 ? '' : 's'}
+                                span.gray  gebruiker#{game.usersCount.requested == 1 ? '' : 's'}
 
             .card-action
                 .row.between-xs: .col-xs-12: .box
-                    a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/info', data-transition='slide') More info
-                    a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players', data-transition='slide') Players
+                    a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/info', data-transition='slide') Meer info
+                    a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players', data-transition='slide') Deelnemers
 
-    div(data-role='nd2tab', data-tab='me')
-        .nd2-card.wow.fadeInUp.card-factory-info
-            .card-title.has-supporting-text
-                h3.card-primary-title My balance
-
-            .card-supporting-text.has-action.has-title
-                table.table-list.ui-responjjjjsive
-                    tr: td Money
-                        td
-                            span.game-balance-money ?
-                            span(style="color: gray;")  dollars
-                    tr: td Ingredients
-                        td
-                            span.game-balance-in ?
-                            span(style="color: gray;")  units
-                    tr: td Drugs
-                        td
-                            span.game-balance-out ?
-                            span(style="color: gray;")  units
-
-        .nd2-card.wow.fadeInUp.card-player-strength
-            .card-title.has-supporting-text
-                h3.card-primary-title Upgrade strength
-
-            .card-supporting-text.has-action.has-title
-                p Upgrading your strength makes it easier to attack enemy labs.
-                div(align='center')
-                    table.table-list.ui-responsive
-                        tr: td Strength
-                            td <span class="game-player-strength">?</span>
-
-            .card-action
-                .row.between-xs: .col-xs-12: .box.upgrade-button-list
-                    div(align="center")
-                        i No upgrades available...<br><br>
-
-        .nd2-card.wow.fadeInUp.card-pings
-            .card-title.has-supporting-text
-                h3.card-primary-title Ping
-
-            .card-supporting-text.has-action.has-title
-                p Execute a ping to scan for a nearby enemy lab.
-
-            .card-action
-                .row.between-xs: .col-xs-12: .box.ping-button-list
-                    div(align="center")
-                        i No pings available...<br><br>
-
-        .nd2-card.wow.fadeInUp.card-standings
-            .card-title.has-supporting-text
-                h3.card-primary-title Current standings
-
-            .card-supporting-text.has-action.has-title
-                p These are the current standings per us::
-                table.table-list.ui-responsive.current-standings
-                    tr: td: i(style='font-weight: normal; color: gray;') Unknown...
+    div(data-role='nd2tab', data-tab='map')
+        #map-container
 
     div(data-role='nd2tab', data-tab='actions')
         .game-actions-list
             div(align='center')
                 p.game-data-load-label: i Loading...
-
-    div(data-role='nd2tab', data-tab='map')
-        #map-container
