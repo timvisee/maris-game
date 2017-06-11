@@ -27,6 +27,7 @@ var _ = require("lodash");
 var login = require('./login');
 var logout = require('./logout');
 var register = require('./register');
+var game = require('./game');
 var about = require('./about');
 var create = require('./create');
 
@@ -63,6 +64,9 @@ router.use('/logout', logout);
 
 // Register page
 router.use('/register', register);
+
+// Game page
+router.use('/game', game);
 
 // About page
 router.use('/about', about);
