@@ -1,0 +1,58 @@
+extends page
+
+block content
+    case game.stage
+        when 0
+            .nd2-card.wow.fadeInUp
+                .card-title.has-supporting-text
+                    h3.card-primary-title Spel starten
+
+                .card-supporting-text.has-action.has-title
+                    p Het spel staat klaar om gestart te worden.
+
+                .card-action
+                    .row.between-xs: .col-xs-12: .box
+                        a.ui-btn.waves-effect.waves-button.waves-effect.waves-button.clr-primary.action-game-start(href='#', data-transition='slide', data-rel='popup')
+                            i.zmdi.zmdi-play
+                            | &nbsp;&nbsp;Spel starten
+
+        when 1
+            .nd2-card.wow.fadeInUp
+                .card-title.has-supporting-text
+                    h3.card-primary-title Spel afronden
+
+                .card-supporting-text.has-action.has-title
+                    p Het spel is momenteel actief. Klik op de onderstaande knop om het spel af te ronden.
+
+                .card-action
+                    .row.between-xs: .col-xs-12: .box
+                        a.ui-btn.waves-effect.waves-button.waves-effect.waves-button.clr-primary.action-game-stop(href='#', data-transition='slide', data-rel='popup')
+                            i.zmdi.zmdi-stop
+                            | &nbsp;&nbsp;Spel afronden
+
+        when 2
+            .nd2-card.wow.fadeInUp
+                .card-title.has-supporting-text
+                    h3.card-primary-title Spel afgerond
+
+                .card-supporting-text.has-action.has-title
+                    p Het spel is afgerond. Je kunt op de onderstaande knop drukken om het spel te hervatten vanaf de huidige staat.
+
+                .card-action
+                    .row.between-xs: .col-xs-12: .box
+                        a.ui-btn.waves-effect.waves-button.waves-effect.waves-button.clr-primary.action-game-resume(href='#', data-transition='slide', data-rel='popup')
+                            i.zmdi.zmdi-fast-forward
+                            | &nbsp;&nbsp;Spel hervatten
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Omroep
+
+        .card-supporting-text.has-action.has-title
+            p Een omroep maakt het mogelijk een bericht te sturen naar alle spelers die deelnemen aan het spel.
+
+        .card-action
+            .row.between-xs: .col-xs-12: .box
+                a.ui-btn.waves-effect.waves-button.waves-effect.waves-button.clr-primary.action-broadcast(href='#', data-transition='slide', data-rel='popup')
+                    i.zmdi.zmdi-mail-send
+                    | &nbsp;&nbsp;Omroep versturen

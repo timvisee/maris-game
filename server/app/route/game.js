@@ -30,7 +30,7 @@ var config = require('../../config');
 var pageInfo = require('./game/info');
 // var pagePlayers = require('./game/players');
 // var pageTeams = require('./game/teams');
-// var pageManage = require('./game/manage');
+var pageManage = require('./game/manage');
 // var pageFactory = require('./game/factory');
 
 var Core = require('../../Core');
@@ -215,10 +215,10 @@ pageInfo.route(router);
 //
 // // Route the game teams page
 // pageTeams.route(router);
-//
-// // Route the game management page
-// pageManage.route(router);
-//
+
+// Route the game management page
+pageManage.route(router);
+
 // // Route the factory page
 // pageFactory.route(router);
 
