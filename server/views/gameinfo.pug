@@ -1,0 +1,28 @@
+extends page
+
+block content
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Spelinformatie
+
+        .card-supporting-text.has-action.has-title
+            table.table-list.ui-responsive
+                tr: td Naam
+                    td= game.name
+                tr: td Staat
+                    case game.stage
+                        when 0
+                            td Nog niet gestart
+                        when 1
+                            td(style="color: green;") Gestart
+                        when 2
+                            td Afgerond
+                tr: td Deelnemers
+                    td= game.users.usersCount.players
+                        span.gray  van #{game.users.usersCount.totalAccepted} gebruiker#{game.users.usersCount.totalAccepted == 1 ? '' : 's'}
+                tr: td Toeschouwers
+                    td= game.users.usersCount.spectators
+                        span.gray  van #{game.users.usersCount.totalAccepted} gebruiker#{game.users.usersCount.totalAccepted == 1 ? '' : 's'}
+                tr: td Aangevraagd
+                    td= game.users.usersCount.requested
+                        span.gray  gebruiker#{game.users.usersCount.requested == 1 ? '' : 's'}

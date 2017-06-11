@@ -27,7 +27,7 @@ var config = require('../../config');
 
 // TODO: Remove this?
 // var pageJoin = require('./game/join');
-// var pageInfo = require('./game/info');
+var pageInfo = require('./game/info');
 // var pagePlayers = require('./game/players');
 // var pageTeams = require('./game/teams');
 // var pageManage = require('./game/manage');
@@ -206,10 +206,10 @@ router.get('/:game', function(req, res, next) {
 // TODO: Remove this?
 // // Route the game join page
 // pageJoin.route(router);
-//
-// // Route the game info page
-// pageInfo.route(router);
-//
+
+// Route the game info page
+pageInfo.route(router);
+
 // // Route the game players page
 // pagePlayers.route(router);
 //
