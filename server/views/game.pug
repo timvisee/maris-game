@@ -22,10 +22,10 @@ block content
             if game.usersCount.requested > 0
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text
-                        h3.card-primary-title Gebruikers die wachten op goedkeuring
+                        h3.card-primary-title Gebruikers goedkeuren
 
                     .card-supporting-text.has-action.has-title.
-                        #{game.usersCount.requested} gebruiker#{game.usersCount.requested == 1 ? '' : 's'} hebben gevraagd mee te doen aan dit spel, en wachten op goedkeuring.
+                        #{game.usersCount.requested} gebruiker#{game.usersCount.requested == 1 ? ' heeft' : 's hebben'} een aanvraag gedaan om deel te nemen aan dit spel, en wacht#{game.usersCount.requested == 1 ? '' : 'en'} op goedkeuring.
                         Klik op de onderstaande knop om gebruikers goed te keuren.
 
                     .card-action
