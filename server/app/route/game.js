@@ -25,11 +25,10 @@ var router = express.Router();
 
 var config = require('../../config');
 
-// TODO: Remove this?
-// var pageJoin = require('./game/join');
+var pageJoin = require('./game/join');
 var pageInfo = require('./game/info');
+// TODO: Remove this?
 // var pagePlayers = require('./game/players');
-// var pageTeams = require('./game/teams');
 var pageManage = require('./game/manage');
 // var pageFactory = require('./game/factory');
 
@@ -39,7 +38,6 @@ var LayoutRenderer = require('../layout/LayoutRenderer');
 var GameParam = require('../router/middleware/GameParam');
 var Validator = require('../validator/Validator');
 // var GameUserDatabase = require('../model/gameuser/GameUserDatabase');
-// var GameTeamDatabase = require('../model/gameteam/GameTeamDatabase');
 
 // Games overview, redirect back to the front page
 router.get('/', (req, res) => res.redirect('/'));
@@ -202,19 +200,15 @@ router.get('/:game', function(req, res, next) {
         });
     });
 });
-
-// TODO: Remove this?
-// // Route the game join page
-// pageJoin.route(router);
+// Route the game join page
+pageJoin.route(router);
 
 // Route the game info page
 pageInfo.route(router);
 
+// TODO: Remove this?
 // // Route the game players page
 // pagePlayers.route(router);
-//
-// // Route the game teams page
-// pageTeams.route(router);
 
 // Route the game management page
 pageManage.route(router);
