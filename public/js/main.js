@@ -406,7 +406,7 @@ var Maris = {
 
                 // Show a notification if this isn't the first time the user disconnected
                 if(!self._firstConnection)
-                    showNotification('Successfully reconnected!', {
+                    showNotification('Succesvol verbonden!', {
                         vibrate: true
                     });
 
@@ -442,7 +442,7 @@ var Maris = {
                 // Show a notification if the last known reconnection attempt count is acceptable
                 const attemptCount = Maris.state.lastReconnectAttempt;
                 if(attemptCount <= 5 || attemptCount % 10 == 0)
-                    showNotification('Failed to connect' + (attemptCount > 1 ? ' (attempt ' + attemptCount + ')' : ''));
+                    showNotification('Verbindingsfout' + (attemptCount > 1 ? ' (poging ' + attemptCount + ')' : ''));
             });
 
             // Handle connection timeouts
@@ -454,14 +454,14 @@ var Maris = {
                 self._deauthenticate();
 
                 // Show a notification
-                showNotification('The connection timed out');
+                showNotification('Verbinding verbroken');
             });
 
             // Handle reconnection attempts
             this._socket.on('reconnect_attempt', function(attemptCount) {
                 // Show a notification
                 if(attemptCount <= 5 || attemptCount % 10 == 0)
-                    showNotification('Trying to reconnect...' + (attemptCount > 1 ? ' (attempt ' + attemptCount + ')' : ''));
+                    showNotification('Verbinden...' + (attemptCount > 1 ? ' (poging ' + attemptCount + ')' : ''));
 
                 // Store the last known reconnection attempt count
                 Maris.state.lastReconnectAttempt = attemptCount;
@@ -476,7 +476,7 @@ var Maris = {
                 self._deauthenticate();
 
                 // Show a notification
-                showNotification('Failed to reconnect');
+                showNotification('Kon niet opnieuw verbinden');
             });
 
             // Handle disconnects
@@ -492,7 +492,7 @@ var Maris = {
                 appStatus = null;
 
                 // Show a notification regarding the disconnect
-                showNotification('You\'ve lost connection...', {
+                showNotification('Verbinding verbroken...', {
                     vibrate: true,
                     vibrationPattern: [1000]
                 });
@@ -909,9 +909,9 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.AUTH_RESPONSE, functio
 
     // Show an error notification if we failed to authenticate
     if(packet.hasOwnProperty('valid') && !packet.valid) {
-        showNotification('Failed to authenticate', {
+        showNotification('Authenticatiefout', {
             action: {
-                text: 'Login',
+                text: 'Inloggen',
                 action: function() {
                     Maris.utils.navigateToPath('/login');
                     return false;
@@ -933,7 +933,6 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.AUTH_RESPONSE, functio
 
     // Request new game data
     requestGameData();
-    requestFactoryData();
 });
 
 // Register game stage change handler
@@ -954,9 +953,9 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_STAGE_CHANGED, fu
     if(!isJoined) {
         // Check whether the user is currently on the page of this game
         if(gameId == Maris.utils.getGameId()) {
-            showNotification('This game has been changed.', {
+            showNotification('Dit spel is aangepast.', {
                 action: {
-                    text: 'Refresh'
+                    text: 'Verversen'
                 }
             }, function() {
                 Maris.utils.navigateToPath('/game/' + gameId);
@@ -969,44 +968,44 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_STAGE_CHANGED, fu
     }
 
     // Define the title, message and actions to show to the user
-    var title = 'Game changed';
-    var message = 'The stage of the game <b>' + gameName + '</b> has changed.';
+    var title = 'Spel aangepast';
+    var message = 'De staat van het spel <b>' + gameName + '</b> is veranderd.';
     var actions = [];
 
     // Determine the title
     if(stage == 1)
-        title = 'Game started';
+        title = 'Spel gestart';
     else if(stage == 2)
-        title = 'Game finished';
+        title = 'Spel afgerond';
 
     // Determine whether this game, or a different game has been started
     if(Maris.utils.getGameId() == gameId) {
         // Build a message to show to the user
         if(stage == 1)
-            message = 'The game has been started.';
+            message = 'Het spel is zojuist gestart.';
         else if(stage == 2)
-            message = 'The game has been finished.';
+            message = 'Het spel is zojuist afgerond.';
 
         // Create the dialog actions
         actions.push({
-            text: 'Refresh',
+            text: 'Verversen',
             type: 'primary'
         });
 
     } else {
         // Build a message to show to the user
         if(stage == 1)
-            message = 'The game <b>' + gameName + '</b> has been started.<br><br>You\'ve joined this game.';
+            message = 'Het spel <b>' + gameName + '</b> is zojuist gestart.<br><br>Je bent een deelnemer van dit spel.';
         else if(stage == 2)
-            message = 'The game <b>' + gameName + '</b> has been finished.<br><br>You\'ve joined this game.';
+            message = 'Het spel <b>' + gameName + '</b> is zojuist afgerond.<br><br>Je bent een deelnemer van dit spel..';
 
         // Create the dialog actions
         actions.push({
-            text: 'View game',
+            text: 'Spel bekijken',
             type: 'primary'
         });
         actions.push({
-            text: 'Close',
+            text: 'Sluiten',
             value: false
         });
     }
@@ -1049,11 +1048,11 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.MESSAGE_RESPONSE, func
     if(dialog) {
         // Show a dialog
         showDialog({
-            title: error ? 'Error' : 'Message',
+            title: error ? 'Error' : 'Bericht',
             message: message,
             actions: [
                 {
-                    text: 'Close'
+                    text: 'Sluiten'
                 }
             ]
         });
@@ -1064,7 +1063,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.MESSAGE_RESPONSE, func
         // Create the notification object
         var notificationObject = {
             action: {
-                text: 'Close'
+                text: 'Sluiten'
             }
         };
 
@@ -1099,9 +1098,9 @@ function showNextBroadcast() {
     const broadcast = broadcastQueue[0];
 
     // Determine the message
-    var dialogMessage = broadcast.message + '<br><hr><i>This broadcast was send by the host of the <b>' + broadcast.gameName + '</b> game.</i>';
+    var dialogMessage = broadcast.message + '<br><hr><i>Deze omroep is gestuurd door een docent van het spel <b>' + broadcast.gameName + '</b>.</i>';
     if(Maris.utils.getGameId() == broadcast.game)
-        dialogMessage = broadcast.message + '<br><hr><i>This broadcast was send by the host of this game.</i>';
+        dialogMessage = broadcast.message + '<br><hr><i>Deze omroep is gestuurd door een docent van dit spel.</i>';
 
     // Define the actions for the dialog
     var actions = [];
@@ -1109,7 +1108,7 @@ function showNextBroadcast() {
     // Create a function to show the dialog
     const _showDialog = function() {
         showDialog({
-            title: 'Broadcast',
+            title: 'Omroep',
             message: dialogMessage,
             actions: actions
         }, function(value) {
@@ -1127,9 +1126,9 @@ function showNextBroadcast() {
                 return;
 
             // Show the postponed notification
-            showNotification('Broadcast postponed', {
+            showNotification('Omroep uitgesteld', {
                 action: {
-                    text: 'View',
+                    text: 'Bekijken',
                     action: function() {
                         setTimeout(function() {
                             _showDialog();
@@ -1146,7 +1145,7 @@ function showNextBroadcast() {
     // Add a 'view game' action if we're currently not viewing the game
     if(Maris.utils.getGameId() != broadcast.game)
         actions.push({
-            text: 'View game',
+            text: 'Spel bekijken',
             value: false,
             action: function() {
                 Maris.utils.navigateToPath('/game/' + broadcast.game);
@@ -1155,7 +1154,7 @@ function showNextBroadcast() {
 
     // Add the mark as read button
     actions.push({
-        text: 'Mark as read',
+        text: 'Markeren als gelezen',
         value: false,
         icon: 'zmdi zmdi-check',
         state: 'primary',
@@ -1169,7 +1168,7 @@ function showNextBroadcast() {
 
     // Add the postpone button
     actions.push({
-        text: 'Postpone',
+        text: 'Uitstellen',
         icon: 'zmdi zmdi-time-restore'
     });
 
@@ -1298,11 +1297,11 @@ function showDisconnectedTooLongDialog() {
     // Show the dialog
     //noinspection JSCheckFunctionSignatures
     showDialog({
-        title: 'Disconnected',
-        message: 'You ' + (Maris.realtime._connected ? 'we\'re' : 'are') + ' disconnected for too long.<br><br>' +
-        'Please refresh the application to make sure everything is up-to-date.',
+        title: 'Verbinding verbroken',
+        message: 'De verbinding ' + (Maris.realtime._connected ? 'was' : 'is') + ' voor een te lange tijd verbroken.<br><br>' +
+        'Ververs de applicatie alstublieft om te zorgen dat alles weer up-to-date is.',
         actions: [{
-            text: 'Refresh',
+            text: 'Verversen',
             state: 'primary',
             icon: 'zmdi zmdi-refresh'
         }]
@@ -1353,11 +1352,11 @@ function updateActiveGame() {
         } else {
             // Ask the user whether to select this as active game
             showDialog({
-                title: 'Change active game',
-                message: 'You may only have one active game to play at a time.<br /><br />Would you like to change your active game to this game now?',
+                title: 'Actief spel aanpassen',
+                message: 'U kunt maar één actief spel hebben.<br /><br />Wilt u dit spel activeren?',
                 actions: [
                     {
-                        text: 'Activate this game',
+                        text: 'Spel activeren',
                         value: true,
                         state: 'primary',
                         icon: 'zmdi zmdi-swap',
@@ -1367,7 +1366,7 @@ function updateActiveGame() {
                         }
                     },
                     {
-                        text: 'View current game',
+                        text: 'Spel bekijken',
                         value: true,
                         icon: 'zmdi zmdi-long-arrow-return',
                         action: function() {
@@ -1376,15 +1375,15 @@ function updateActiveGame() {
                         }
                     },
                     {
-                        text: 'Ignore'
+                        text: 'Negeren'
                     }
                 ]
 
             }, function() {
                 // Show a notification to switch to the active game
-                showNotification('Switch to your active game', {
+                showNotification('Ga naar uw actieve spel', {
                     action: {
-                        text: 'Switch',
+                        text: 'Ga',
                         action: function() {
                             $.mobile.navigate('/game/' + Maris.state.activeGame, {
                                 transition: 'flow'
@@ -1412,7 +1411,7 @@ function setActiveGame(gameId) {
     // Show a notification if the active game is changing
     if(Maris.state.activeGame != gameId) {
         // Show a notification
-        showNotification('This is now your active game');
+        showNotification('Dit spel is nu actief.');
 
         // TODO: Send packet to server to change the user's active game
 
@@ -1512,7 +1511,7 @@ function showDialog(options, callback) {
         title: 'Popup',
         message: '',
         actions: [{
-            text: 'Close'
+            text: 'Sluiten'
         }]
     };
 
@@ -1595,7 +1594,7 @@ function showDialog(options, callback) {
     options.actions.forEach(function(action) {
         // Create the button defaults
         const buttonDefaults = {
-            text: 'Button',
+            text: 'Knop',
             value: undefined,
             state: 'normal'
         };
@@ -1715,7 +1714,7 @@ function showNotification(message, options) {
     if(options.toast) {
         // Create an array of actions to show on the notification
         var notificationAction = {
-            title: "Close",
+            title: 'Sluiten',
             fn: function() {},
             color: 'lime'
         };
@@ -1824,7 +1823,7 @@ function showNativeNotification(message, fallback) {
 
         // Show a fallback notification
         showNotification(message, {
-            title: 'Message'
+            title: 'Bericht'
         });
     });
 }
@@ -1854,7 +1853,7 @@ $(document).bind("pageinit", function() {
 
         // Show a warning if no user is selected
         if(checkboxes.length === 0) {
-            showNotification('Please select the users to change', {
+            showNotification('Geen gebruikers geselecteerd', {
                 toast: true,
                 native: false,
                 vibrate: true,
@@ -1918,7 +1917,7 @@ $(document).bind("pageinit", function() {
             const onError = function(message) {
                 // Define the error message
                 if(typeof message !== 'string')
-                    message = 'Failed to change user roles';
+                    message = 'Fout bij het toepassen';
                 const errorMessage = 'Error: ' + message;
 
                 // Show an error notification
@@ -1961,7 +1960,7 @@ $(document).bind("pageinit", function() {
                     const updatedUsersCount = updatedUsers.length;
 
                     // Show an error notification
-                    showNotification('Changed roles for ' + updatedUsersCount + ' user' + (updatedUsersCount != 1 ? 's' : ''), {
+                    showNotification('Rollen aangepast voor ' + updatedUsersCount + ' gebruiker' + (updatedUsersCount != 1 ? 's' : ''), {
                         toast: true,
                         native: false,
                         vibrate: true,
@@ -2064,17 +2063,17 @@ $(document).bind("pagecreate", function() {
 
         // Show a dialog, and ask whether the user is sure
         showDialog({
-            title: 'Start game',
-            message: 'Are you sure you want to start the game?',
+            title: 'Spel starten',
+            message: 'Weet u zeker dat u dit spel wilt starten?',
             actions: [
                 {
-                    text: 'Start game',
+                    text: 'Spel starten',
                     icon: 'zmdi zmdi-play',
                     state: 'primary',
                     action: gameStartAction
                 },
                 {
-                    text: 'Cancel'
+                    text: 'Annuleren'
                 }
             ]
         });
@@ -2088,17 +2087,17 @@ $(document).bind("pagecreate", function() {
 
         // Show a dialog, and ask whether the user is sure
         showDialog({
-            title: 'Finish game',
-            message: 'Are you sure you want to stop and finish this game?',
+            title: 'Spel afronden',
+            message: 'Weet u zeker dat u dit spel wilt afronden?',
             actions: [
                 {
-                    text: 'Finish game',
+                    text: 'Spel afronden',
                     icon: 'zmdi zmdi-stop',
                     state: 'warning',
                     action: gameStopAction
                 },
                 {
-                    text: 'Cancel'
+                    text: 'Annuleren'
                 }
             ]
         });
@@ -2112,17 +2111,17 @@ $(document).bind("pagecreate", function() {
 
         // Show a dialog, and ask whether the user is sure
         showDialog({
-            title: 'Resume game',
-            message: 'Are you sure you want to resume the game from the current state?',
+            title: 'Spel hervatten',
+            message: 'Weet u zeker dat u dit spel wilt hervatten vanaf de huidige staat?',
             actions: [
                 {
-                    text: 'Resume game',
+                    text: 'Spel hervatten',
                     icon: 'zmdi zmdi-fast-forward',
                     state: 'primary',
                     action: gameResumeAction
                 },
                 {
-                    text: 'Cancel'
+                    text: 'Annuleren'
                 }
             ]
         });
@@ -2144,13 +2143,13 @@ $(document).bind("pagecreate", function() {
 
         // Show a dialog, and ask whether the user is sure
         showDialog({
-            title: 'Broadcast message',
-            message: 'Enter a message to broadcast to all users in this game:<br><br>' +
-            '<label for="' + fieldId + '">Message</label>' +
+            title: 'Omroep bericht',
+            message: 'Vul een omroepbericht in om naar alle spelers van dit spel te sturen:<br><br>' +
+            '<label for="' + fieldId + '">Bericht</label>' +
             '<input type="text" name="' + fieldId + '" id="' + fieldId + '" value="" data-clear-btn="true" />',
             actions: [
                 {
-                    text: 'Broadcast message',
+                    text: 'Omroep bericht',
                     icon: 'zmdi zmdi-mail-send',
                     state: 'primary',
                     action: function() {
@@ -2164,10 +2163,10 @@ $(document).bind("pagecreate", function() {
                         if(message.trim().length <= 0) {
                             // Show an error dialog to the user
                             showDialog({
-                                title: 'Invalid message',
-                                message: 'The message you\'ve entered to broadcast is invalid.',
+                                title: 'Ongeldig bericht',
+                                message: 'Het bericht wat u heeft opgegeven om te sturen is ongeldig.',
                                 actions: [{
-                                        text: 'Close'
+                                        text: 'Sluiten'
                                 }]
                             });
                             return;
@@ -2181,7 +2180,7 @@ $(document).bind("pagecreate", function() {
                     }
                 },
                 {
-                    text: 'Cancel'
+                    text: 'Annuleren'
                 }
             ]
         });
@@ -2263,23 +2262,23 @@ $(document).bind("pageinit", function() {
         var statusBody = '<div align="center" class="table-list">' +
             '<table>' +
             '    <tr>' +
-            '        <td class="left"><i class="zmdi zmdi-play zmdi-hc-fw"></i> Game</td><td class="status-game-label">Unknown</td>' +
+            '        <td class="left"><i class="zmdi zmdi-play zmdi-hc-fw"></i> Spel</td><td class="status-game-label">Onbekend</td>' +
             '    </tr>' +
             '    <tr>' +
-            '        <td class="left"><i class="zmdi zmdi-network zmdi-hc-fw"></i> Network</td><td class="status-network-label">Unknown</td>' +
+            '        <td class="left"><i class="zmdi zmdi-network zmdi-hc-fw"></i> Netwerk</td><td class="status-network-label">Onbekend</td>' +
             '    </tr>' +
             '    <tr>' +
-            '        <td class="left"><i class="zmdi zmdi-gps-dot zmdi-hc-fw"></i> GPS<br>&nbsp;</td><td class="status-gps-label">Unknown</td>' +
+            '        <td class="left"><i class="zmdi zmdi-gps-dot zmdi-hc-fw"></i> GPS<br>&nbsp;</td><td class="status-gps-label">Onbekend</td>' +
             '    </tr>' +
             '    <tr>' +
-            '        <td class="left"><i class="zmdi zmdi-battery zmdi-hc-fw"></i> Battery</td><td class="status-battery-label">Unknown</td>' +
+            '        <td class="left"><i class="zmdi zmdi-battery zmdi-hc-fw"></i> Batterij</td><td class="status-battery-label">Onbekend</td>' +
             '    </tr>' +
             '</table>' +
             '</div>';
 
         // Show a dialog, and ask whether the user is sure
         showDialog({
-            title: 'Device status',
+            title: 'Apparaat status',
             message: statusBody,
             actions: [
                 {
@@ -2287,13 +2286,13 @@ $(document).bind("pageinit", function() {
                     action: testGps
                 },
                 {
-                    text: 'Reload application',
+                    text: 'Applicatie verversen',
                     action: function() {
                         location.reload();
                     }
                 },
                 {
-                    text: 'Close'
+                    text: 'Sluiten'
                 }
             ]
         });
@@ -2359,33 +2358,33 @@ function updateStatusLabels() {
 
     // Set the network status label
     if(!isConnected && !isOnline)
-        networkStatusLabel.html('<span style="color: red;">Not online</span>');
+        networkStatusLabel.html('<span style="color: red;">Niet online</span>');
     else if(!isConnected)
-        networkStatusLabel.html('<span style="color: red;">Online, not connected</span>');
+        networkStatusLabel.html('<span style="color: red;">Online, niet verbonden</span>');
     else
-        networkStatusLabel.html('Connected');
+        networkStatusLabel.html('Verbonden');
 
     // Set the GPS status label
     if(!hasGps)
-        gpsStatusLabel.html('<span style="color: red;">Not supported</span>');
+        gpsStatusLabel.html('<span style="color: red;">Niet ondersteund</span>');
     else if(Maris.state.geoState == GeoStates.UNKNOWN)
-        gpsStatusLabel.html('Supported<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active'));
+        gpsStatusLabel.html('Ondersteund<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief'));
     else if(Maris.state.geoState == GeoStates.WORKING)
-        gpsStatusLabel.html('Working<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active'));
+        gpsStatusLabel.html('Werkt<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief'));
     else if(Maris.state.geoState == GeoStates.NO_PERMISSION)
-        gpsStatusLabel.html('<span style="color: red;">No permission<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active') + '</span>');
+        gpsStatusLabel.html('<span style="color: red;">Geen rechten<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief') + '</span>');
     else if(Maris.state.geoState == GeoStates.TIMEOUT)
-        gpsStatusLabel.html('<span style="color: red;">Timed out<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active') + '</span>');
+        gpsStatusLabel.html('<span style="color: red;">Timeout<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief') + '</span>');
     else if(Maris.state.geoState == GeoStates.NOT_WORKING)
-        gpsStatusLabel.html('<span style="color: red;">Not working<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active') + '</span>');
+        gpsStatusLabel.html('<span style="color: red;">Werkt niet<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief') + '</span>');
     else if(Maris.state.geoState == GeoStates.UNKNOWN_POSITION)
-        gpsStatusLabel.html('<span style="color: red;">Unknown position<br>' + (Maris.state.geoWatcher !== null ? 'Active' : 'Not active') + '</span>');
+        gpsStatusLabel.html('<span style="color: red;">Onbekende positie<br>' + (Maris.state.geoWatcher !== null ? 'Actief' : 'Niet actief') + '</span>');
 
     // Battery the GPS status label
     if(!hasBattery)
-        batteryStatusLabel.html('<i>Not supported</i>');
+        batteryStatusLabel.html('<i>Niet ondersteund</i>');
     else if(batteryLevel < 0)
-        batteryStatusLabel.html('<i>Unknown</i>');
+        batteryStatusLabel.html('<i>Onbekend</i>');
     else if(batteryLevel <= 10)
         batteryStatusLabel.html('<span style="color: red;">' + batteryLevel + '%</span>');
     else
@@ -2397,9 +2396,9 @@ function updateStatusLabels() {
 
     // Set the game status label
     if(error)
-        gameStatusLabel.html('<span style="color: red;">Device not functional</span>');
+        gameStatusLabel.html('<span style="color: red;">Apparaat niet functioneel</span>');
     else
-        gameStatusLabel.html(playing ? 'Playing' : 'Ready to play');
+        gameStatusLabel.html(playing ? 'Speelt' : 'Klaar om te spelen');
 
     // Update the error state
     error = error || (hasBattery && batteryLevel >= 0 && batteryLevel <= 10);
@@ -2463,7 +2462,7 @@ $(document).on('offline online', function() {
  */
 function testGps() {
     // Show a notification
-    showNotification('Testing GPS...');
+    showNotification('GPS testen...');
 
     // Get the current GPS location
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -2471,7 +2470,7 @@ function testGps() {
         processLocationSuccess(position, false, true);
 
         // Show a notification regarding the GPS
-        showNotification('Your GPS is working');
+        showNotification('Uw GPS werkt');
 
     }, function(error) {
         // Process the location error callback
@@ -2505,7 +2504,7 @@ function processLocationSuccess(position, notification, alsoUpdateLocal) {
 
     // Show a GPS success notification if it started working again
     if(notification && gpsStateChanged)
-        showNotification('Your location is available', {
+        showNotification('Locatie beschikbaar', {
             vibrate: true
         });
 
@@ -2562,31 +2561,31 @@ function processLocationError(error, showErrorDialog) {
     // Show an error if the showDialogError parameter is set to true
     if(showErrorDialog) {
         // Define the message to show to the user
-        var dialogMessage = 'We were unable to determine your location.<br><br>' +
-            'Please make sure the location functionality and GPS is enabled on your device.<br><br>' +
-            'It might take a while for your device to determine your location.' +
-            'Please keep testing your GPS until your location is found.';
+        var dialogMessage = 'We konden uw locatie niet bepalen.<br><br>' +
+            'Zorg alstublieft dat de locatie en GPS functionliteit op uw apparaat aan staat.<br><br>' +
+            'Het kan even duren voordat uw apparaat de locatie kan bepalen. ' +
+            'Blijf alstublieft uw GPS testen totdat een locatie gevonden is.';
 
 
         // Handle the permission denied error
         if(error.code == error.PERMISSION_DENIED)
-            dialogMessage = NameConfig.app.name + ' doesn\'t have permission to use your device\'s location.<br><br>' +
-                'Please allow this application to use your location and test your GPS again.';
+            dialogMessage = NameConfig.app.name + ' heeft geen rechten om de locatie van uw apparaat te zien.<br><br>' +
+                'Sta alstublieft toe dat deze applicatie gebruik mag maken van de locatievoorzieningen voordat u verder gaat.';
 
         // Handle the position unavailable error
         else if(error.code == error.POSITION_UNAVAILABLE)
-            dialogMessage = 'The location of your device is currently unknown.<br><br>' +
-                'It might take a while for your device to determine your location.' +
-                'Please test your GPS again until your location is found.<br><br>' +
-                'Note: Your device\'s location service and GPS must be enabled.';
+            dialogMessage = 'De locatie van dit apparaat is momenteel nog onbekend.<br><br>' +
+                'Het kan even duren voordat uw apparaat de locatie kan bepalen. ' +
+                'Blijf uw GPS alstublieft testen totdat een locatie gevonden is.<br><br>' +
+                'Noot: De locatievoorzieningen van uw appraat moeten aan staan.';
 
         // Handle the timeout error
         else if(error.code == error.TIMEOUT)
-            dialogMessage = 'The location of your device couldn\'t be found in time.<br><br>' +
-                'You device might temporarily be having trouble determining your location using satellite,' +
-                'this problem usually resolves itself after a while.<br><br>' +
-                'Please keep testing your GPS until your location is found.<br><br>' +
-                'Note: Your device\'s location service and GPS must be enabled.';
+            dialogMessage = 'De locatie van uw apparaat kon binnen een bepaalde tijd niet gevonden worden.<br><br>' +
+                'Uw appraat kan problemen hebben met het vinden van GPS satelieten om de locatie te bepalen,' +
+                'dit probleem lost zichzelf vaak na enige tijd op.<br><br>' +
+                'Blijf alstublieft uw GPS testen totdat een locatie gevonden is.<br><br>' +
+                'Noot: De locatievoorzieningen van uw appraat moeten aan staan.';
 
         // Show a dialog
         showDialog({
@@ -2594,12 +2593,12 @@ function processLocationError(error, showErrorDialog) {
             message: dialogMessage,
             actions: [
                 {
-                    text: 'Test GPS again',
+                    text: 'Test GPS opnieuw',
                     state: 'primary',
                     action: testGps
                 },
                 {
-                    text: 'Ignore'
+                    text: 'Negeren'
                 }
             ]
         });
@@ -2609,19 +2608,19 @@ function processLocationError(error, showErrorDialog) {
 
     } else if(gpsStateChanged) {
         // Define the notification message
-        var notificationMessage = 'Your location is unknown';
+        var notificationMessage = 'Locatie onbekend';
 
         // Handle the permission denied error
         if(error.code == error.PERMISSION_DENIED)
-            notificationMessage = 'No permission for your location';
+            notificationMessage = 'Geen rechten tot locatie';
 
         // Handle the position unavailable error
         else if(error.code == error.POSITION_UNAVAILABLE)
-            notificationMessage = 'Your location is unknown';
+            notificationMessage = 'Locatie onbekend';
 
         // Handle the timeout error
         else if(error.code == error.TIMEOUT)
-            notificationMessage = 'Your location timed out';
+            notificationMessage = 'Locatie timeout';
 
         // Show a notification
         showNotification('Error: ' + notificationMessage, {
@@ -2758,7 +2757,7 @@ function setFollowPlayer(state, options) {
 
     // Show a notification if the state changed
     if(options.showNotification && state != oldState)
-        showNotification((state ? 'Started' : 'Stopped') + ' following you');
+        showNotification((state ? 'Gestart' : 'Gestopt') + ' met volgen');
 }
 
 /**
@@ -2813,7 +2812,7 @@ function setFollowEverything(state, options) {
 
     // Show a notification if the state changed
     if(options.showNotification && state != oldState)
-        showNotification((state ? 'Started' : 'Stopped') + ' following everything');
+        showNotification((state ? 'Gestart' : 'Gestopt') + ' met alles volgen');
 }
 
 /**
@@ -2939,7 +2938,7 @@ $(document).bind("tab-switch", function(event, data) {
                 states: [{
                     stateName: 'no-follow-player',
                     icon:      'zmdi zmdi-account-o',
-                    title:     'Start following yourself on the map',
+                    title:     'Uzelf volgen op de kaart',
                     onClick: function(button, map) {
                         // Set whether to follow the player
                         setFollowPlayer(true);
@@ -2950,7 +2949,7 @@ $(document).bind("tab-switch", function(event, data) {
                 }, {
                     stateName: 'follow-player',
                     icon:      'zmdi zmdi-account',
-                    title:     'Stop following yourself on the map',
+                    title:     'Uzelf niet volgen op de kaart',
                     onClick: function(button, map) {
                         // Set whether to follow the player
                         setFollowPlayer(false);
@@ -2969,7 +2968,7 @@ $(document).bind("tab-switch", function(event, data) {
                 states: [{
                     stateName: 'no-follow-everything',
                     icon:      'zmdi zmdi-accounts-outline',
-                    title:     'Start following everything',
+                    title:     'Alles volgen op de kaart',
                     onClick: function(button, map) {
                         // Set whether to follow everything
                         setFollowEverything(true);
@@ -2980,7 +2979,7 @@ $(document).bind("tab-switch", function(event, data) {
                 }, {
                     stateName: 'follow-everything',
                     icon:      'zmdi zmdi-accounts',
-                    title:     'Stop following everything',
+                    title:     'Niet alles volgen op de kaart',
                     onClick: function(button, map) {
                         // Set whether to follow everything
                         setFollowEverything(false);
@@ -3065,7 +3064,7 @@ function requestMapData(game) {
         return;
 
     // Show a status message
-    showNotification('Refreshing map...');
+    showNotification('Kaart verversen...');
 
     // Request the map data
     Maris.realtime.packetProcessor.sendPacket(PacketType.GAME_LOCATIONS_REQUEST, {
@@ -3116,10 +3115,10 @@ function updatePlayerMarker() {
             // Show a popup when the user clicks on the marker
             playerMarker.on('click', function() {
                 showDialog({
-                    title: 'You',
-                    message: 'This marker shows your current location.<br><br>' +
-                    'The position of your marker is updated as soon as your device detects you\'ve moved.<br><br>' +
-                    'The blue circle around you shows how accurate your position is.',
+                    title: 'Uzelf',
+                    message: 'Deze marker laat uw huidige locatie zien.<br><br>' +
+                    'Deze marker wordt automatisch verplaatst als uw apparaat beweging heeft gedetecteerd.<br><br>' +
+                    'De blauwe cirkel laat zien hoe accuraat de locatiebepaling is.',
                     actions: [
                         {
                             text: 'Test GPS',
@@ -3128,7 +3127,7 @@ function updatePlayerMarker() {
                             }
                         },
                         {
-                            text: 'Close'
+                            text: 'Sluiten'
                         }
                     ]
                 })
@@ -3274,20 +3273,17 @@ function updatePlayerMarkers(users) {
             var dialogBody = '<div align="center" class="table-list">' +
                 '<table>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-account zmdi-hc-fw"></i> Player</td><td>' + user.userName + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-account zmdi-hc-fw"></i> Speler</td><td>' + user.userName + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Ally</td><td>' + (user.ally ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>') + '</td>' +
-                '    </tr>' +
-                '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-shopping-cart zmdi-hc-fw"></i> ' + capitalizeFirst(NameConfig.shop.name) + '</td><td>' + (user.shop.isShop ? 'Yes' : 'No') + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Vriendelijk</td><td>' + (user.ally ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>';
 
             // Add a range part if the user is a shop
             if(user.shop.isShop) {
                 dialogBody +=
                     '    <tr>' +
-                    '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> In range</td><td>' + (user.shop.inRange ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>') + '</td>' +
+                    '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (user.shop.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                     '    </tr>';
             }
 
@@ -3303,7 +3299,7 @@ function updatePlayerMarkers(users) {
             if(user.shop.isShop && user.shop.inRange) {
                 // Buy button
                 actions.push({
-                    text: 'Buy ' + NameConfig.in.name,
+                    text: 'Koop ' + NameConfig.in.name,
                     icon: 'zmdi zmdi-arrow-left',
                     action: function() {
                         // Show the buy dialog
@@ -3313,7 +3309,7 @@ function updatePlayerMarkers(users) {
 
                 // Sell button
                 actions.push({
-                    text: 'Sell ' + NameConfig.out.name,
+                    text: 'Verkoopt ' + NameConfig.out.name,
                     icon: 'zmdi zmdi-arrow-right',
                     action: function() {
                         // Show the sell dialog
@@ -3324,12 +3320,12 @@ function updatePlayerMarkers(users) {
 
             // Add the close button
             actions.push({
-                text: 'Close'
+                text: 'Sluiten'
             });
 
             // Show a dialog
             showDialog({
-                title: 'Other player',
+                title: 'Andere speler',
                 message: dialogBody,
                 actions: actions
             });
@@ -3478,13 +3474,13 @@ function updateFactoryMarkers(factories) {
             const dialogBody = '<div align="center" class="table-list">' +
                 '<table>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-tag-more zmdi-hc-fw"></i> Name</td><td>' + factory.name + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-tag-more zmdi-hc-fw"></i> Naam</td><td>' + factory.name + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Ally</td><td>' + (factory.ally ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>') + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Vriendelijk</td><td>' + (factory.ally ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> In range</td><td>' + (factory.inRange ? '<span style="color: green;">Yes</span>' : '<span style="color: red;">No</span>') + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (factory.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '</table>' +
                 '</div>';
@@ -3495,13 +3491,13 @@ function updateFactoryMarkers(factories) {
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'View ' + NameConfig.factory.name,
+                        text: 'Bekijk ' + NameConfig.factory.name,
                         state: 'primary',
                         action: function() {
                             Maris.utils.navigateToPage('/game/' + Maris.utils.getGameId() + '/factory/' + factory.factory, true, true, 'flip');
                         }
                     }, {
-                        text: 'Close'
+                        text: 'Sluiten'
                     }
                 ]
             })
@@ -3758,37 +3754,6 @@ function updateGameDataVisuals() {
         // Get the factory build card element if available
         var factoryBuildCardElement = gameActionsList.find('.card-factory-build');
 
-        // Create the factory build card if it isn't available
-        if(showFactoryBuild && factoryBuildCardElement.length == 0) {
-            gameActionsList.prepend('<div class="nd2-card wow card-factory-build">' +
-                '    <div class="card-title has-supporting-text">' +
-                '        <h3 class="card-primary-title">Build a ' + capitalizeFirst(NameConfig.factory.name) + '</h3>' +
-                '    </div>' +
-                '    <div class="card-supporting-text has-action has-title">' +
-                '        <p>Build a ' + NameConfig.factory.name + ' at your current location to expand your fleet and start producing more ' + NameConfig.out.name + '.</p>' +
-                '    </div>' +
-                '    <div class="card-action">' +
-                '        <div class="row between-xs">' +
-                '            <div class="col-xs-12">' +
-                '                <div class="box">' +
-                '                    <a href="#" class="ui-btn waves-effect waves-button action-factory-build">' +
-                '                        <i class="zmdi zmdi-pin"></i>&nbsp;' +
-                '                        Build ' + NameConfig.factory.name + '&nbsp;&nbsp;(<span class="game-factory-cost">?</span>)' +
-                '                    </a>' +
-                '                </div>' +
-                '            </div>' +
-                '        </div>' +
-                '    </div>' +
-                '</div>');
-            bindFactoryBuildButton();
-            changed = true;
-            cardAnimationSlideIn(gameActionsList.find('.card-factory-build'));
-
-        } else if(!showFactoryBuild && factoryBuildCardElement.length > 0) {
-            cardAnimationSlideOut(factoryBuildCardElement);
-            changed = true;
-        }
-
         // Create an array with the factory IDs that are shown
         var factoryIds = [];
 
@@ -3819,7 +3784,7 @@ function updateGameDataVisuals() {
                 '                <div class="box">' +
                 '                    <a href="/game/' + gameId + '/factory/' + factory.id + '" class="ui-btn waves-effect waves-button">' +
                 '                        <i class="zmdi zmdi-zoom-in"></i>&nbsp;' +
-                '                        View ' + NameConfig.factory.name + '' +
+                '                        Bekijk ' + NameConfig.factory.name + '' +
                 '                    </a>' +
                 '                </div>' +
                 '            </div>' +
@@ -3849,95 +3814,10 @@ function updateGameDataVisuals() {
         // Define the shop card selector prefix
         const shopCardSelector = 'card-shop';
 
-        // Loop through the list of shops
-        cardCount += data.shops.length;
-        data.shops.forEach(function(shop) {
-            // Add the shop ID to the array
-            shopTokens.push(shop.token);
-
-            // Determine the card selector for this shop´s card and get the elements for it
-            var shopCardElement = gameActionsList.find('.' + shopCardSelector + '[data-shop-token=\'' + shop.token + '\']');
-
-            // Skip this run if it already exists
-            if(shopCardElement.length > 0)
-                return;
-
-            // Create an unique ID for the buy and sell button
-            const buyButtonId = generateUniqueId('button-buy-');
-            const sellButtonId = generateUniqueId('button-sell-');
-
-            // Create a new card for this shop
-            gameActionsList.prepend('<div class="nd2-card wow ' + shopCardSelector + '" data-shop-token="' + shop.token + '">' +
-                '    <div class="card-title has-supporting-text">' +
-                '        <h3 class="card-primary-title">Local dealer</h3>' +
-                '    </div>' +
-                '    <div class="card-supporting-text has-action has-title">' +
-                '        <p>' + shop.name + ' is currently dealing high quality goods around your location.</p>' +
-                '        <table class="table-list ui-responsive">' +
-                '            <tr>' +
-                '                <td>Selling</td>' +
-                '                <td><span style="color: gray;">~</span> ' + formatMoney(shop.inSellPrice, true) + ' <span style="color: gray;">/ 1 ' + NameConfig.in.name + ' unit</span></td>' +
-                '            </tr>' +
-                '            <tr>' +
-                '                <td>Buying</td>' +
-                '                <td><span style="color: gray;">~</span> ' + formatMoney(shop.outBuyPrice, true) + ' <span style="color: gray;">/ 1 ' + NameConfig.out.name + ' unit</span></td>' +
-                '            </tr>' +
-                '        </table>' +
-                '    </div>' +
-                '    <div class="card-action">' +
-                '        <div class="row between-xs">' +
-                '            <div class="col-xs-12">' +
-                '                <div class="box">' +
-                '                    <a href="#" id="' + buyButtonId + '" class="ui-btn waves-effect waves-button">' +
-                '                        <i class="zmdi zmdi-arrow-left"></i>&nbsp;' +
-                '                        Buy ' + NameConfig.in.name + '' +
-                '                    </a>' +
-                '                    <a href="#" id= "' + sellButtonId + '" class="ui-btn waves-effect waves-button">' +
-                '                        <i class="zmdi zmdi-arrow-right"></i>&nbsp;' +
-                '                        Sell ' + NameConfig.out.name + '' +
-                '                    </a>' +
-                '                </div>' +
-                '            </div>' +
-                '        </div>' +
-                '    </div>' +
-                '</div>');
-            changed = true;
-
-            // Select the buttons elements
-            const buyButtonElement = gameActionsList.find('#' + buyButtonId);
-            const sellButtonElement = gameActionsList.find('#' + sellButtonId);
-
-            // Show the buy dialog for the shop when clicking the buy button
-            buyButtonElement.click(function() {
-                // Show the buy dialog for the shop
-                showShopBuyDialog(shop.token);
-            });
-
-            // Show the sell dialog for the shop when clicking the sell button
-            sellButtonElement.click(function() {
-                // Show the sell dialog for the shop
-                showShopSellDialog(shop.token);
-            });
-
-            // Slide out animation
-            cardAnimationSlideIn(gameActionsList.find('.' + shopCardSelector + '[data-shop-token=\'' + shop.token + '\']'));
-        });
-
-        // Find all shop cards, and loop through them
-        const shopCards = gameActionsList.find('.' + shopCardSelector);
-        shopCards.each(function() {
-            // Get the shop ID
-            const shopToken = $(this).data('shop-token');
-
-            // Delete the card if it's not in the shop tokens array
-            if(jQuery.inArray(shopToken, shopTokens) == -1)
-                cardAnimationSlideOut($(this));
-        });
-
         // Show a label if no card is shown
         if(cardCount == 0)
             gameActionsList.html('<div align="center" class="game-data-load-label">' +
-                '    <i>No actions available...</i>' +
+                '    <i>Geen acties beschikbaar...</i>' +
                 '</div>');
 
         // Trigger the create event on the game actions list
@@ -3949,7 +3829,7 @@ function updateGameDataVisuals() {
     if(data.hasOwnProperty('factory')) {
         // Update the factory cost label
         if(data.factory.hasOwnProperty('cost'))
-            $('.game-factory-cost').html(data.factory.cost != 0 ? formatMoney(data.factory.cost, true) : 'Free');
+            $('.game-factory-cost').html(data.factory.cost != 0 ? formatMoney(data.factory.cost, true) : 'Gratis');
     }
 
     if(data.hasOwnProperty('balance')) {
@@ -3961,160 +3841,11 @@ function updateGameDataVisuals() {
             activePage.find('.game-balance-out').html(formatGoods(data.balance.out));
     }
 
-    // Check whether strength data is being sent
-    if(data.hasOwnProperty('strength')) {
-        // Make sure the current strength value is included
-        if(data.strength.hasOwnProperty('value'))
-            activePage.find('.game-player-strength').html(data.strength.value);
-
-        // Get the upgrade button list element, and clear it
-        const upgradeButtonList = activePage.find('.card-player-strength').find('.upgrade-button-list');
-        upgradeButtonList.empty();
-
-        // Check whether there are any strength upgrades
-        if(!data.strength.hasOwnProperty('upgrades')) {
-            upgradeButtonList.html('<div align="center"><i>No upgrades available...<br><br></i></div>');
-
-        } else {
-            // Loop through the list of upgrades
-            data.strength.upgrades.forEach(function(upgrade, i) {
-                // Get an unique button ID
-                var buttonId = generateUniqueId('button-upgrade-');
-
-                // Append a button
-                upgradeButtonList.append('<a id="' + buttonId + '" class="ui-btn waves-effect waves-button" href="#" data-transition="slide" data-rel="popup">' +
-                    '    <i class="zmdi zmdi-plus"></i>&nbsp;' +
-                    '    ' + upgrade.name + '&nbsp;&nbsp;<span style="color: gray;">(' + formatMoney(upgrade.cost, true) + ' / +' + upgrade.strength + ')</span>' +
-                    '</a>');
-
-                // Get the button
-                var button = upgradeButtonList.find('#' + buttonId);
-
-                // Bind a click action
-                button.click(function() {
-                    showDialog({
-                        title: 'Strength upgrade',
-                        message: 'Are you sure you want to buy this upgrade for <b>' + formatMoney(upgrade.cost, true) + '</b>?<br><br>' +
-                        'This will improve your players defence.',
-                        actions: [
-                            {
-                                text: 'Buy upgrade',
-                                state: 'primary',
-                                action: function() {
-                                    // Send an upgrade packet
-                                    Maris.realtime.packetProcessor.sendPacket(PacketType.PLAYER_STRENGTH_BUY, {
-                                        game: Maris.utils.getGameId(),
-                                        index: i,
-                                        cost: upgrade.cost,
-                                        strength: upgrade.strength
-                                    });
-
-                                    // Show a notification
-                                    showNotification('Buying upgrade...');
-                                }
-                            },
-                            {
-                                text: 'Cancel'
-                            }
-                        ]
-                    })
-                });
-            });
-        }
-
-        // Trigger a create on the list
-        upgradeButtonList.trigger('create');
-    }
-
-    // Check whether ping data is being sent
-    if(data.hasOwnProperty('pings')) {
-        // Get the pings button list element, and clear it
-        const pingsButtonList = activePage.find('.card-pings').find('.ping-button-list');
-        pingsButtonList.empty();
-
-        // Make sure there are any pings
-        if(data.pings.length <= 0) {
-            pingsButtonList.html('<div align="center"><i>No pings available...<br><br></i></div>');
-
-        } else {
-            // Loop through the list of pings
-            data.pings.forEach(function(ping, i) {
-                // Get an unique button ID
-                var buttonId = generateUniqueId('button-ping-');
-
-                // Append a button
-                pingsButtonList.append('<a id="' + buttonId + '" class="ui-btn waves-effect waves-button" href="#" data-transition="slide" data-rel="popup">' +
-                    '    <i class="zmdi zmdi-portable-wifi-changes"></i>&nbsp;' +
-                    '    ' + ping.name + '&nbsp;&nbsp;<span style="color: gray;">(' + formatMoney(ping.cost, true) + ' / ' + (ping.range >= 0 ? ping.range : '&#8734;') + ' m)</span>' +
-                    '</a>');
-
-                // Get the button
-                var button = pingsButtonList.find('#' + buttonId);
-
-                // Bind a click action
-                button.click(function() {
-                    // Show the ping dialog
-                    showDialog({
-                        title: ping.name,
-                        message: 'Are you sure you want to execute this ping for <b>' + formatMoney(ping.cost, true) + '</b>?<br><br>' +
-                        '<table class="table-list ui-responsive">' +
-                        '<tr><td>Max range</td><td> ' + (ping.range >= 0 ? ping.range + ' meters' : '<i>Infinite</i>') + '</td></tr>' +
-                        '<tr><td>Max discoveries</td><td>' + (ping.max > 0 ? ping.max + ' ' + (ping.max != 1 ? NameConfig.factory.names : NameConfig.factory.name) : '<i>Infinite</i>') + '</td></tr>' +
-                        '</table><br>' +
-                        capitalizeFirst(NameConfig.factory.names) + ' that have been found, will appear on your map for just ' + Math.round(ping.duration / 1000) + ' seconds.<br><br>' +
-                        'The ping will be consumed immediately after executing.',
-                        actions: [
-                            {
-                                text: 'Execute ping',
-                                state: 'primary',
-                                action: function() {
-                                    // Get the amount of money the user currently has
-                                    var moneyCurrent = 0;
-                                    if(hasGameData()) {
-                                        const gameData = getGameData();
-                                        if(gameData != null && gameData.hasOwnProperty('balance') && gameData.balance.hasOwnProperty('money'))
-                                            moneyCurrent = gameData.balance.money;
-                                    }
-
-                                    // Make sure the user has enough money
-                                    if(ping.cost > moneyCurrent) {
-                                        showDialog({
-                                            title: 'Not enough money',
-                                            message: 'You don\'t have enough money to execute this ping.<br><br>' +
-                                            'Make some money to execute one later in the game!'
-                                        });
-                                        return;
-                                    }
-
-                                    // Send an ping packet
-                                    Maris.realtime.packetProcessor.sendPacket(PacketType.PING_BUY, {
-                                        game: Maris.utils.getGameId(),
-                                        pingId: ping.id,
-                                        cost: ping.cost
-                                    });
-
-                                    // Show a notification
-                                    showNotification('Executing ping...');
-                                }
-                            },
-                            {
-                                text: 'Cancel'
-                            }
-                        ]
-                    })
-                });
-            });
-        }
-
-        // Trigger a create on the list
-        pingsButtonList.trigger('create');
-    }
-
     if(data.hasOwnProperty('standings')) {
         const list = activePage.find('.current-standings');
 
         if(data.standings.length == 0) {
-            list.html('<tr><td><i style="font-weight: normal; color: gray;">Unknown...</i><br>');
+            list.html('<tr><td><i style="font-weight: normal; color: gray;">Onbekend...</i><br>');
             return;
         }
 
@@ -4174,7 +3905,7 @@ function toggleFullScreen() {
         else if(document.documentElement.webkitRequestFullscreen)
             document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         else
-            showNotification('Full screen is not supported on this device');
+            showNotification('De full-screen modus wordt niet ondersteund door deze browser op dit apparaat.');
     } else {
         if(document.exitFullscreen)
             document.exitFullscreen();
@@ -4185,7 +3916,7 @@ function toggleFullScreen() {
         else if(document.webkitExitFullscreen)
             document.webkitExitFullscreen();
         else
-            showNotification('Full screen is not supported on this device');
+            showNotification('De full-screen modus wordt niet ondersteund door deze browser op dit apparaat.');
     }
 }
 
