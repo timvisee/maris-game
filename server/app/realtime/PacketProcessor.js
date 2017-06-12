@@ -28,6 +28,7 @@ var config = require('../../config');
 
 var Core = require('../../Core');
 var UserModel = require('../model/user/UserModel');
+var User = require('../live/user/User');
 
 /**
  * Packet parser class.

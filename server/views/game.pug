@@ -16,7 +16,8 @@ block content
     div(data-role='nd2tab', data-tab='actions')
         .game-actions-list
             div(align='center')
-                p.game-data-load-label: i Loading...
+                p.game-data-load-label: i Geen acties beschikbaar...
+
     div(data-role='nd2tab', data-tab='info')
         if (user.isHost || user.isAdmin)
             if game.usersCount.requested > 0

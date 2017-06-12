@@ -2764,7 +2764,7 @@ function setFollowPlayer(state, options) {
 
     // Show a notification if the state changed
     if(options.showNotification && state != oldState)
-        showNotification((state ? 'Gestart' : 'Gestopt') + ' met volgen');
+        showNotification((state ? 'Gestart' : 'Gestopt') + ' met uzelf volgen');
 }
 
 /**
@@ -2819,7 +2819,8 @@ function setFollowEverything(state, options) {
 
     // Show a notification if the state changed
     if(options.showNotification && state != oldState)
-        showNotification((state ? 'Gestart' : 'Gestopt') + ' met alles volgen');
+        if(state)
+            showNotification((state ? 'Gestart' : 'Gestopt') + ' met alles volgen');
 }
 
 /**
