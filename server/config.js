@@ -364,6 +364,30 @@ config.validation.gameNameMaxLength = 128;
  */
 config.game.pointRange = 10;
 
+/**
+ * Location decay time in milliseconds.
+ * @type {number}
+ */
+config.game.locationDecayTime = 30 * 1000;
+
+/**
+ * Update interval in milliseconds to send new location updates.
+ * @type {number}
+ */
+config.game.locationUpdateInterval = 5 * 1000;
+
+/**
+ * Define whether to spread all tasks that have to be invoked automatically over
+ * their available time frame, instead of invoking them all at once.
+ *
+ * This will schedule factory tick processing, location updates and more.
+ *
+ * True to schedule and spread, false to invoke all at once.
+ *
+ * @type {boolean}
+ */
+config.game.spreadTicks = true;
+
 
 /******************************************************************************
  * Sentry error monitoring configuration.                                     *
