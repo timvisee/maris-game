@@ -118,10 +118,10 @@ Router.prototype.init = function(callback) {
         // Show an error page, render the stack trace if we're in development mode
         res.status(err.status || 500);
         LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: '<i>You broke the interwebs!</i>\n\n' +
-            'We can\'t load your page because some error occurred on our end.\n\n' +
-            'The web administrators are freaking out right now, running around, bashing buttons, rebooting systems...\n\n' +
-            'A team of wizards and magicians has been dispatched to deal with this situation.',
+            message: '<i>Je hebt het internet kappot gemaakt!</i>\n\n' +
+            'We kunnen de pagina niet voor je laden omdat er aan onze kant een fout is opgetreden.\n\n' +
+            'De website administrators zijn nu aan het stressen, rondrenn, op knoppen aan het slaan, systemen aan het herstarten...\n\n' +
+            'Een team of tovenaars en magiërs is losgelaten om de situatie op te lossen.',
             showStacktrace: dev && err.status !== 404,
             statusCode: err.status,
             stacktrace: !dev ? {} : {

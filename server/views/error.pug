@@ -4,12 +4,12 @@ block content
     //- Page not found error
     if statusCode == 404
         p.
-            The page you're trying to reach does not exist.#[br]
+            De pagina die u probeert te bezoeken bestaat niet.#[br]
             #[br]
-            Please go back to the previous page and try again.
+            Ga alstublieft terug naar de vorige pagina en probeer het opnieuw.
 
         br
-        a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Go back') Go back
+        a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug') Ga terug
 
     else
         //- Print the error message
@@ -19,14 +19,14 @@ block content
         .button-list
             //- Show the login button if specified
             if showLoginButton
-                a.ui-btn.ui-btn-raised.clr-primary(href='/login', title='Go to the login page') Login
+                a.ui-btn.ui-btn-raised.clr-primary(href='/login', title='Ga naar de inlog pagina') Inloggen
 
             //- Show the back button
             unless hideBackButton
-                //- a.ui-btn.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Go back')
+                //- a.ui-btn.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug')
                 //-     i.zmdi.zmdi-arrow-back.ui-pull-left
-                //-     |  Go back
-                a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Go back') Go back
+                //-     |  Ga terug
+                a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug') Ga terug
 
     //- Show a stack trace if given
     if showStacktrace

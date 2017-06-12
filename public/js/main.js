@@ -3913,7 +3913,7 @@ function toggleFullScreen() {
         else if(document.documentElement.webkitRequestFullscreen)
             document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         else
-            showNotification('De full-screen modus wordt niet ondersteund door deze browser op dit apparaat.');
+            showNotification('De volledig scherm modus wordt niet ondersteund door deze browser op dit apparaat.');
     } else {
         if(document.exitFullscreen)
             document.exitFullscreen();
@@ -3924,7 +3924,7 @@ function toggleFullScreen() {
         else if(document.webkitExitFullscreen)
             document.webkitExitFullscreen();
         else
-            showNotification('De full-screen modus wordt niet ondersteund door deze browser op dit apparaat.');
+            showNotification('De volledig scherm modus wordt niet ondersteund door deze browser op dit apparaat.');
     }
 }
 
