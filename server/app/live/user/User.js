@@ -54,14 +54,6 @@ var User = function(user, game) {
     this._game = game;
 
     /**
-     * Team model of this user, if the user is in any team.
-     *
-     * @type {GameTeamModel|null} Team model if the user is in a team, or null if the user isn't in a team.
-     * @private
-     */
-    this._teamModel = null;
-
-    /**
      * Last known location of the user.
      *
      * @type {null}
@@ -153,115 +145,12 @@ User.prototype.getGameUser = function(callback) {
  */
 
 /**
- * Get the user's team if the user has any.
- *
- * @param {User~getTeamCallback} callback Called with the team or when an error occurred.
- */
-User.prototype.getTeam = function(callback) {
-    // Get the game user for this user
-    this.getGameUser(function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the user isn't null
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the user's team
-        gameUser.getTeam(callback);
-    });
-};
-
-/**
- * Called with the team or when an error occurred.
- *
- * @callback User~getTeamCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {GameTeamModel|null=} User's team or null if the user doesn't have a team.
- */
-
-/**
- * Check whether the user has a team.
- * The User#getTeam() function should be called instead if it's also preferred to use the team model instance for
- * performance reasons.
- *
- * @param {User~hasTeamCallback} callback Called with the result or when an error occurred.
- */
-User.prototype.hasTeam = function(callback) {
-    // Get the user's team
-    this.getTeam(function(err, team) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Check whether the user has a team, call back the result
-        callback(null, team != null);
-    });
-};
-
-/**
- * Called with the result or when an error occurred.
- *
- * @callback User~hasTeamCallback
- * @param {Error|null} Error instance if an error occurred.
- * @param {boolean=} True if this user has a team, false if not.
- */
-
-/**
- * Check whether this participant is in the given team.
- * Null is also called back if the team of the current participant is unknown and/or if the given team is null.
- *
- * @param {GameTeamModel} otherTeam Other team.
- * @param {User~isTeamCallback} callback Called back with the result or when an error occurred.
- */
-User.prototype.isTeam = function(otherTeam, callback) {
-    // Call back if the other team is null
-    if(otherTeam == null) {
-        callback(null, false);
-        return;
-    }
-
-    // Get the team of the current user
-    this.getTeam(function(err, team) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Call back false if the team is unknown
-        if(team == null) {
-            callback(null, false);
-            return;
-        }
-
-        // Compare the teams and return the result
-        callback(null, team.getId().equals(otherTeam.getId()));
-    });
-};
-
-/**
- * Called back with the result or when an error occurred.
- *
- * @callback User~isTeamCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {boolean=} True if the teams are the same, false if not.
- */
-
-/**
  * Get the user name.
  *
  * @param {User~getNameCallback} callback Callback with the result.
  */
 User.prototype.getName = function(callback) {
-    this.getUserModel().getDisplayName(callback);
+    this.getUserModel().getName(callback);
 };
 
 /**
@@ -279,41 +168,15 @@ User.prototype.getGame = function() {
 };
 
 /**
- * Unload this live user instance.
+ * Load this live user instance.
  *
  * @param {User~loadCallback} callback Called on success or when an error occurred.
  */
 User.prototype.load = function(callback) {
-    // Get the user model and game
-    const userModel = this.getUserModel();
-    const gameModel = this.getGame().getGameModel();
+    // TODO: Implement user loading here, for what needs to be loaded.
 
-    // Store this instance
-    const self = this;
-
-    // Get the user state
-    Core.model.gameUserModelManager.getGameUser(gameModel, userModel, function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Get the game team
-        gameUser.getTeam(function(err, result) {
-            // Call back errors
-            if(err !== null) {
-                callback(err);
-                return;
-            }
-
-            // Get the team
-            self._teamModel = result;
-
-            // Call back
-            callback(null);
-        });
-    });
+    // Call back
+    callback(null);
 };
 
 /**
@@ -326,40 +189,9 @@ User.prototype.load = function(callback) {
 /**
  * Unload this live user instance.
  */
-User.prototype.unload = function() {};
-
-/**
- * Get the strength of the user.
- *
- * @param {User~getStrengthCallback} callback Called back with the strength or when an error occurred.
- */
-User.prototype.getStrength = function(callback) {
-    // Get the game user
-    this.getGameUser(function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure a game user is known
-        if(gameUser == null) {
-            callback(null, 0);
-            return;
-        }
-
-        // Get the user's strength
-        gameUser.getStrength(callback);
-    });
+User.prototype.unload = function() {
+    // TODO: Unload the user here, for what needs to be unloaded.
 };
-
-/**
- * Called back with the strength or when an error occurred.
- *
- * @callback User~getStrengthCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {Number=} Strength value for this user.
- */
 
 /**
  * Set the location.
@@ -444,7 +276,7 @@ User.prototype.updateLocation = function(location, socket, callback) {
     const self = this;
 
     // Set the location
-    if(location != undefined)
+    if(location !== undefined)
         this.setLocation(location);
 
     // Get the live game
@@ -459,57 +291,58 @@ User.prototype.updateLocation = function(location, socket, callback) {
     // Create a callback latch
     var latch = new CallbackLatch();
 
-    // Loop through all the factories
-    liveGame.factoryManager.factories.forEach(function(liveFactory) {
-        // Skip if we called back
-        if(calledBack)
-            return;
+    // TODO: Loop through all points, to check whether the user is close
+    // // Loop through all the factories
+    // liveGame.factoryManager.factories.forEach(function(liveFactory) {
+    //     // Skip if we called back
+    //     if(calledBack)
+    //         return;
+    //
+    //     // Update the visibility state for the user
+    //     latch.add();
+    //     liveFactory.updateVisibilityState(self, function(err, changed) {
+    //         // Call back errors
+    //         if(err !== null) {
+    //             if(!calledBack)
+    //                 callback(err);
+    //             calledBack = true;
+    //             return;
+    //         }
+    //
+    //         // Check whether we should update the game data
+    //         if(changed)
+    //             updateUser = true;
+    //
+    //         // Resolve the latch
+    //         latch.resolve();
+    //     });
+    // });
 
-        // Update the visibility state for the user
-        latch.add();
-        liveFactory.updateVisibilityState(self, function(err, changed) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Check whether we should update the game data
-            if(changed)
-                updateUser = true;
-
-            // Resolve the latch
-            latch.resolve();
-        });
-    });
-
-    // Loop through all the shops
-    liveGame.shopManager.shops.forEach(function(liveShop) {
-        // Skip if we called back
-        if(calledBack)
-            return;
-
-        // Update the visibility state for the user
-        latch.add();
-        liveShop.updateVisibilityState(self, function(err, changed) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Check whether we should update the game data
-            if(changed)
-                updateUser = true;
-
-            // Resolve the latch
-            latch.resolve();
-        });
-    });
+    // // Loop through all the shops
+    // liveGame.shopManager.shops.forEach(function(liveShop) {
+    //     // Skip if we called back
+    //     if(calledBack)
+    //         return;
+    //
+    //     // Update the visibility state for the user
+    //     latch.add();
+    //     liveShop.updateVisibilityState(self, function(err, changed) {
+    //         // Call back errors
+    //         if(err !== null) {
+    //             if(!calledBack)
+    //                 callback(err);
+    //             calledBack = true;
+    //             return;
+    //         }
+    //
+    //         // Check whether we should update the game data
+    //         if(changed)
+    //             updateUser = true;
+    //
+    //         // Resolve the latch
+    //         latch.resolve();
+    //     });
+    // });
 
     // Continue when we're done
     latch.then(function() {
@@ -561,270 +394,8 @@ User.prototype.updateLocation = function(location, socket, callback) {
  * @param {Error|null} Error instance if an error occurred, null on success.
  */
 
-/**
- * Get the user's money.
- *
- * @param {User~getMoneyCallback} callback Called with the result or when an error occurred.
- */
-User.prototype.getMoney = function(callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the money
-        gameUser.getMoney(callback);
-    });
-};
-
-/**
- * Called with the result or when an error occurred.
- *
- * @callback User~getMoneyCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {Number} Amount of money.
- */
-
-/**
- * Set the user's money.
- *
- * @param {Number} money Money.
- * @param {User~setMoneyCallback} callback Called on success or when an error occurred.
- */
-User.prototype.setMoney = function(money, callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the money
-        gameUser.setMoney(money, callback);
-    });
-};
-
-/**
- * Called on success or when an error occurred.
- *
- * @callback User~setMoneyCallback
- * @param {Error|null} Error instance if an error occurred, null on success.
- */
-
-/**
- * Add money to a user.
- *
- * @param {Number} amount Amount of money to add.
- * @param {User~addMoneyCallback} callback Called on success or when an error occurred.
- */
-User.prototype.addMoney = function(amount, callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the money
-        gameUser.addMoney(amount, callback);
-    });
-};
-
-/**
- * Called on success or when an error occurred.
- *
- * @callback User~addMoneyCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- */
-
-/**
- * Subtract money from a user.
- *
- * @param {Number} amount Amount of money to subtract.
- * @param {User~subtractMoney} callback Called on success or when an error occurred.
- */
-User.prototype.subtractMoney = function(amount, callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the money
-        gameUser.subtractMoney(amount, callback);
-    });
-};
-
-/**
- * Called on success or when an error occurred.
- *
- * @callback User~subtractMoney
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- */
-
-/**
- * Get the user's in.
- *
- * @param {User~getInCallback} callback Called with the result or when an error occurred.
- */
-User.prototype.getIn = function(callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the goods
-        gameUser.getIn(callback);
-    });
-};
-
-/**
- * Called with the result or when an error occurred.
- *
- * @callback User~getInCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {Number} Amount of in.
- */
-
-/**
- * Set the user's in value.
- *
- * @param {Number} goods Number of in.
- * @param {User~setInCallback} callback Called on success or when an error occurred.
- */
-User.prototype.setIn = function(goods, callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the goods
-        gameUser.setIn(goods, callback);
-    });
-};
-
-/**
- * Called on success or when an error occurred.
- *
- * @callback User~setInCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- */
-
-/**
- * Get the user's out.
- *
- * @param {User~getOutCallback} callback Called with the result or when an error occurred.
- */
-User.prototype.getOut = function(callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the goods
-        gameUser.getOut(callback);
-    });
-};
-
-/**
- * Called with the result or when an error occurred.
- *
- * @callback User~getOutCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {Number} Amount of out.
- */
-
-/**
- * Set the user's out value.
- *
- * @param {Number} goods Number of out.
- * @param {User~setOutCallback} callback Called on success or when an error occurred.
- */
-User.prototype.setOut = function(goods, callback) {
-    // Get the game user
-    Core.model.gameUserModelManager.getGameUser(this.getGame().getGameModel(), this.getUserModel(), function(err, gameUser) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Make sure the game user is valid
-        if(gameUser == null) {
-            callback(null, null);
-            return;
-        }
-
-        // Get the goods
-        gameUser.setOut(goods, callback);
-    });
-};
-
-/**
- * Called on success or when an error occurred.
- *
- * @callback User~setOutCallback
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- */
-
+// TODO: Implement this, to check whether users can see each other
+// TODO: Spectators should always be able to see others, players close by might be able to see each other too
 /**
  * Check whether this user is visible for the given user.
  *
@@ -833,7 +404,7 @@ User.prototype.setOut = function(goods, callback) {
  */
 User.prototype.isVisibleFor = function(other, callback) {
     // Make sure a valid user is given
-    if(other == null) {
+    if(other === null) {
         callback(null, false);
         return;
     }
@@ -858,7 +429,7 @@ User.prototype.isVisibleFor = function(other, callback) {
     const gameModel = liveGame.getGameModel();
 
     // Make sure the game model is valid
-    if(gameModel == null) {
+    if(gameModel === null) {
         callback(null, false);
         return;
     }
@@ -895,84 +466,18 @@ User.prototype.isVisibleFor = function(other, callback) {
             return;
         }
 
-        // Check whether this user is a shop
-        if(self.getGame().shopManager.isShopUser(self)) {
-            callback(null, true);
-            return;
-        }
-
         // Make sure this user has a recent location
         if(!self.hasRecentLocation()) {
             callback(null, false);
             return;
         }
 
-        // Create a team latch
-        var teamLatch = new CallbackLatch();
+        // TODO: Only show other users when in-range!
 
-        // Create two variables for the user and other user's team
-        var team = null;
-        var otherTeam = null;
-
-        // Get the user's team
-        teamLatch.add();
-        self.getTeam(function(err, result) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Call back if the team is null
-            if(result == null) {
-                if(!calledBack)
-                    callback(null, false);
-                calledBack = true;
-                return;
-            }
-
-            // Set the team
-            team = result;
-
-            // Resolve the team latch
-            teamLatch.resolve();
-        });
-
-        // Get the other user's team
-        teamLatch.add();
-        other.getTeam(function(err, result) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Call back if the team is null
-            if(result == null) {
-                if(!calledBack)
-                    callback(null, false);
-                calledBack = true;
-                return;
-            }
-
-            // Set the other team
-            otherTeam = result;
-
-            // Resolve the team latch
-            teamLatch.resolve();
-        });
-
-        // Check whether the user team's are the same when we fetched both teams
-        teamLatch.then(function() {
-            // Determine whether the teams are the same and call back
-            if(!calledBack)
-                callback(null, team.getId().equals(otherTeam.getId()));
-            calledBack = true;
-        });
+        // Determine whether the player is shown, and call back
+        if(!calledBack)
+            callback(null, true);
+        calledBack = true;
     });
 };
 

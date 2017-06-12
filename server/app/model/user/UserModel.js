@@ -292,5 +292,30 @@ UserModel.prototype.setCreateDate = function(isPro, callback) {
     this.setField('is_pro', isPro, callback);
 };
 
+/**
+ * Get the game state for the given game.
+ *
+ * @param {GameModel} game Game.
+ * @param {GameModelManager~getGameStateCallback} callback Called with the result or when an error occurred.
+ */
+UserModel.prototype.getGameState = function(game, callback) {
+    Core.model.gameUserModelManager.getUserGameState(game, this, callback);
+};
+
+/**
+ * @typedef {Object} UserGameState
+ * @property {boolean} participant True if the user is a game participant, false if not.
+ * @property {boolean} spectator True if the user is a spectator, false if not.
+ * @property {boolean} requested True if the user requested to join this game, false if not.
+ */
+
+/**
+ * Called with the user's game state or when an error occurred.
+ *
+ * @callback GameModelManager~getGameStateCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {UserGameState=} User's game state.
+ */
+
 // Export the user class
 module.exports = UserModel;
