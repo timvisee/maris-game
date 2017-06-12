@@ -31,7 +31,7 @@ var CallbackLatch = require('../../../util/CallbackLatch');
 router.post('/', function(req, res, next) {
     // Make sure the user has a valid session
     if(!req.session.valid) {
-        next(new Error('No permission.'));
+        next(new Error('Geen rechten'));
         return;
     }
 
@@ -40,7 +40,7 @@ router.post('/', function(req, res, next) {
 
     // Make sure a data object is given
     if(!req.hasOwnProperty('body') || !req.body.hasOwnProperty('data')) {
-        next(new Error('Missing data'));
+        next(new Error('Missende data'));
         return;
     }
 

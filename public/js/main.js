@@ -1961,10 +1961,10 @@ $(document).bind("pageinit", function() {
 
                     // Define the message to show
                     var message;
-                    if(updatedUserCount == 1)
+                    if(updatedUsersCount == 1)
                         message = 'Rol voor 1 gebruiker aangepast';
                     else
-                        message = 'Rollen voor ' + updatedUserCount + ' gebruikers aangepast';
+                        message = 'Rollen voor ' + updatedUsersCount + ' gebruikers aangepast';
 
                     // Show an error notification
                     showNotification(message, {
