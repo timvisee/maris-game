@@ -764,7 +764,6 @@
                 }
 
                 //_self.iniGoogleAnalytics();
-
             };
 
             _self.globalSettings = function() {

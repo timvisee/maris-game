@@ -1299,7 +1299,7 @@ function showDisconnectedTooLongDialog() {
     showDialog({
         title: 'Verbinding verbroken',
         message: 'De verbinding ' + (Maris.realtime._connected ? 'was' : 'is') + ' voor een te lange tijd verbroken.<br><br>' +
-        'Ververs de applicatie alstublieft om te zorgen dat alles weer up-to-date is.',
+        'Ververs de applicatie alstublieft zodat alles weer up-to-date is.',
         actions: [{
             text: 'Verversen',
             state: 'primary',
@@ -1951,7 +1951,7 @@ $(document).bind("pageinit", function() {
                 success: function(data) {
                     // Show an error message if any kind of error occurred
                     if(data.status != 'ok' || data.hasOwnProperty('error')) {
-                        onError(typeof data.error.message === 'string' ? data.error.message : undefined);
+                        onError(data.error.message);
                         return;
                     }
 
@@ -1959,8 +1959,15 @@ $(document).bind("pageinit", function() {
                     const updatedUsers = data.updatedUsers;
                     const updatedUsersCount = updatedUsers.length;
 
+                    // Define the message to show
+                    var message;
+                    if(updatedUserCount == 1)
+                        message = 'Rol voor 1 gebruiker aangepast';
+                    else
+                        message = 'Rollen voor ' + updatedUserCount + ' gebruikers aangepast';
+
                     // Show an error notification
-                    showNotification('Rollen aangepast voor ' + updatedUsersCount + ' gebruiker' + (updatedUsersCount != 1 ? 's' : ''), {
+                    showNotification(message, {
                         toast: true,
                         native: false,
                         vibrate: true,
