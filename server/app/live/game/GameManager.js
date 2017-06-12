@@ -777,6 +777,12 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
         pings: []
     };
 
+    // Convert the sockets to an array
+    if(sockets === undefined)
+        sockets = [];
+    else if(!_.isArray(sockets))
+        sockets = [sockets];
+
     // Store this instance
     const self = this;
 
@@ -817,6 +823,7 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
         // Set the game stage
         gameData.stage = gameStage;
 
+        // TODO: Resolve or remove this
         // Send the game data if the game isn't active
         // if(gameStage != 1) {
         //     sendGameData();
@@ -836,85 +843,6 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                 calledBack = true;
                 return;
             }
-
-            // Set whether the user can build new factories
-            _.set(gameData, 'factory.canBuild', userState.participant);
-
-            // Resolve the latch
-            latch.resolve();
-        });
-
-        // Get the game user if applicable
-        latch.add();
-        Core.model.gameUserModelManager.
-        getGameUser(game, user, function(err, gameUser) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Make sure the game user exists
-            if(gameUser == null) {
-                latch.resolve();
-                return;
-            }
-
-            // Get the money, in and out goods of the user
-            latch.add();
-            gameUser.getMoney(function(err, money) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set the money
-                _.set(gameData, 'balance.money', money);
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Get the money, in and out goods of the user
-            latch.add();
-            gameUser.getIn(function(err, value) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set the in
-                _.set(gameData, 'balance.in', value);
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Get the money, in and out goods of the user
-            latch.add();
-            gameUser.getOut(function(err, value) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set the out
-                _.set(gameData, 'balance.out', value);
-
-                // Resolve the latch
-                latch.resolve();
-            });
 
             // Resolve the latch
             latch.resolve();
@@ -937,248 +865,62 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
                 return;
             }
 
-            // Get the live user
-            latch.add();
-            liveGame.getUser(user, function(err, liveUser) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Resolve the latch and continue if we didn't find a live user
-                if(liveUser === null) {
-                    latch.resolve();
-                    return;
-                }
-
-                // Get the user's team
-                latch.add();
-                liveUser.getTeam(function(err, team) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Make sure the user has a team
-                    if(team == null) {
-                        // Resolve the latch and return
-                        latch.resolve();
-                        return;
-                    }
-
-                    // Get the point cost
-                    latch.add();
-                    liveGame.calculateFactoryCost(team, function(err, cost) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the cost
-                        _.set(gameData, 'factory.cost', cost != 0 ? cost : 0);
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Add the point data
-            latch.add();
-            liveGame.factoryManager.getVisibleFactories(user, function(err, factories) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Loop through the factories
-                factories.forEach(function(factory) {
-                    // Create a point latch
-                    latch.add();
-                    var factoryLatch = new CallbackLatch();
-
-                    // Create a point object
-                    var factoryObject = {
-                        id: factory.getIdHex()
-                    };
-
-                    // Get the point name
-                    factoryLatch.add();
-                    factory.getName(function(err, name) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the point name
-                        factoryObject.name = name;
-
-                        // Resolve the point latch
-                        factoryLatch.resolve();
-                    });
-
-                    // Add the point data when we're done and resolve the regular latch
-                    factoryLatch.then(function() {
-                        // Add the point object
-                        gameData.factories.push(factoryObject);
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-                });
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Add the shop data when close by
-            latch.add();
-            liveGame.getUser(user, function(err, liveUser) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Stop if the live user is not found
-                if(liveUser === null) {
-                    latch.resolve();
-                    return;
-                }
-
-                // Get the shops
-                liveGame.shopManager.shops.forEach(function(liveShop) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Check whether the user is in range
-                    liveShop.isUserInRange(liveUser, function(err, inRange) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Return if the user isn't in range
-                        if(!inRange)
-                            return;
-
-                        // Get the name of the shop
-                        latch.add();
-                        liveShop.getName(function(err, liveShopName) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Set the name in the point object
-                            gameData.shops.push({
-                                token: liveShop.getToken(),
-                                name: liveShopName,
-                                inSellPrice: liveShop.getInSellPrice(),
-                                outBuyPrice: liveShop.getOutBuyPrice()
-                            });
-
-                            // Resolve the latch
-                            latch.resolve();
-                        });
-                    });
-                });
-
-                // Resolve the latch
-                latch.resolve();
-            });
+            // TODO: Add the point data
+            // latch.add();
+            // liveGame.factoryManager.getVisibleFactories(user, function(err, factories) {
+            //     // Call back errors
+            //     if(err !== null) {
+            //         if(!calledBack)
+            //             callback(err);
+            //         calledBack = true;
+            //         return;
+            //     }
+            //
+            //     // Loop through the factories
+            //     factories.forEach(function(factory) {
+            //         // Create a point latch
+            //         latch.add();
+            //         var factoryLatch = new CallbackLatch();
+            //
+            //         // Create a point object
+            //         var factoryObject = {
+            //             id: factory.getIdHex()
+            //         };
+            //
+            //         // Get the point name
+            //         factoryLatch.add();
+            //         factory.getName(function(err, name) {
+            //             // Call back errors
+            //             if(err !== null) {
+            //                 if(!calledBack)
+            //                     callback(err);
+            //                 calledBack = true;
+            //                 return;
+            //             }
+            //
+            //             // Set the point name
+            //             factoryObject.name = name;
+            //
+            //             // Resolve the point latch
+            //             factoryLatch.resolve();
+            //         });
+            //
+            //         // Add the point data when we're done and resolve the regular latch
+            //         factoryLatch.then(function() {
+            //             // Add the point object
+            //             gameData.factories.push(factoryObject);
+            //
+            //             // Resolve the latch
+            //             latch.resolve();
+            //         });
+            //     });
+            //
+            //     // Resolve the latch
+            //     latch.resolve();
+            // });
 
             // Resolve the latch
             latch.resolve();
-        });
-
-        // Get the game user
-        latch.add();
-        Core.model.gameUserModelManager.getGameUser(game, user, function (err, gameUser) {
-            // Call back errors
-            if (err !== null) {
-                if (!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Make sure the game user is valid
-            if (gameUser == null) {
-                latch.resolve();
-                return;
-            }
-
-            // Get the game user strength
-            gameUser.getStrength(function (err, userStrength) {
-                // Call back errors
-                if (err !== null) {
-                    if (!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set the user strength
-                gameData.strength.value = userStrength;
-
-                // Get the game config
-                if(gameStage == 1) {
-                    game.getConfig(function (err, gameConfig) {
-                        // Call back errors
-                        if (err !== null) {
-                            if (!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Get the user strength upgrades
-                        gameData.strength.upgrades = gameConfig.player.getStrengthUpgrades(userStrength);
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-
-                } else {
-                    // Resolve the latch
-                    latch.resolve();
-                }
-            });
         });
 
         // Get the game standings
@@ -1193,96 +935,28 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
             }
 
             // Make sure the game isn't null
-            if(liveGame == null) {
+            if(liveGame === null) {
                 latch.resolve();
                 return;
             }
 
+            // TODO: Get the number of points everybody has
             // Get the amount of money each team has
-            liveGame.getTeamMoney(undefined, function (err, standings) {
-                // Call back errors
-                if (err !== null) {
-                    if (!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
+            // liveGame.getTeamMoney(undefined, function (err, standings) {
+            //     // Call back errors
+            //     if (err !== null) {
+            //         if (!calledBack)
+            //             callback(err);
+            //         calledBack = true;
+            //         return;
+            //     }
 
                 // Set the standings object
-                gameData.standings = standings;
+                gameData.standings = [];
 
-                // Get the game user, for the current game/user
-                Core.model.gameUserModelManager.getGameUser(game, user, function (err, gameUser) {
-                    // Call back errors
-                    if (err !== null) {
-                        if (!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // The game user may not be null
-                    if (gameUser == null) {
-                        latch.resolve();
-                        return;
-                    }
-
-                    // Get the team the user is in
-                    gameUser.getTeam(function(err, team) {
-                        // Call back errors
-                        if (err !== null) {
-                            if (!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Remember the amount of money the ally team has
-                        var allyTeamMoney = 0;
-
-                        // Loop through the list of teams, and define whether the team is ally for the user
-                        for(var i = 0; i < gameData.standings.length; i++) {
-                            // The team is never an ally if the user's team is null
-                            if(team == null) {
-                                gameData.standings[i].ally = false;
-                                continue;
-                            }
-
-                            // Determine whether this team is ally, and set the ally status
-                            var isAlly = gameData.standings[i].id == team.getIdHex();
-                            gameData.standings[i].ally = isAlly;
-
-                            // Set the money of the ally team
-                            if(isAlly)
-                                allyTeamMoney = gameData.standings[i].money;
-                        }
-
-                        // Get the pings that are applicable for this team, and set the pings field in the game data object
-                        if(gameStage == 1) {
-                            // Get the pings
-                            const pings = gameConfig.ping.getPings(allyTeamMoney);
-
-                            // Create public ping objects, and add them to the game data object
-                            pings.forEach(function (ping) {
-                                gameData.pings.push({
-                                    id: ping.id,
-                                    name: ping.name,
-                                    cost: ping.price,
-                                    range: ping.range,
-                                    duration: ping.duration,
-                                    max: ping.max
-                                });
-                            });
-                        }
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-                });
-
-                // Resolve the latch
-                latch.resolve();
-            });
+            //     // Resolve the latch
+            //     latch.resolve();
+            // });
         });
 
         // Send the game data when we're done
@@ -1291,12 +965,6 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
             sendGameData();
         });
     });
-
-    // Convert the sockets to an array
-    if(sockets === undefined)
-        sockets = [];
-    else if(!_.isArray(sockets))
-        sockets = [sockets];
 };
 
 /**
