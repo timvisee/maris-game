@@ -215,8 +215,8 @@ User.prototype.hasTeam = function(callback) {
  */
 
 /**
- * Check whether this player is in the given team.
- * Null is also called back if the team of the current player is unknown and/or if the given team is null.
+ * Check whether this participant is in the given team.
+ * Null is also called back if the team of the current participant is unknown and/or if the given team is null.
  *
  * @param {GameTeamModel} otherTeam Other team.
  * @param {User~isTeamCallback} callback Called back with the result or when an error occurred.
@@ -373,9 +373,9 @@ User.prototype.setLocation = function(location) {
 };
 
 /**
- * Get the last known player location.
+ * Get the last known participant location.
  *
- * @return {Coordinate|null} Null is returned if this player doesn't have a known location.
+ * @return {Coordinate|null} Null is returned if this participant doesn't have a known location.
  */
 User.prototype.getLocation = function() {
     return this._location;
@@ -396,7 +396,7 @@ User.prototype.getLocationAge = function() {
 };
 
 /**
- * Get the recent/last known player location.
+ * Get the recent/last known participant location.
  * Null will be returned if the location hasn't been updated and/or is decayed.
  *
  * @return {Coordinate|null} Location or null.
@@ -880,7 +880,7 @@ User.prototype.isVisibleFor = function(other, callback) {
         }
 
         // Return if the user isn't a spectator or player
-        if(!roles.player && !roles.spectator) {
+        if(!roles.participant && !roles.spectator) {
             if(!calledBack)
                 callback(null, false);
             calledBack = true;

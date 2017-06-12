@@ -146,11 +146,11 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
             latch.resolve();
         });
 
-        // Make sure this user is a player or a special player
+        // Make sure this user is a player
         latch.add();
         game.getUserState(user, function(err, userState) {
             // Call back errors and make sure the user has the correct state
-            if(err !== null || (!userState.player && !userState.special)) {
+            if(err !== null || !userState.participant) {
                 callbackError();
                 return;
             }
@@ -166,7 +166,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         latch.add();
         Core.gameController.getGame(game, function(err, result) {
             // Call back errors
-            if(err !== null || result == null) {
+            if(err !== null || result === null) {
                 callbackError();
                 return;
             }
@@ -183,7 +183,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
             // Get the live game
             liveGame.getUser(user, function(err, liveUser) {
                 // Call back errors
-                if(err !== null || liveUser == null) {
+                if(err !== null || liveUser === null) {
                     callbackError();
                     return;
                 }

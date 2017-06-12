@@ -43,7 +43,7 @@ module.exports = {
 
         // Route the list pages
         router.get('/:game/players/requested', (req, res, next) => self.listPage(req, res, next, 'requested'));
-        router.get('/:game/players/players', (req, res, next) => self.listPage(req, res, next, 'players'));
+        router.get('/:game/players/participants', (req, res, next) => self.listPage(req, res, next, 'participants'));
         router.get('/:game/players/spectators', (req, res, next) => self.listPage(req, res, next, 'spectators'));
     },
 
@@ -259,8 +259,8 @@ module.exports = {
         var options = {};
         if(category === 'requested')
             options.requested = true;
-        else if(category === 'players')
-            options.players = true;
+        else if(category === 'participants')
+            options.participants = true;
         else if(category === 'spectators')
             options.spectators = true;
 

@@ -4,3 +4,5 @@
 _id : ID                Team ID.
 game_id : ID            Game ID of the game the user joined.
 user_id : ID            User ID of the user that joined the game.
+is_participant : bool   True if this user is a game participant, false if not.
+is_spectator : bool     True if this user is a game spectator, false if not.

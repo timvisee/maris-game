@@ -90,7 +90,7 @@ module.exports = {
             }
 
             // Make sure the user hasn't joined already
-            if(userState.player || userState.special || userState.special) {
+            if(userState.participant) {
                 // Show an error page
                 LayoutRenderer.render(req, res, next, 'error', 'Al deelnemer', {
                     message: 'Het lijkt er op dat je al deelneemt aan dit spel.'

@@ -18,7 +18,7 @@ block content
                         when 2
                             td Afgerond
                 tr: td Deelnemers
-                    td= game.users.usersCount.players
+                    td= game.users.usersCount.participants
                         span.gray  van #{game.users.usersCount.totalAccepted} gebruiker#{game.users.usersCount.totalAccepted == 1 ? '' : 's'}
                 tr: td Toeschouwers
                     td= game.users.usersCount.spectators

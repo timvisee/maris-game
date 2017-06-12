@@ -44,9 +44,11 @@ GameUserDatabase.DB_COLLECTION_NAME = 'game_user';
  *
  * @param {GameModel} game Game.
  * @param {UserModel} user User.
+ * @param {boolean} isParticipant True if this user is a game participant, false if not.
+ * @param {boolean} isSpectator True if this user is a game spectator, false if not.
  * @param {function} callback (err, {GameUserModel} gameUserId) Callback.
  */
-GameUserDatabase.addGameUser = function(game, user, callback) {
+GameUserDatabase.addGameUser = function(game, user, isParticipant, isSpectator, callback) {
     // Get the database instance
     const db = MongoUtil.getConnection();
 
@@ -55,6 +57,8 @@ GameUserDatabase.addGameUser = function(game, user, callback) {
     const insertObject = {
         game_id: game.getId(),
         user_id: user.getId(),
+        is_participant: !!isParticipant,
+        is_spectator: !!isSpectator
     };
 
     // Insert the game user into the database
@@ -89,7 +93,7 @@ GameUserDatabase.addGameUser = function(game, user, callback) {
  * @param {function} callback (err, {ObjectId} gameUserId) Callback.
  */
 GameUserDatabase.addGameUserRequest = function(game, user, callback) {
-    this.addGameUser(game, user, null, false, false, callback);
+    this.addGameUser(game, user, false, false, callback);
 };
 
 /**

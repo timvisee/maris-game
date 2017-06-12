@@ -192,23 +192,21 @@ GameUserModelManager.prototype.getUserById = function(id, callback) {
  *
  * @param {GameModel} game Game to get the player count for.
  * @param {Object} [options] Options object for additional configurations and constraints.
- * @param {boolean|undefined} [options.players=] True if the result must include players, false if the result may not
- * include players. Undefined if this constraint shouldn't be checked.
+ * @param {boolean|undefined} [options.participants=] True if the result must include game participants, false if the
+ * result may not include players. Undefined if this constraint shouldn't be checked.
  * @param {boolean|undefined} [options.spectators=] True if the result must include spectators, false if the result may
  * not include spectators. Undefined if this constraint shouldn't be checked.
- * @param {boolean|undefined} [options.specials=] True if the result must include special players, false if the result
- * may not include special players. Undefined if this constraint shouldn't be checked.
  * @param {boolean|undefined} [options.requested=] True if the result must include requested players, false if the result
  * may not include requested players. This property overrides other constraints when set to true.
  * @param {UserModel|undefined} [options.user=] User model instance if only a specific user should be counted.
  * @param {GameModelManager~getGameUserCountCallback} callback Called with the result or when an error occurred.
  */
+// TODO: Update all usages
 GameUserModelManager.prototype.getGameUserCount = function(game, options, callback) {
     // Create an object with the default options
     const defaultOptions = {
-        players: undefined,
+        participants: undefined,
         spectators: undefined,
-        specials: undefined,
         requested: undefined
     };
 
@@ -232,16 +230,14 @@ GameUserModelManager.prototype.getGameUserCount = function(game, options, callba
 
     // Override the options if requested is set to true
     if(options.requested !== undefined && options.requested) {
-        options.players = false;
+        options.participants = false;
         options.spectators = false;
-        options.specials = false;
     }
 
     // Determine the Redis cache key for this function
     const redisCacheKey = REDIS_KEY_ROOT + ':getGamePlayerCount:' + game.getIdHex() + ':' +
-        (options.players !== undefined ? (options.players ? '1' : '0') : '?') + ',' +
+        (options.participants !== undefined ? (options.participants ? '1' : '0') : '?') + ',' +
         (options.spectators !== undefined ? (options.spectators ? '1' : '0') : '?') + ',' +
-        (options.specials !== undefined ? (options.specials ? '1' : '0') : '?') + ',' +
         (options.requested !== undefined ? (options.requested ? '1' : '0') : '?') +
         (options.user !== undefined ? ':user,' + options.user.getIdHex() : '') + ':count';
 
@@ -284,19 +280,16 @@ GameUserModelManager.prototype.getGameUserCount = function(game, options, callba
         // Apply the requested property if it's set to false
         if(options.requested !== undefined && !options.requested) {
             queryObject.$or = [
-                {team_id: {$ne: null}},
-                {is_spectator: true},
-                {is_special: true}
+                {is_participant: true},
+                {is_spectator: true}
             ];
         }
 
         // Configure the fields object
-        if(options.players !== undefined)
-            queryObject.team_id = options.players ? {$ne: null} : null;
+        if(options.participants !== undefined)
+            queryObject.is_participant = options.participants;
         if(options.spectators !== undefined)
             queryObject.is_spectator = options.spectators;
-        if(options.specials !== undefined)
-            queryObject.is_special = options.specials;
 
         // Limit the query to a specific user if set
         if(options.user !== undefined)
@@ -357,8 +350,7 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
     var gameUsersStateObject = {
         total: 0,
         totalAccepted: 0,
-        players: 0,
-        specials: 0,
+        participants: 0,
         spectators: 0,
         requested: 0
     };
@@ -393,10 +385,9 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
             // Fill the result object
             gameUsersStateObject.total = parseInt(resultSplitted[0], 10);
             gameUsersStateObject.totalAccepted = parseInt(resultSplitted[1], 10);
-            gameUsersStateObject.players = parseInt(resultSplitted[2], 10);
-            gameUsersStateObject.specials = parseInt(resultSplitted[3], 10);
-            gameUsersStateObject.spectators = parseInt(resultSplitted[4], 10);
-            gameUsersStateObject.requested = parseInt(resultSplitted[5], 10);
+            gameUsersStateObject.participants = parseInt(resultSplitted[2], 10);
+            gameUsersStateObject.spectators = parseInt(resultSplitted[3], 10);
+            gameUsersStateObject.requested = parseInt(resultSplitted[4], 10);
 
             // Call back with the result
             callback(null, gameUsersStateObject);
@@ -412,8 +403,7 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
 
         // Create the projection object
         const projectionObject = {
-            team_id: true,
-            is_special: true,
+            is_participant: true,
             is_spectator: true
         };
 
@@ -432,15 +422,13 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
                 gameUsersStateObject.total++;
 
                 // Increase the player type values
-                if(gameUser.team_id !== null && gameUser.team_id !== undefined)
-                    gameUsersStateObject.players++;
-                if(gameUser.is_special)
-                    gameUsersStateObject.specials++;
+                if(gameUser.is_participant)
+                    gameUsersStateObject.participants++;
                 if(gameUser.is_spectator)
                     gameUsersStateObject.spectators++;
 
                 // Increase the requested value if the player requested to join this game
-                if((gameUser.team_id === null || gameUser.team_id === undefined) && !gameUser.is_special && !gameUser.is_spectator)
+                if(!gameUser.is_participant && !gameUser.is_spectator)
                     gameUsersStateObject.requested++;
                 else
                     gameUsersStateObject.totalAccepted++;
@@ -454,8 +442,7 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
                 // Create a data string
                 var dataString = gameUsersStateObject.total + ';' +
                     gameUsersStateObject.totalAccepted + ';' +
-                    gameUsersStateObject.players + ';' +
-                    gameUsersStateObject.specials + ';' +
+                    gameUsersStateObject.participants + ';' +
                     gameUsersStateObject.spectators + ';' +
                     gameUsersStateObject.requested;
 
@@ -476,8 +463,7 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
  * @typedef {Object} GameUsersState
  * @property {Number} total Total number of users that joined this game.
  * @property {Number} totalAccepted Total number of users that were accepted for this game.
- * @property {Number} players Total number of users that joined a team.
- * @property {Number} specials Total number of users that are a special player.
+ * @property {Number} participants Total number of users that joined a team.
  * @property {Number} spectators Total number of users that are a spectator.
  * @property {Number} requested Total number of users that requested to join the game.
  */
@@ -496,12 +482,10 @@ GameUserModelManager.prototype.getGameUsersCount = function(game, callback) {
  * @param {GameModel} game The game to check in.
  * @param {UserModel} user The user to check for.
  * @param {Object} [options] Options object for additional configurations and constraints.
- * @param {boolean|undefined} [options.players=] True if the user must be in a team, false if the user may not be in a
+ * @param {boolean|undefined} [options.participants=] True if the user must be in a team, false if the user may not be in a
  * team. Undefined to ignore this constraint.
  * @param {boolean|undefined} [options.spectators=] True if the user must be a spectator, false if the user may not be
  * a spectator. Undefined to ignore this constraint.
- * @param {boolean|undefined} [options.specials=] True if the user must be a special player, false if the user may not
- * be a special player. Undefined to ignore this constraint.
  * @param {boolean|undefined} [options.requested=] True if the user must be requested, false if the player must not be requested.
  * This option overrides other constraints when set to true. Undefined to ignore this constraint.
  * @param {GameModelManager~hasUserCallback} callback Called with the result or when an error occurred.
@@ -547,8 +531,7 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
 
     // Create a UserGameState object
     var userGameState = {
-        player: false,
-        special: false,
+        participant: false,
         spectator: false,
         requested: false
     };
@@ -581,10 +564,9 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
             var dataSplitted = result.split(';');
 
             // Create a UserGameState object
-            userGameState.player = dataSplitted[0] == '1';
-            userGameState.special = dataSplitted[1] == '1';
-            userGameState.spectator = dataSplitted[2] == '1';
-            userGameState.requested = dataSplitted[3] == '1';
+            userGameState.participant = dataSplitted[0] === '1';
+            userGameState.spectator = dataSplitted[1] === '1';
+            userGameState.requested = dataSplitted[2] === '1';
 
             // Call back with the result
             callback(null, userGameState);
@@ -601,8 +583,7 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
 
         // Create the projection object
         const projectionObject = {
-            team_id: true,
-            is_special: true,
+            is_participant: true,
             is_spectator: true
         };
 
@@ -619,13 +600,12 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
             if(data.length > 0) {
                 // Loop through the result
                 data.forEach(function(gameUser) {
-                    userGameState.player = gameUser.team_id !== null && gameUser.team_id !== undefined;
-                    userGameState.special = gameUser.is_special;
+                    userGameState.participant = gameUser.is_participant;
                     userGameState.spectator = gameUser.is_spectator;
                 });
 
                 // Determine the requested state
-                if(!userGameState.player && !userGameState.special && !userGameState.spectator)
+                if(!userGameState.participant && !userGameState.spectator)
                     userGameState.requested = true;
             }
 
@@ -635,8 +615,7 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
             // Store the result in Redis if ready
             if(RedisUtils.isReady()) {
                 // Create a data string
-                var dataString = (userGameState.player ? '1' : '0') + ';' +
-                    (userGameState.special ? '1' : '0') + ';' +
+                var dataString = (userGameState.participant ? '1' : '0') + ';' +
                     (userGameState.spectator ? '1' : '0') + ';' +
                     (userGameState.requested ? '1' : '0');
 
@@ -655,8 +634,7 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
 
 /**
  * @typedef {Object} UserGameState
- * @property {boolean} player True if the user is a player in a team, false if not.
- * @property {boolean} special True if the user is a special player in the game, false if not.
+ * @property {boolean} participant True if the user is a player in a team, false if not.
  * @property {boolean} spectator True if the user is a spectator, false if not.
  * @property {boolean} requested True if the user requested to join this game, false if not.
  */
@@ -675,12 +653,10 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
  *
  * @param {GameModel} game Game to get the players for.
  * @param {Object} [options] Options object for additional configurations and constraints.
- * @param {boolean|undefined} [options.players=] True if the result must include players, false if the result may not
+ * @param {boolean|undefined} [options.participants=] True if the result must include participants, false if the result may not
  * include players. Undefined if this constraint shouldn't be checked.
  * @param {boolean|undefined} [options.spectators=] True if the result must include spectators, false if the result may
  * not include spectators. Undefined if this constraint shouldn't be checked.
- * @param {boolean|undefined} [options.specials=] True if the result must include special players, false if the result
- * may not include special players. Undefined if this constraint shouldn't be checked.
  * @param {boolean|undefined} [options.requested=] True if the result must include requested players, false if the result
  * may not include requested players. This property overrides other constraints when set to true.
  * @param {UserModel|undefined} [options.user=] User model instance if only a specific user should be counted.
@@ -690,9 +666,8 @@ GameUserModelManager.prototype.getUserGameState = function(game, user, callback)
 GameUserModelManager.prototype.getGameUsers = function(game, options, callback) {
     // Create an object with the default options
     const defaultOptions = {
-        players: undefined,
+        participants: undefined,
         spectators: undefined,
-        specials: undefined,
         requested: undefined
     };
 
@@ -713,9 +688,8 @@ GameUserModelManager.prototype.getGameUsers = function(game, options, callback) 
 
     // Override the options if requested is set to true
     if(options.requested !== undefined && options.requested) {
-        options.players = false;
+        options.participants = false;
         options.spectators = false;
-        options.specials = false;
     }
 
     // Create the query object
@@ -726,19 +700,16 @@ GameUserModelManager.prototype.getGameUsers = function(game, options, callback) 
     // Apply the requested property if it's set to false
     if(options.requested !== undefined && !options.requested) {
         queryObject.$or = [
-            {team_id: {$ne: null}},
-            {is_spectator: true},
-            {is_special: true}
+            {is_participant: true},
+            {is_spectator: true}
         ];
     }
 
     // Configure the fields object
-    if(options.players !== undefined)
-        queryObject.team_id = options.players ? {$ne: null} : null;
+    if(options.participants !== undefined)
+        queryObject.is_participant = options.participants;
     if(options.spectators !== undefined)
         queryObject.is_spectator = options.spectators;
-    if(options.specials !== undefined)
-        queryObject.is_special = options.specials;
 
     // Limit the query to a specific user if set
     if(options.user !== undefined)
@@ -902,102 +873,6 @@ GameUserModelManager.prototype.getGameUser = function(game, user, callback) {
  * @callback GameUserModelManager~getGameUserCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
  * @param {GameUserModel=} GameUserModel instance or null if none was found.
- */
-
-/**
- * Get the number of users in the given team.
- *
- * @param {GameTeamModel|ObjectId|string} team The game team instance or ID.
- * @param {GameUserModelManager~getTeamUserCount} callback Called with the result or when an error occurred.
- */
-GameUserModelManager.prototype.getTeamUserCount = function(team, callback) {
-    // Validate the object ID, or get the object ID if a game team is given
-    if(team instanceof GameModel)
-        team = team.getId();
-    else if(team === null || team === undefined || !ObjectId.isValid(team)) {
-        // Call back
-        callback(null);
-        return;
-    }
-
-    // Create a callback latch
-    var latch = new CallbackLatch();
-
-    // Determine the Redis cache key
-    var redisCacheKey = REDIS_KEY_ROOT + ':getTeamUserCount:' + team.toString();
-
-    // Check whether the team is valid through Redis if ready
-    if(RedisUtils.isReady()) {
-        // TODO: Update this caching method!
-        // Fetch the result from Redis
-        latch.add();
-        RedisUtils.getConnection().get(redisCacheKey, function(err, result) {
-            // Show a warning if an error occurred
-            if(err !== null && err !== undefined) {
-                // Print the error to the console
-                console.error('A Redis error occurred while counting team users, falling back to MongoDB.');
-                console.error(new Error(err));
-
-                // Resolve the latch and return
-                latch.resolve();
-                return;
-            }
-
-            // Resolve the latch if the result is undefined, null or zero
-            if(result === undefined || result === null) {
-                // Resolve the latch and return
-                latch.resolve();
-                return;
-            }
-
-            // Convert the result to an integer and return it
-            callback(null, parseInt(result, 10));
-        });
-    }
-
-    // Fetch the result from MongoDB when we're done with Redis
-    latch.then(function() {
-        // Create a query object
-        const queryObject = {
-            team_id: team
-        };
-
-        // Query the database
-        GameUserDatabase.layerFetchFieldsFromDatabase(queryObject, {_id: true}, function(err, data) {
-            // Call back errors
-            if(err !== null && err !== undefined) {
-                // Encapsulate the error and call back
-                callback(new Error(err), null);
-                return;
-            }
-
-            // Count the number of users
-            const userCount = data.length;
-
-            // Call back with the number of users
-            callback(null, userCount);
-
-            // Store the result in Redis if ready
-            if(RedisUtils.isReady()) {
-                // Store the results
-                RedisUtils.getConnection().setex(redisCacheKey, config.redis.cacheExpire, userCount.toString(), function(err) {
-                    // Show a warning on error
-                    if(err !== null && err !== undefined) {
-                        console.error('A Redis error occurred when storing team user counts, ignoring.');
-                        console.error(new Error(err));
-                    }
-                });
-            }
-        });
-    });
-};
-
-/**
- * Get the number of users in the given team.
- *
- * @callback GameUserModelManager~getTeamUserCount
- * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {Number=} Number of users in the given team.
  */
 
 /**

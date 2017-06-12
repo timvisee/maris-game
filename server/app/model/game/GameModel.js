@@ -314,8 +314,7 @@ GameModel.prototype.getUsersCount = function(callback) {
  * @typedef {Object} GameUsersState
  * @property {Number} total Total number of users that joined this game.
  * @property {Number} totalAccepted Total number of users that were accepted for this game.
- * @property {Number} players Total number of users that joined a team.
- * @property {Number} specials Total number of users that are a special player.
+ * @property {Number} participants Total number of users that joined a team.
  * @property {Number} spectators Total number of users that are a spectator.
  * @property {Number} requested Total number of users that requested to join the game.
  */
@@ -333,12 +332,10 @@ GameModel.prototype.getUsersCount = function(callback) {
  *
  * @param {UserModel} user The user to check for.
  * @param {Object} [options] Options object for additional configurations and constraints.
- * @param {boolean|undefined} [options.players=] True if the user must be in a team, false if the user may not be in a
+ * @param {boolean|undefined} [options.participants=] True if the user must be in a team, false if the user may not be in a
  * team. Undefined to ignore this constraint.
  * @param {boolean|undefined} [options.spectators=] True if the user must be a spectator, false if the user may not be
  * a spectator. Undefined to ignore this constraint.
- * @param {boolean|undefined} [options.specials=] True if the user must be a special player, false if the user may not
- * be a special player. Undefined to ignore this constraint.
  * @param {boolean|undefined} [options.requested=] True if the user must be requested, false if the player must not be requested.
  * This option overrides other constraints when set to true. Undefined to ignore this constraint.
  * @param {GameModelManager~hasUserCallback} callback Called with the result or when an error occurred.
@@ -387,8 +384,7 @@ GameModel.prototype.getUserState = function(user, callback) {
 
 /**
  * @typedef {Object} UserGameState
- * @property {boolean} player True if the user is a player in a team, false if not.
- * @property {boolean} special True if the user is a special player in the game, false if not.
+ * @property {boolean} participant True if the user is a game participant, false if not.
  * @property {boolean} spectator True if the user is a spectator, false if not.
  * @property {boolean} requested True if the user requested to join this game, false if not.
  */

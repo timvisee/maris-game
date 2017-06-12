@@ -44,7 +44,7 @@ block content
                         a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/manage', data-transition='slide') Beheer
 
         //- Show a proper card if the user hasn't joined this game
-        unless game.userState.player || game.userState.spectator || game.userState.special
+        unless game.userState.participant || game.userState.spectator
             if game.userState.requested
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text

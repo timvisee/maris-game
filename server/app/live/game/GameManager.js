@@ -484,8 +484,9 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 }
 
                 // Update the show flags
-                showTeamPlayers = userState.player;
-                showAllPlayers = userState.spectator || (!userState.player && userState.special);
+                showTeamPlayers = userState.participant;
+                // TODO: Always show all players for spectators?
+                showAllPlayers = userState.spectator || !userState.participant;
 
                 // Resolve the latch
                 gameLatch.resolve();
@@ -837,7 +838,7 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
             }
 
             // Set whether the user can build new factories
-            _.set(gameData, 'factory.canBuild', userState.player);
+            _.set(gameData, 'factory.canBuild', userState.participant);
 
             // Resolve the latch
             latch.resolve();

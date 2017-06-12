@@ -123,6 +123,7 @@ module.exports = {
      */
     LOCATION_UPDATE: 10,
 
+    // TODO: This must be updated in the client script!
     /**
      * Packet containing the game/user info of a game.
      * Send from the server to the client.
@@ -130,9 +131,8 @@ module.exports = {
      * Data:
      * - game: Game ID this info is for
      * - stage: Game stage number
-     * - roles.player: True if the user is a player, false if not.
+     * - roles.participant: True if the user is a participant, false if not.
      * - roles.spectator: True if the user is a spectator, false if not.
-     * - roles.special: True if the user is special, false if not.
      * - roles.requested: True if the user requested to join this game, false if not.
      */
     GAME_INFO: 11,

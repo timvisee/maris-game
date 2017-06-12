@@ -11,8 +11,8 @@ block content
                     span.ui-li-count()= game.users.count.requested
 
             li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Geaccepteerde gebruikers
-            li: a.wow.fadeInUp(href=page.url + '/players', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Deelnemers...
-                span.ui-li-count()= game.users.count.players
+            li: a.wow.fadeInUp(href=page.url + '/participants', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Deelnemers...
+                span.ui-li-count()= game.users.count.participants
             li: a.wow.fadeInUp(href=page.url + '/spectators', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Toeschouwers...
                 span.ui-li-count()= game.users.count.spectators
 
@@ -36,8 +36,8 @@ block content
                 .row
                     .col-xs: .box
                         //- Flip switch for regular players
-                        label(for='field-special') Deelnemer
-                        select(name='field-player', id='field-special', data-role='flipswitch', selected='selected')
+                        label(for='field-participant') Deelnemer
+                        select(name='field-participant', id='field-participant', data-role='flipswitch', selected='selected')
                             option(value='false') NEE
                             option(value='true') JA
 
