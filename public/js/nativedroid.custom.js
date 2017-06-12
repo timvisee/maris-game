@@ -351,7 +351,7 @@
             var newContent = obj.closest('.ui-page').find(".nd2Tabs-content-tab[data-tab='" + _self.settings.activeTab + "']");
 
             // Animate the tabs
-            if(Dworek.state.animate) {
+            if(Maris.state.animate) {
                 oldContent.addClass("to-" + directionTo);
                 window.setTimeout(function() {
                     oldContent.removeClass("nd2Tab-active to-" + directionTo);
@@ -369,7 +369,7 @@
             // Reset the switching flag
             window.setTimeout(function() {
                 _self.settings.switching = false;
-            }, Dworek.state.animate ? 400 : 1);
+            }, Maris.state.animate ? 400 : 1);
 
             // Trigger a tab change event
             $(document).trigger('tab-switch', {
@@ -750,13 +750,13 @@
 
             _self.build = function(rebuild) {
                 // Set the rebuild property if it isn't defined
-                if(rebuild == undefined)
+                if(rebuild === undefined)
                     rebuild = false;
 
                 _self.globalSettings();
                 _self.bindNavigationSwipe();
 
-                if(Dworek === undefined || !!Dworek.state.animate) {
+                if(Maris === undefined || !!Maris.state.animate) {
                     if(!rebuild)
                         _self.iniWow();
                     //_self.iniWaves();
