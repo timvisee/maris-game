@@ -25,4 +25,8 @@ block content
                         span.gray  van #{game.users.usersCount.totalAccepted} gebruiker#{game.users.usersCount.totalAccepted == 1 ? '' : 's'}
                 tr: td Aangevraagd
                     td= game.users.usersCount.requested
-                        span.gray  gebruiker#{game.users.usersCount.requested == 1 ? '' : 's'}
+                        span.gray  gebruiker#{g
+
+        .card-action
+            .row.between-xs: .col-xs-12: .box
+                a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players', data-transition='slide') Deelnemers
