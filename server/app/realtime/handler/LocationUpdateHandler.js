@@ -78,7 +78,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         // Send a message to the user
         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
             error: true,
-            message: 'Failed to send your location, a server error occurred.',
+            message: 'Er is een fout opgetreden bij het sturen van uw locatie, door een interne server error.',
             dialog: true
         }, socket);
 
@@ -102,7 +102,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         // Send a message response to the user
         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
             error: true,
-            message: 'Failed to send your location, you\'re not authenticated.',
+            message: 'Er is een fout opgetreden bij het sturen an uw locatie, u bent niet geauthoriseerd.',
             dialog: true
         }, socket);
         return;
@@ -113,7 +113,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
 
     // Parse the coordinate
     const coordinate = Coordinate.parse(rawLocation);
-    if(coordinate == null) {
+    if(coordinate === null) {
         callbackError();
         return;
     }
@@ -121,7 +121,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
     // Get the game instance by it's ID
     Core.model.gameModelManager.getGameById(rawGame, function(err, game) {
         // Handle errors
-        if(err !== null || game == null) {
+        if(err !== null || game === null) {
             // Print the error to the console
             console.error(err);
 
@@ -137,7 +137,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         latch.add();
         game.getStage(function(err, stage) {
             // Call back errors
-            if(err !== null || stage != 1) {
+            if(err !== null || stage !== 1) {
                 callbackError();
                 return;
             }

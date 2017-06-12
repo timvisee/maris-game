@@ -78,7 +78,7 @@ GameLocationsRequestHandler.prototype.handler = function(packet, socket) {
         // Send a message to the user
         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
             error: true,
-            message: 'Failed to load location data, an error occurred.',
+            message: 'Er is een fout opgetreden bij het laden van locatie data.',
             dialog: true
         }, socket);
 
@@ -100,7 +100,7 @@ GameLocationsRequestHandler.prototype.handler = function(packet, socket) {
         // Send a message response to the user
         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
             error: true,
-            message: 'Failed load game data, you\'re not authenticated.',
+            message: 'Er is een fout opgetreden bij het laden van de speldata, u bent niet geauthoriseerd.',
             dialog: true
         }, socket);
         return;

@@ -51,7 +51,7 @@ var BroadcastMessageHandler = function(init) {
  */
 BroadcastMessageHandler.prototype.init = function() {
     // Make sure the real time instance is initialized
-    if(Core.realTime == null)
+    if(Core.realTime === null)
         throw new Error('Real time server not initialized yet');
 
     // Register the handler
@@ -80,7 +80,7 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
         // Send a message response to the user
         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
             error: true,
-            message: 'Failed to broadcast message, you\'re not authenticated.',
+            message: 'Er is een fout opgetreden bij het omroepen van uw bericht, u bent niet geauthoriseerd.',
             dialog: true
         }, socket);
         return;
@@ -92,14 +92,14 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
     // Get the game instance by it's ID
     Core.model.gameModelManager.getGameById(rawGame, function(err, game) {
         // Handle errors
-        if(err !== null || game == null) {
+        if(err !== null || game === null) {
             // Print the error to the console
             console.error(err);
 
             // Send a message response to the user
             Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
                 error: true,
-                message: 'Failed to broadcast message',
+                message: 'Er is een fout opgetreden bij het omroepen van uw bericht.',
                 dialog: true
             }, socket);
             return;
@@ -108,14 +108,14 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
         // Make sure the user has management rights
         game.hasManagePermission(user, function(err, hasPermission) {
             // Handle errors
-            if(err !== null || game == null) {
+            if(err !== null || game === null) {
                 // Print the error to the console
                 console.error(err);
 
                 // Send a message response to the user
                 Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
                     error: true,
-                    message: 'Failed to broadcast message.',
+                    message: 'Er is een fout opgetreden bij het omroepen van uw bericht.',
                     dialog: true
                 }, socket);
                 return;
@@ -126,7 +126,7 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
                 // Send a message response to the user
                 Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
                     error: true,
-                    message: 'You don\'t have permission to broadcast a message.',
+                    message: 'U heeft geen rechten om een bericht om te roepen.',
                     dialog: true
                 }, socket);
                 return;
@@ -138,7 +138,7 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
                 if(err !== null) {
                     Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
                         error: true,
-                        message: 'An error occurred while sending a broadcast.',
+                        message: 'Er is een fout opgetreden tijdens het sturen van uw omroep naar gebruikers.',
                         dialog: true
                     }, socket);
                     return;
@@ -156,7 +156,7 @@ BroadcastMessageHandler.prototype.handler = function(packet, socket) {
                     if(err !== null) {
                         Core.realTime.packetProcessor.sendPacket(PacketType.MESSAGE_RESPONSE, {
                             error: true,
-                            message: 'An error occurred while sending a broadcast.',
+                            message: 'Er is een fout opgetreden bij het sturen van uw omroep naar een gebruiker.',
                             dialog: true
                         }, socket);
                         return;
