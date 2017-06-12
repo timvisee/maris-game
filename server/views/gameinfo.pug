@@ -25,7 +25,7 @@ block content
                         span.gray  van #{game.users.usersCount.totalAccepted} gebruiker#{game.users.usersCount.totalAccepted == 1 ? '' : 's'}
                 tr: td Aangevraagd
                     td= game.users.usersCount.requested
-                        span.gray  gebruiker#{g
+                        span.gray  gebruiker#{game.users.usersCount.requested == 1 ? '' : 's'}
 
         .card-action
             .row.between-xs: .col-xs-12: .box
