@@ -707,9 +707,9 @@ GameUserModelManager.prototype.getGameUsers = function(game, options, callback) 
 
     // Configure the fields object
     if(options.participants !== undefined)
-        queryObject.is_participant = options.participants;
+        queryObject.is_participant = options.participants ? true : {$ne: true};
     if(options.spectators !== undefined)
-        queryObject.is_spectator = options.spectators;
+        queryObject.is_spectator = options.participants ? true : {$ne: true};
 
     // Limit the query to a specific user if set
     if(options.user !== undefined)
