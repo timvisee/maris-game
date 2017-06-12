@@ -884,7 +884,11 @@ GameUserModelManager.prototype.flushCache = function(callback) {
     // Determine the cache key for this manager and wildcard it
     const cacheKey = REDIS_KEY_ROOT + ':*';
 
+    // Create a latch
+    var latch = new CallbackLatch();
+
     // Flush the cache
+    latch.add();
     RedisUtils.flushKeys(cacheKey, function(err, keyCount) {
         // Call back errors
         if(err !== null) {
@@ -892,10 +896,15 @@ GameUserModelManager.prototype.flushCache = function(callback) {
             return;
         }
 
-        // Delete the internal model cache
-        this._instanceManager.clear(true);
+        // Resolve the latch
+        latch.resolve();
+    });
 
-        // Call back
+    // Delete the internal model cache
+    this._instanceManager.clear(true);
+
+    // Call back when we're done
+    latch.then(function() {
         if(callback !== undefined)
             callback(null);
     });
