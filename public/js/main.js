@@ -1901,7 +1901,7 @@ $(document).bind("pageinit", function() {
                 game: gameId,
                 users: userIds,
                 role: {
-                    participant: participant
+                    participant: participant,
                     spectator: spectator
                 }
             };
