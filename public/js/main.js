@@ -135,7 +135,7 @@ var Maris = {
              * Object defining a users role.
              *
              * @typedef {Object} UserRoles
-             * @param {boolean} player True if the user is a player, false if not.
+             * @param {boolean} participant True if the user is a game participant, false if not.
              * @param {boolean} spectator True if the user is a spectator, false if not.
              * @param {boolean} requested True if the user requested to join the game, flase if not.
              */
@@ -290,7 +290,7 @@ var Maris = {
             // TODO: Make sure geo location is supported
 
             // Determine whether to send locations to the server
-            const sendLocationUpdates = playing && Maris.state.activeGameRoles.player;
+            const sendLocationUpdates = playing && Maris.state.activeGameRoles.participant;
 
             // Start the GEO location watcher if it needs to be started
             if(sendLocationUpdates && Maris.state.geoWatcher == null) {
@@ -1499,7 +1499,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_INFO, function(pa
     // Determine the roles changed
     var rolesChanged = Maris.state.activeGameRoles == null;
     if(!rolesChanged) {
-        rolesChanged = Maris.state.activeGameRoles.player != roles.player ||
+        rolesChanged = Maris.state.activeGameRoles.participant != roles.participant ||
             Maris.state.activeGameRoles.spectator != roles.spectator ||
             Maris.state.activeGameRoles.requested != roles.requested;
     }
@@ -1507,7 +1507,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_INFO, function(pa
     // Update the game stage and roles for the user
     Maris.state.activeGameStage = stage;
     Maris.state.activeGameRoles = {
-        player: roles.player,
+        participant: roles.participant,
         spectator: roles.spectator,
         requested: roles.requested
     };
@@ -1521,7 +1521,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_INFO, function(pa
             setFollowEverything(true, {
                 showNotification: false
             });
-        else if(roles.player)
+        else if(roles.participant)
             setFollowPlayer(true, {
                 showNotification: false
             });
@@ -2927,7 +2927,7 @@ function updateStatusLabels() {
 
     // Make sure the user roles are fetched
     if(Maris.state.activeGameRoles != null)
-        playing = playing & Maris.state.activeGameRoles.player;
+        playing = playing & Maris.state.activeGameRoles.participant;
     else
         playing = false;
 
@@ -3120,7 +3120,7 @@ function processLocationSuccess(position, notification, alsoUpdateLocal) {
         });
 
     // Update the location if a game is active and we have the proper roles
-    if(Maris.state.activeGame !== null && Maris.state.activeGameStage == 1 && Maris.state.activeGameRoles.player) {
+    if(Maris.state.activeGame !== null && Maris.state.activeGameStage == 1 && Maris.state.activeGameRoles.participant) {
         // Send a location update to the server if we've an active game
         Maris.realtime.packetProcessor.sendPacket(PacketType.LOCATION_UPDATE, {
             game: Maris.state.activeGame,
@@ -3689,7 +3689,7 @@ function requestMapData(game) {
  */
 function updatePlayerPosition(position) {
     // Return if the user doesn't have the right roles
-    if(Maris.state.activeGameRoles == null || !Maris.state.activeGameRoles.player)
+    if(Maris.state.activeGameRoles == null || !Maris.state.activeGameRoles.participant)
         return;
 
     // Set the last known location
@@ -3704,7 +3704,7 @@ function updatePlayerPosition(position) {
  */
 function updatePlayerMarker() {
     // Return if the user doesn't have the right roles
-    if(Maris.state.activeGameRoles == null || !Maris.state.activeGameRoles.player)
+    if(Maris.state.activeGameRoles == null || !Maris.state.activeGameRoles.participant)
         return;
 
     // Set the last known location
@@ -3792,7 +3792,7 @@ function updatePlayerMarkers(users) {
         return;
 
     // Return if the user doesn't have the right roles
-    if(Maris.state.activeGameRoles == null || !(Maris.state.activeGameRoles.player || Maris.state.activeGameRoles.spectator))
+    if(Maris.state.activeGameRoles == null || !(Maris.state.activeGameRoles.participant || Maris.state.activeGameRoles.spectator))
         return;
 
     // Determine whether to fit all users in the map after updating
@@ -4006,7 +4006,7 @@ function updateFactoryMarkers(factories) {
         return;
 
     // Return if the user doesn't have the right roles
-    if(Maris.state.activeGameRoles == null || !(Maris.state.activeGameRoles.player || Maris.state.activeGameRoles.spectator))
+    if(Maris.state.activeGameRoles == null || !(Maris.state.activeGameRoles.participant || Maris.state.activeGameRoles.spectator))
         return;
 
     // Loop through the factories
@@ -4242,7 +4242,7 @@ function buildFactory() {
     }
 
     // Make sure the user has the proper roles to build a lab
-    if(!Maris.state.activeGameRoles.player) {
+    if(!Maris.state.activeGameRoles.participant) {
         showNotification('You don\'t have permission to build');
         return;
     }
