@@ -22,63 +22,53 @@
 
 var express = require('express');
 var router = express.Router();
-var _ = require("lodash");
 
-var ajax = require('./ajax/index');
-var login = require('./login');
-var logout = require('./logout');
-var register = require('./register');
-var game = require('./game');
-var about = require('./about');
-var create = require('./create');
-
-var appInfo = require('../../appInfo');
-var Core = require('../../Core');
-var CallbackLatch = require('../util/CallbackLatch');
-var LayoutRenderer = require('../layout/LayoutRenderer');
+var Core = require('../../../Core');
+var user = require('./user/index');
 
 // Index page
-router.get('/', function(req, res, next) {
-    // Show the index page if the user isn't logged in, show the dashboard if logged in
-    if(!req.session.valid) {
-        // Define the page options object
-        var pageOptions = {};
+router.get('/', (req, res, next) => next(new Error('No AJAX endpoint specified')));
 
-        // Set the next property if known
-        if(_.isString(req.param('next')))
-            pageOptions.next = req.param('next');
+// User directory
+router.use('/user', user);
 
-        // Render the index page
-        LayoutRenderer.render(req, res, next, 'index', appInfo.APP_NAME, pageOptions);
-        return;
-    }
+// Catch 404 errors, and forward them to the error handler
+router.use(function(req, res, next) {
+    // Create an error, and set the status code
+    var error = new Error('Not Found');
+    error.status = 404;
 
-    // Render the dashboard
-    LayoutRenderer.render(req, res, next, 'dashboard', appInfo.APP_NAME);
+    // Forward the error
+    next(error);
 });
 
-// Ajax requests
-router.use('/ajax', ajax);
+// Error handler
+router.use(function(err, req, res) {
+    // Determine whether we're in development mode
+    var dev = Core.expressApp.get('env') === 'development';
 
-// Login page
-router.use('/login', login);
+    // Show an error page, render the stack trace if we're in development mode
+    res.status(err.status || 500);
 
-// Logout page
-router.use('/logout', logout);
+    // Create a response object
+    var responseObject = {
+        status: 'error',
+        error: {
+            message: err.message,
+            status: err.status
+        }
+    };
 
-// Register page
-router.use('/register', register);
+    // Append the stack trace if we're in development mode
+    if(dev)
+        responseObject.error.stacktrace = err.stack;
 
-// Game page
-router.use('/game', game);
+    // Respond with the response object
+    res.json(responseObject);
 
-// About page
-router.use('/about', about);
-
-// Game creation page
-router.use('/create', create);
-
-// TODO: Add (back) status route
+    // Print the error message to the console
+    console.error(err.stack);
+});
 
 // Export the router
 module.exports = router;

@@ -22,63 +22,14 @@
 
 var express = require('express');
 var router = express.Router();
-var _ = require("lodash");
 
-var ajax = require('./ajax/index');
-var login = require('./login');
-var logout = require('./logout');
-var register = require('./register');
-var game = require('./game');
-var about = require('./about');
-var create = require('./create');
-
-var appInfo = require('../../appInfo');
-var Core = require('../../Core');
-var CallbackLatch = require('../util/CallbackLatch');
-var LayoutRenderer = require('../layout/LayoutRenderer');
+var changeRoles = require('./changeRoles');
 
 // Index page
-router.get('/', function(req, res, next) {
-    // Show the index page if the user isn't logged in, show the dashboard if logged in
-    if(!req.session.valid) {
-        // Define the page options object
-        var pageOptions = {};
+router.get('/', (req, res, next) => next(new Error('No AJAX endpoint specified')));
 
-        // Set the next property if known
-        if(_.isString(req.param('next')))
-            pageOptions.next = req.param('next');
-
-        // Render the index page
-        LayoutRenderer.render(req, res, next, 'index', appInfo.APP_NAME, pageOptions);
-        return;
-    }
-
-    // Render the dashboard
-    LayoutRenderer.render(req, res, next, 'dashboard', appInfo.APP_NAME);
-});
-
-// Ajax requests
-router.use('/ajax', ajax);
-
-// Login page
-router.use('/login', login);
-
-// Logout page
-router.use('/logout', logout);
-
-// Register page
-router.use('/register', register);
-
-// Game page
-router.use('/game', game);
-
-// About page
-router.use('/about', about);
-
-// Game creation page
-router.use('/create', create);
-
-// TODO: Add (back) status route
+// Change roles request
+router.use('/changeRoles', changeRoles);
 
 // Export the router
 module.exports = router;
