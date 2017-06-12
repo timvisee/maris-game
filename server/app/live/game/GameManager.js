@@ -393,7 +393,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
         gameConstraint = gameConstraint.getId();
     else if(_.isString(gameConstraint) && ObjectId.isValid(gameConstraint))
         gameConstraint = new ObjectId(gameConstraint);
-    else if(gameConstraint != undefined && !(gameConstraint instanceof ObjectId)) {
+    else if(gameConstraint !== undefined && !(gameConstraint instanceof ObjectId)) {
         callback(new Error('Invalid game instance'));
         return;
     }

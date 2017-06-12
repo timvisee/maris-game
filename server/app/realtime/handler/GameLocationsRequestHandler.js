@@ -22,6 +22,8 @@
 
 var _ = require('lodash');
 
+var config = require('../../../config');
+
 var Core = require('../../../Core');
 var PacketType = require('../PacketType');
 
@@ -110,7 +112,7 @@ GameLocationsRequestHandler.prototype.handler = function(packet, socket) {
     // Get the game instance by it's ID
     Core.model.gameModelManager.getGameById(rawGame, function(err, game) {
         // Handle errors
-        if(err !== null || game == null) {
+        if(err !== null || game === null) {
             // Print the error to the console
             console.error(err);
 
@@ -120,7 +122,7 @@ GameLocationsRequestHandler.prototype.handler = function(packet, socket) {
         }
 
         // Send the location data to the user
-        Core.gameManager.broadcastLocationData(game, user, socket, function(err) {
+        Core.gameManager.broadcastLocationData(null, game, user, socket, function(err) {
             // Call back errors
             if(err !== null)
                 callbackError();
