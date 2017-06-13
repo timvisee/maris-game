@@ -232,5 +232,83 @@ Validator.isValidRedirectUrl = function(redirectUrl) {
     return redirectUrl.trim().startsWith('/');
 };
 
+/**
+ * Parse the the given latitude.
+ * This doesn't validate the latitude, validation must be done through the {@code Validator.isValidLatitude} function.
+ *
+ * @param {string} latitude Latitude value.
+ *
+ * @return {Number} The formatted latitude.
+ */
+Validator.parseLatitude = function(latitude) {
+    return parseFloat(latitude.trim());
+};
+
+/**
+ * Check whether the given latitude is valid.
+ *
+ * @param {string} latitude Latitude value.
+ *
+ * @return {boolean} True if the latitude is valid, false if not.
+ */
+Validator.isValidLatitude = function(latitude) {
+    // Make sure the latitude isn't undefined or null
+    if(latitude === undefined || latitude === null)
+        return false;
+
+    // Trim the latitude
+    latitude = latitude.trim();
+
+    // The latitude must match the regex
+    if(!validator.matches(latitude, /^-?0*\d{1,2}(\.\d+)?$/i))
+        return false;
+
+    // Parse the value as float
+    //noinspection JSValidateTypes
+    latitude = parseFloat(latitude);
+
+    // Make sure the value is in range
+    return !isNaN(latitude) && latitude >= -90 && latitude <= 90;
+};
+
+/**
+ * Parse the the given longitude.
+ * This doesn't validate the longitude, validation must be done through the {@code Validator.isValidLongitude} function.
+ *
+ * @param {string} longitude Longitude value.
+ *
+ * @return {Number} The formatted longitude.
+ */
+Validator.parseLongitude = function(longitude) {
+    return parseFloat(longitude.trim());
+};
+
+/**
+ * Check whether the given longitude is valid.
+ *
+ * @param {string} longitude Longitude value.
+ *
+ * @return {boolean} True if the longitude is valid, false if not.
+ */
+Validator.isValidLongitude = function(longitude) {
+    // Make sure the longitude isn't undefined or null
+    if(longitude === undefined || longitude === null)
+        return false;
+
+    // Trim the longitude
+    longitude = longitude.trim();
+
+    // The longitude must match the regex
+    if(!validator.matches(longitude, /^-?0*\d{1,3}(\.\d+)?$/i))
+        return false;
+
+    // Parse the value as float
+    //noinspection JSValidateTypes
+    longitude = parseFloat(longitude);
+
+    // Make sure the value is in range
+    return !isNaN(longitude) && longitude >= -180 && longitude <= 180;
+};
+
 // Export the class
 module.exports = Validator;
