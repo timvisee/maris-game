@@ -2890,6 +2890,8 @@ function initMap(element) {
     if(element === undefined || element === null)
         element = getActivePage();
 
+    // TODO: Only initialize/update if the map tab is shown (if the page has tabs)
+
     // Get the map container
     var mapContainer = element.find('#map-container');
 
