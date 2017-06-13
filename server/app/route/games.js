@@ -162,14 +162,55 @@ router.get('/finished', function(req, res, next) {
  * @param {string} pageTitle Page title.
  */
 function renderGameList(req, res, next, stage, limit, category, pageTitle) {
-    // Get a list of game objects
-    getGameList(stage, limit, function(err, games) {
+    // Get the user of the current session
+    const user = req.session.user;
+
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Determine whether the user is administrator
+    var games = [];
+    var isAdmin = false;
+
+    // Determine whether the user is administrator
+    latch.add();
+    user.isAdmin(function(err, result) {
         // Call back errors
         if(err !== null) {
-            next(err);
+            if(!calledBack)
+                next(err);
+            calledBack = true;
             return;
         }
 
+        // Set whether the user is administrator
+        isAdmin = result;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Get a list of game objects
+    latch.add();
+    getGameList(stage, limit, function(err, result) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the games
+        games = result;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Complete the latch and render the page
+    latch.then(function() {
         // Render the games page
         LayoutRenderer.render(req, res, next, 'gamelist', pageTitle, {
             page: {
@@ -178,6 +219,9 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
             games: {
                 category: category,
                 games: games
+            },
+            user: {
+                isAdmin
             }
         });
     });
