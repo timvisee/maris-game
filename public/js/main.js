@@ -4590,3 +4590,153 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.APP_STATUS_UPDATE, fun
     // Store the app status
     appStatus = status;
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var pointSelectMap = null;
+var pointSelectMarker = null;
+var pointSelectCircle = null;
+
+/**
+ * Initialize the map for point selection.
+ * This function early-return if there isn't any point selection map container
+ * on the current page.
+ */
+function initPointSelectMap() {
+    // Get the page element
+    var pageElement = getActivePage();
+
+    // Get the map container
+    var mapContainer = pageElement.find('#point-map-container');
+
+    // Return early if there's no map container on this page
+    if(mapContainer.length <= 0) {
+		// Remove the map
+		if(pointSelectMap !== null) {
+			console.log('Destroying point selection map');
+			
+			// Remove the existing point selection marker
+			if(pointSelectMarker !== null) {
+				pointSelectMap.removeLayer(pointSelectMarker);
+				pointSelectMarker = null;
+			}
+
+			// Remove the existing point selection circle
+			if(pointSelectCircle !== null) {
+				pointSelectMap.removeLayer(pointSelectCircle);
+				pointSelectCircle = null;
+			}
+
+			// Remove the leaflet map
+			pointSelectMap.remove();
+
+			pointSelectMap = null;
+		}
+
+		return;
+	}
+
+	// Get the longitude and latitude fields
+    var latField = pageElement.find('#field-point-lat');
+    var lngField = pageElement.find('#field-point-lng');
+
+    //// Make sure any map is available inside the container
+    //if(mapContainer.find("div.leaflet-map-pane").length <= 0) {
+    //    // Reset the map instance, to cause it to be created again
+    //    map = null;
+    //}
+
+    // TODO: Update the size of the map!
+
+    // Use the last known player location when possible
+    var latlng = [52.06387, 4.248329];
+
+    // Create a map if none has been created yet
+    if(pointSelectMap == null) {
+        // Show a status message
+        console.log('Initializing the point selection map.');
+
+        // Build the map options
+        var mapOptions = {};
+
+        // Add animation options when animations are disabled
+        if(!Maris.state.animate) {
+            mapOptions.fadeAnimation = false;
+            mapOptions.zoomAnimation = false;
+            mapOptions.makerZoomAnimation = false;
+            mapOptions.inertia = false;
+        }
+
+        // Create the map
+        pointSelectMap = L.map('point-map-container', mapOptions).setView(latlng, 16);
+
+        // Set up the tile layers
+        L.tileLayer('https://api.mapbox.com/styles/v1/timvisee/cirawmn8f001ch4m27llnb45d/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidGltdmlzZWUiLCJhIjoiY2lyZXY5cDhzMDAxM2lsbTNicGViaTZkYyJ9.RqbUkoWLWeh_WZoyoxxt-Q', {
+            attribution: 'Hosted by <a href="https://timvisee.com/" target="_blank">timvisee.com</a>'
+        }).addTo(pointSelectMap);
+
+		// Put a marker on the map, or move an existing one when the map is clicked
+		pointSelectMap.on('click', function onMapClick(e) {
+            // Set the latitude and longitude in the fields
+            latField.val(e.latlng.lat);
+            lngField.val(e.latlng.lng);
+
+			// Determine whether to create or reuse a marker
+			if(pointSelectMarker === null) {
+				// Create and configure the marker
+				pointSelectMarker = new L.marker(e.latlng, {draggable: 'true'});
+
+				// Create a player range circle
+				// TODO: Fetch the range value from the game configuration
+				pointSelectCircle = L.circle(e.latlng, 10, {draggable: 'true'});
+				pointSelectCircle.setStyle({
+					opacity: 0.4
+				});
+
+				// Make the marker draggable
+				pointSelectMarker.on('dragend', function(event) {
+					// Get the marker and position
+					var marker = event.target;
+					var position = marker.getLatLng();
+
+					// Set the latitude and longitude in the fields
+					latField.val(position.lat);
+					lngField.val(position.lng);
+
+					// Update the marker, and pan to it
+					pointSelectMarker.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
+					pointSelectCircle.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
+					pointSelectMap.panTo(new L.LatLng(position.lat, position.lng))
+				});
+
+				// Add the marker to the map
+				pointSelectMap.addLayer(pointSelectMarker);
+				pointSelectMap.addLayer(pointSelectCircle);
+
+			} else {
+				// Update the position of the existing marker and circle
+				pointSelectMarker.setLatLng(e.latlng);
+				pointSelectCircle.setLatLng(e.latlng);
+			}
+		});
+
+        // Invalidate the map size, because the container size might be changed
+        pointSelectMap.invalidateSize();
+    }
+}
+
+$(document).bind('pageshow', function() {
+    initPointSelectMap();
+});
