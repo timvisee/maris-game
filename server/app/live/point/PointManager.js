@@ -179,7 +179,7 @@ PointManager.prototype.getLoadedPoint = function(pointId) {
     // Loop through the list of points
     this.points.forEach(function(entry) {
         // Skip if we already found a point
-        if(result != null)
+        if(result !== null)
             return;
 
         // Check whether the point ID equals the point

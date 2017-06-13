@@ -208,18 +208,14 @@ Point.prototype.sendData = function(user, sockets, callback) {
     // Get the point model
     const pointModel = this.getPointModel();
 
-    // Create a callback latch
-    var latch = new CallbackLatch();
-
     // Parse the sockets
     if(sockets === undefined)
         sockets = [];
     else if(!_.isArray(sockets))
         sockets = [sockets];
 
-    // Get the game user
-    latch.add();
-    this.getGame().getUser(user, function(err, liveUser) {
+    // Make sure the point is part of this game
+    pointModel.getGame(function(err, result) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -228,34 +224,16 @@ Point.prototype.sendData = function(user, sockets, callback) {
             return;
         }
 
-        // Check whether this point is visible for the given live user
-        self.isVisibleFor(liveUser, function(err, visible) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Set the visibility status
-            pointData.visible = visible;
-
-            // Resolve the latch
-            latch.resolve();
-        });
-    });
-
-    // Continue when we're done
-    latch.then(function() {
-        // Send the data if no visible
-        if(!pointData.visible) {
-            sendPointData();
+        // Compare the games
+        if(!game.getId().equals(result.getId())) {
+            if(!calledBack)
+                callback(new Error('The point is not part of this game'));
+            calledBack = true;
             return;
         }
 
-        // Make sure the point is part of this game
-        pointModel.getGame(function(err, result) {
+        // Get the live point
+        pointModel.getLivePoint(function(err, livePoint) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -264,16 +242,14 @@ Point.prototype.sendData = function(user, sockets, callback) {
                 return;
             }
 
-            // Compare the games
-            if(!game.getId().equals(result.getId())) {
-                if(!calledBack)
-                    callback(new Error('The point is not part of this game'));
-                calledBack = true;
-                return;
-            }
+            // TODO: Make sure the user has rights to view this point!
 
-            // Get the live point
-            pointModel.getLivePoint(function(err, livePoint) {
+            // Create a callback latch
+            var latch = new CallbackLatch();
+
+            // Get the point name
+            latch.add();
+            pointModel.getName(function(err, name) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -282,14 +258,26 @@ Point.prototype.sendData = function(user, sockets, callback) {
                     return;
                 }
 
-                // TODO: Make sure the user has rights to view this point!
+                // Set the name
+                pointData.name = name;
 
-                // Reset the latch
-                latch.identity();
+                // Resolve the latch
+                latch.resolve();
+            });
 
-                // Get the point name
-                latch.add();
-                pointModel.getName(function(err, name) {
+            // Get the live user this data is send to
+            latch.add();
+            self.getGame().getUser(user, function(err, liveUser) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Get the visibility state for the user
+                self.getVisibilityState(liveUser, function(err, visibilityState) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
@@ -298,272 +286,18 @@ Point.prototype.sendData = function(user, sockets, callback) {
                         return;
                     }
 
-                    // Set the name
-                    pointData.name = name;
+                    // Set the visibility, range and ally states
+                    pointData.inRange = visibilityState.inRange;
+                    pointData.ally = visibilityState.ally;
 
                     // Resolve the latch
                     latch.resolve();
                 });
+            });
 
-                // Get the point level
-                latch.add();
-                pointModel.getLevel(function(err, level) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the level
-                    pointData.level = level;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the defence value
-                latch.add();
-                pointModel.getDefence(function(err, defence) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the defence
-                    pointData.defence = defence;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the point conquer value
-                latch.add();
-                livePoint.getConquer(function(err, conquerValue, userCount) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the conquer value and user count
-                    pointData.conquerValue = conquerValue;
-                    pointData.conquerUserCount = userCount;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the input
-                latch.add();
-                pointModel.getIn(function(err, input) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the input
-                    pointData.in = input;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the output
-                latch.add();
-                pointModel.getOut(function(err, output) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the defence
-                    pointData.out = output;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the creator
-                latch.add();
-                pointModel.getUser(function(err, creator) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Get the display name of the user
-                    latch.add();
-                    creator.getDisplayName(function(err, displayName) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the display name
-                        pointData.creatorName = displayName;
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-
-                    // Get the team
-                    latch.add();
-                    pointModel.getTeam(function(err, pointTeam) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Get the team name
-                        pointTeam.getName(function(err, teamName) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Set the team name
-                            pointData.teamName = teamName;
-
-                            // Resolve the latch
-                            latch.resolve();
-                        });
-                    });
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the input production
-                latch.add();
-                self.getProductionIn(function(err, production) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the production
-                    pointData.productionIn = production;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the output production
-                latch.add();
-                self.getProductionOut(function(err, production) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the production
-                    pointData.productionOut = production;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the defence upgrades
-                latch.add();
-                self.getDefenceUpgrades(function(err, defenceUpgrades) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the production
-                    pointData.defenceUpgrades = defenceUpgrades;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the next level cost
-                latch.add();
-                self.getNextLevelCost(function(err, nextLevelCost) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set the production
-                    pointData.nextLevelCost = nextLevelCost;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Get the live user this data is send to
-                latch.add();
-                self.getGame().getUser(user, function(err, liveUser) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            callback(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Get the visibility state for the user
-                    self.getVisibilityState(liveUser, function(err, visibilityState) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the visibility, range and ally states
-                        pointData.inRange = visibilityState.inRange;
-                        pointData.ally = visibilityState.ally;
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-                });
-
-                // Send the point data
-                latch.then(function() {
-                    sendPointData();
-                });
+            // Send the point data
+            latch.then(function() {
+                sendPointData();
             });
         });
     });
