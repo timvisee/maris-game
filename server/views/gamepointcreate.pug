@@ -1,0 +1,39 @@
+extends page
+
+block content
+    unless created
+        p.
+            Vul de naam en locatie in voor het punt dat u wilt aanmaken.#[br]
+            #[br]
+            Gebruik de longitude en latitude om de gewenste locatie aan te duiden.
+            U kunt een punt op de kaart plaatsen om automatisch de longitude en latitude te bepalen.
+        br
+
+        form(method='POST', action=page.url + '/#')
+            label(for='field-point-name') Puntnaam:
+            input(type='text', name='field-point-name', id='field-point-name', value='', data-clear-btn='true', data-randomize='true')
+
+            #point-map-container
+
+            label(for='field-point-lat') Latitude:
+            input(type='text', name='field-point-lat', id='field-point-lat', value='', data-clear-btn='true', data-randomize='true')
+            label(for='field-point-lng') Longitude:
+            input(type='text', name='field-point-lng', id='field-point-lng', value='', data-clear-btn='true', data-randomize='true')
+
+            br
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Punt aanmaken
+
+    else
+        p Het punt is succesvol aangemaakt.
+
+        div(align="center")
+            table.table-list.ui-responsive
+                tr: td Punt
+                    td= point.name
+
+        p Klik op de onderstaande knop om terug te gaan naar het punten overzicht.
+
+        br
+        .button-list
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/points', title='Puntenoverzicht') Puntenoverzicht
+            a.ui-btn.ui-btn-raised(href='/game/' + game.id + '/point/' + point.id, title='Punt bekijken') Punt bekijken
