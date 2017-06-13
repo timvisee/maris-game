@@ -22,10 +22,10 @@
 
 var crypto = require('crypto');
 
-var Core = require('../../../Core');
-var Validator = require('../../validator/Validator');
-var PointDatabase = require('../../model/point/PointDatabase');
-var LayoutRenderer = require('../../layout/LayoutRenderer');
+var Core = require('../../../../Core');
+var Validator = require('../../../validator/Validator');
+var PointDatabase = require('../../../model/point/PointDatabase');
+var LayoutRenderer = require('../../../layout/LayoutRenderer');
 
 // Export the module
 module.exports = {

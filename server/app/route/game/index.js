@@ -23,20 +23,24 @@
 var express = require('express');
 var router = express.Router();
 
-var config = require('../../config');
+var config = require('../../../config');
 
-var pageJoin = require('./game/join');
-var pageInfo = require('./game/info');
-var pagePlayers = require('./game/players');
-var pagePoints = require('./game/points');
-var pagePointCreate = require('./game/pointcreate');
-var pageManage = require('./game/manage');
+var pageCreate = require('./create');
+var pageJoin = require('./join');
+var pageInfo = require('./info');
+var pagePlayers = require('./players');
+var pagePoints = require('./point/index');
+var pagePointCreate = require('./point/create');
+var pageManage = require('./manage');
 
-var Core = require('../../Core');
-var CallbackLatch = require('../util/CallbackLatch');
-var LayoutRenderer = require('../layout/LayoutRenderer');
-var GameParam = require('../router/middleware/GameParam');
-var Validator = require('../validator/Validator');
+var Core = require('../../../Core');
+var CallbackLatch = require('../../util/CallbackLatch');
+var LayoutRenderer = require('../../layout/LayoutRenderer');
+var GameParam = require('../../router/middleware/GameParam');
+var Validator = require('../../validator/Validator');
+
+// Games overview, redirect back to the front page
+router.use('/create', pageCreate);
 
 // Games overview, redirect back to the front page
 router.get('/', (req, res) => res.redirect('/'));

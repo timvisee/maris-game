@@ -29,9 +29,9 @@ var login = require('./login');
 var logout = require('./logout');
 var register = require('./register');
 var games = require('./games');
-var game = require('./game');
+var game = require('./game/index');
 var about = require('./about');
-var create = require('./create');
+var create = require('./game/create');
 
 var appInfo = require('../../appInfo');
 var Core = require('../../Core');
@@ -147,9 +147,6 @@ router.use('/game', game);
 
 // About page
 router.use('/about', about);
-
-// Game creation page
-router.use('/create', create);
 
 // TODO: Add (back) status route
 
