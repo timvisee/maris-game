@@ -179,8 +179,8 @@ PointModelManager.prototype.getPoints = function(game, user, callback) {
     var latch = new CallbackLatch();
 
     // Determine the Redis cache key
-    var redisCacheKey = REDIS_KEY_ROOT + ':' +(game != null ? game.getIdHex() : '0' ) +
-        ':' +(user != null ? user.getIdHex() : '0' ) + ':getPoints';
+    var redisCacheKey = REDIS_KEY_ROOT + ':' +(game !== null ? game.getIdHex() : '0' ) +
+        ':' +(user !== null ? user.getIdHex() : '0' ) + ':getPoints';
 
     // Store this instance
     const self = this;
@@ -203,7 +203,7 @@ PointModelManager.prototype.getPoints = function(game, user, callback) {
             }
 
             // Resolve the latch if the result is undefined, null or zero
-            if(result === undefined || result === null || result == 0) {
+            if(result === undefined || result === null || result === 0) {
                 // Resolve the latch and return
                 latch.resolve();
                 return;

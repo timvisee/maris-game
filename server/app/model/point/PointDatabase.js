@@ -59,7 +59,7 @@ PointDatabase.addPoint = function (name, game, user, location, callback) {
     }
 
     // Make sure the game and user are valid
-    if(game == null || user == null) {
+    if(game === null || user === null) {
         callback(new Error('Unable to create point, invalid game or user instance.'));
         return;
     }
@@ -94,7 +94,6 @@ PointDatabase.addPoint = function (name, game, user, location, callback) {
         // Create the object to insert
         var insertObject = {
             name,
-            create_date: new Date(),
             user_id: user.getId(),
             game_id: game.getId(),
             location,
