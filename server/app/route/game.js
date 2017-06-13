@@ -28,6 +28,8 @@ var config = require('../../config');
 var pageJoin = require('./game/join');
 var pageInfo = require('./game/info');
 var pagePlayers = require('./game/players');
+var pagePoints = require('./game/points');
+var pagePointCreate = require('./game/pointcreate');
 var pageManage = require('./game/manage');
 
 var Core = require('../../Core');
@@ -35,13 +37,30 @@ var CallbackLatch = require('../util/CallbackLatch');
 var LayoutRenderer = require('../layout/LayoutRenderer');
 var GameParam = require('../router/middleware/GameParam');
 var Validator = require('../validator/Validator');
-// var GameUserDatabase = require('../model/gameuser/GameUserDatabase');
 
 // Games overview, redirect back to the front page
 router.get('/', (req, res) => res.redirect('/'));
 
 // Attach the game param middleware
 GameParam.attach(router);
+
+// Route the game join page
+pageJoin.route(router);
+
+// Route the game info page
+pageInfo.route(router);
+
+// Route the game players page
+pagePlayers.route(router);
+
+// Route the game points page
+pagePoints.route(router);
+
+// Route the game point creation page
+pagePointCreate.route(router);
+
+// Route the game management page
+pageManage.route(router);
 
 // Game page
 router.get('/:game', function(req, res, next) {
@@ -198,17 +217,6 @@ router.get('/:game', function(req, res, next) {
         });
     });
 });
-// Route the game join page
-pageJoin.route(router);
-
-// Route the game info page
-pageInfo.route(router);
-
-// Route the game players page
-pagePlayers.route(router);
-
-// Route the game management page
-pageManage.route(router);
 
 // Export the module
 module.exports = router;
