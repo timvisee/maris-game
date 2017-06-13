@@ -6,17 +6,17 @@ block tabs
         if game.stage >= 1
             li.wow.fadeInUp(data-tab='map', data-wow-delay=(fadeDelay += 0.1) + 's') Kaart
         if game.stage == 1
-            li.wow.fadeInUp(data-tab='actions', data-wow-delay=(fadeDelay += 0.1) + 's') Acties
+            li.wow.fadeInUp(data-tab='assignments', data-wow-delay=(fadeDelay += 0.1) + 's') Opdrachten
         li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
 
 block content
     div(data-role='nd2tab', data-tab='map')
         #map-container
 
-    div(data-role='nd2tab', data-tab='actions')
-        .game-actions-list
+    div(data-role='nd2tab', data-tab='assignments')
+        .game-assignments-list
             div(align='center')
-                p.game-data-load-label: i Geen acties beschikbaar...
+                p.game-data-load-label: i Geen opdrachten beschikbaar...
 
     div(data-role='nd2tab', data-tab='info')
         if (user.isHost || user.isAdmin)
