@@ -38,17 +38,30 @@ router.get('/', function(req, res, next) {
     if(!req.requireValidSession())
         return;
 
-    // TODO: The user must be an administrator / teacher!
-
     // Get the game and user
     const user = req.session.user;
 
-    // Show the game creation page
-    LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aanmaken', {
-        page: {
-            leftButton: 'back'
-        },
-        created: false
+    // The user must be an administrator
+    user.isAdmin(function(err, isAdmin) {
+        // Call back errors
+        if(err !== null) {
+            next(err);
+            return;
+        }
+
+        // Make sure the user is an administrator
+        if(!isAdmin) {
+            LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+            return;
+        }
+
+        // Show the game creation page
+        LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aanmaken', {
+            page: {
+                leftButton: 'back'
+            },
+            created: false
+        });
     });
 });
 
@@ -61,49 +74,62 @@ router.post('/', function(req, res, next) {
     if(!req.requireValidSession())
         return;
 
-    // TODO: The user must be an administrator / teacher!
-
     // Get the game and user
     const user = req.session.user;
 
-    // Validate game name
-    if(!Validator.isValidGameName(gameName)) {
-        // Show a warning if the user hadn't filled in their game name
-        if(gameName.length === 0) {
-            // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
-                message: 'De naam van het spel mist.\n\n' +
-                'Ga alstublieft terug en vul een naam voor het spel in dat u wilt aanmaken.'
-            });
-            return;
-        }
-
-        // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
-            message: 'De naam die u heeft ingevuld voor het spel is ongeldig.\n\n' +
-            'Ga alstublieft terug en vul een andere naam in.'
-        });
-        return;
-    }
-
-    // Create a session for the user
-    GameDatabase.addGame(user, gameName, function(err, gameModel) {
+    // The user must be an administrator
+    user.isAdmin(function(err, isAdmin) {
         // Call back errors
         if(err !== null) {
             next(err);
             return;
         }
 
-        // Show the game creation page
-        LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aangemaakt', {
-            page: {
-                leftButton: 'back'
-            },
-            created: true,
-            game: {
-                id: gameModel.getIdHex(),
-                name: gameName
+        // Make sure the user is an administrator
+        if(!isAdmin) {
+            LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+            return;
+        }
+
+        // Validate game name
+        if(!Validator.isValidGameName(gameName)) {
+            // Show a warning if the user hadn't filled in their game name
+            if(gameName.length === 0) {
+                // Show an error page
+                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    message: 'De naam van het spel mist.\n\n' +
+                    'Ga alstublieft terug en vul een naam voor het spel in dat u wilt aanmaken.'
+                });
+                return;
             }
+
+            // Show an error page
+            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                message: 'De naam die u heeft ingevuld voor het spel is ongeldig.\n\n' +
+                'Ga alstublieft terug en vul een andere naam in.'
+            });
+            return;
+        }
+
+        // Create a session for the user
+        GameDatabase.addGame(user, gameName, function(err, gameModel) {
+            // Call back errors
+            if(err !== null) {
+                next(err);
+                return;
+            }
+
+            // Show the game creation page
+            LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aangemaakt', {
+                page: {
+                    leftButton: 'back'
+                },
+                created: true,
+                game: {
+                    id: gameModel.getIdHex(),
+                    name: gameName
+                }
+            });
         });
     });
 });
