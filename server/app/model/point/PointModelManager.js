@@ -169,6 +169,12 @@ PointModelManager.prototype.getPoints = function(game, user, callback) {
     // Create the query object
     var queryObject = {};
 
+    // Convert undefined values to null
+    if(game === undefined)
+        game = null;
+    if(user === undefined)
+        user = null;
+
     // Add the game and user to the query object if specified
     if(game !== null)
         queryObject.game_id = game.getId();
@@ -179,8 +185,8 @@ PointModelManager.prototype.getPoints = function(game, user, callback) {
     var latch = new CallbackLatch();
 
     // Determine the Redis cache key
-    var redisCacheKey = REDIS_KEY_ROOT + ':' +(game !== null ? game.getIdHex() : '0' ) +
-        ':' +(user !== null ? user.getIdHex() : '0' ) + ':getPoints';
+    var redisCacheKey = REDIS_KEY_ROOT + ':' + (game !== null ? game.getIdHex() : '0' ) +
+        ':' + (user !== null ? user.getIdHex() : '0' ) + ':getPoints';
 
     // Store this instance
     const self = this;
@@ -217,6 +223,11 @@ PointModelManager.prototype.getPoints = function(game, user, callback) {
 
             // Loop over the point IDs and create point models
             rawPointIds.forEach(function(pointId) {
+                // Skip if the ID is nothing
+                if(pointId.trim().length === 0)
+                    return;
+
+                // Add the point
                 points.push(self._instanceManager.create(pointId));
             });
 

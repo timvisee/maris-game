@@ -463,7 +463,7 @@ GameModel.prototype.hasManagePermission = function(user, callback) {
         }
 
         // Make sure a valid user was fetched, resolve the latch if not
-        if(host == undefined) {
+        if(host === undefined) {
             latch.resolve();
             return;
         }
