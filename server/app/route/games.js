@@ -169,13 +169,23 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
     var latch = new CallbackLatch();
     var calledBack = false;
 
-    // Determine whether the user is administrator
-    var games = [];
-    var isAdmin = false;
+    // Create a page options object
+    var options = {
+        page: {
+            leftButton: 'back'
+        },
+        games: {
+            category: category,
+            games: []
+        },
+        user: {
+            isAdmin: false
+        }
+    };
 
     // Determine whether the user is administrator
     latch.add();
-    user.isAdmin(function(err, result) {
+    user.isAdmin(function(err, isAdmin) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -185,7 +195,7 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
         }
 
         // Set whether the user is administrator
-        isAdmin = result;
+        options.user.isAdmin = isAdmin;
 
         // Resolve the latch
         latch.resolve();
@@ -193,7 +203,7 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
 
     // Get a list of game objects
     latch.add();
-    getGameList(stage, limit, function(err, result) {
+    getGameList(stage, limit, function(err, games) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -203,7 +213,7 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
         }
 
         // Set the games
-        games = result;
+        options.games.games = games;
 
         // Resolve the latch
         latch.resolve();
@@ -211,19 +221,7 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
 
     // Complete the latch and render the page
     latch.then(function() {
-        // Render the games page
-        LayoutRenderer.render(req, res, next, 'gamelist', pageTitle, {
-            page: {
-                leftButton: 'back'
-            },
-            games: {
-                category: category,
-                games: games
-            },
-            user: {
-                isAdmin
-            }
-        });
+        LayoutRenderer.render(req, res, next, 'gamelist', pageTitle, options);
     });
 }
 
