@@ -1,0 +1,30 @@
+extends page
+
+block content
+    ul(data-role='listview')
+        - var fadeDelay = -0.1;
+
+        if games.category == null
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Categorieën
+        else if games.category == 'Open'
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Open spellen
+        else if games.category == 'Active'
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Actieve spellen
+        else if games.category == 'Finished'
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Afgeronde spellen
+
+        if games.category == null
+            li: a.wow.fadeInUp(href='/games/open', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Open spellen...
+                span.ui-li-count()= games.openCount
+            li: a.wow.fadeInUp(href='/games/active', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Actieve spellen...
+                span.ui-li-count()= games.activeCount
+            li: a.wow.fadeInUp(href='/games/finished', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Afgeronde spellen...
+                span.ui-li-count()= games.finishedCount
+
+        else
+            if games.games.length > 0
+                each game in games.games
+                    li: a.wow.fadeInUp(href='/game/' + game.id, data-wow-delay=(fadeDelay += 0.1) + 's')= game.name
+                        span.ui-li-count() #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
+            else
+                li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen spellen in deze categorie...

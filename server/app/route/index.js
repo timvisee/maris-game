@@ -28,6 +28,7 @@ var ajax = require('./ajax/index');
 var login = require('./login');
 var logout = require('./logout');
 var register = require('./register');
+var games = require('./games');
 var game = require('./game');
 var about = require('./about');
 var create = require('./create');
@@ -68,6 +69,9 @@ router.use('/logout', logout);
 
 // Register page
 router.use('/register', register);
+
+// Games page
+router.use('/games', games);
 
 // Game page
 router.use('/game', game);
