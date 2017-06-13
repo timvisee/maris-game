@@ -28,3 +28,8 @@ block content
                         span.ui-li-count() #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
             else
                 li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen spellen in deze categorie...
+
+    if user.isAdmin
+        br
+        .button-list
+            a.ui-btn.wow.fadeInUp(href='/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuw spel aanmaken') Spel aanmaken

@@ -39,5 +39,8 @@ block content
                 li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen spellen in deze categorie...
 
         br
-        a.ui-btn.wow.fadeInUp(href='/games', data-wow-delay=(fadeDelay += 0.1) + 's', title='View all games...') Alle spellen bekijken...
+        .button-list
+            a.ui-btn.wow.fadeInUp(href='/games', data-wow-delay=(fadeDelay += 0.1) + 's', title='Alle spellen bekijken...') Alle spellen bekijken...
+            if user.isAdmin
+                a.ui-btn.wow.fadeInUp(href='/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuw spel aanmaken') Spel aanmaken
 

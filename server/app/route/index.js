@@ -53,8 +53,13 @@ router.get('/', function(req, res, next) {
         LayoutRenderer.render(req, res, next, 'index', appInfo.APP_NAME, pageOptions);
         return;
     }
+
+    // Get the user of the current session
+    const user = req.session.user;
+
     // Create a callback latch
     var latch = new CallbackLatch();
+    var calledBack = false;
 
     // Create an object with layout options
     var options = {
@@ -63,6 +68,9 @@ router.get('/', function(req, res, next) {
                 open: [],
                 active: []
             }
+        },
+        user: {
+            isAdmin: false
         }
     };
 
@@ -70,9 +78,12 @@ router.get('/', function(req, res, next) {
     latch.add(2);
     getGameList(0, 3, function(err, games) {
         // Call back errors
-        if(err !== null)
-            next(err);
-        else
+        if (err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        } else
             options.games.games.open = games;
 
         // Resolve the latch
@@ -80,10 +91,31 @@ router.get('/', function(req, res, next) {
     });
     getGameList(1, 3, function(err, games) {
         // Call back errors
-        if(err !== null)
-            next(err);
-        else
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        } else
             options.games.games.active = games;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Determine whether the user is administrator
+    latch.add();
+    user.isAdmin(function(err, isAdmin) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set whether the user is administrator
+        options.user.isAdmin = isAdmin;
 
         // Resolve the latch
         latch.resolve();
@@ -134,8 +166,6 @@ function getGameList(stage, limit, callback) {
 
     // Create a callback latch to determine whether to start rendering the layout
     var latch = new CallbackLatch();
-
-    // Define whether we called back
     var calledBack = false;
 
     // Get the list of active games

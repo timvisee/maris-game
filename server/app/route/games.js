@@ -34,8 +34,12 @@ router.get('/', function(req, res, next) {
     if(!req.requireValidSession())
         return;
 
+    // Get the user of the current session
+    const user = req.session.user;
+
     // Create a callback latch
     var latch = new CallbackLatch();
+    var calledBack = false;
 
     // Create an object with layout options
     var options = {
@@ -47,18 +51,22 @@ router.get('/', function(req, res, next) {
             openCount: 0,
             activeCount: 0,
             finishedCount: 0
+        },
+        user: {
+            isAdmin: false
         }
     };
 
     // Count the games
-    latch.add();
-    latch.add();
-    latch.add();
+    latch.add(3);
     Core.model.gameModelManager.getGamesCountWithStage(0, function(err, gameCount) {
         // Call back errors
-        if(err !== null)
-            next(err);
-        else
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        } else
             options.games.openCount = gameCount;
 
         // Resolve the latch
@@ -66,9 +74,12 @@ router.get('/', function(req, res, next) {
     });
     Core.model.gameModelManager.getGamesCountWithStage(1, function(err, gameCount) {
         // Call back errors
-        if(err !== null)
-            next(err);
-        else
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        } else
             options.games.activeCount = gameCount;
 
         // Resolve the latch
@@ -76,10 +87,31 @@ router.get('/', function(req, res, next) {
     });
     Core.model.gameModelManager.getGamesCountWithStage(2, function(err, gameCount) {
         // Call back errors
-        if(err !== null)
-            next(err);
-        else
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        } else
             options.games.finishedCount = gameCount;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Determine whether the user is administrator
+    latch.add();
+    user.isAdmin(function(err, isAdmin) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set whether the user is administrator
+        options.user.isAdmin = isAdmin;
 
         // Resolve the latch
         latch.resolve();
@@ -164,8 +196,6 @@ function getGameList(stage, limit, callback) {
 
     // Create a callback latch to determine whether to start rendering the layout
     var latch = new CallbackLatch();
-
-    // Define whether we called back
     var calledBack = false;
 
     // Get the list of active games
