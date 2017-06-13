@@ -11,8 +11,8 @@ block content
         p Welkom #{session.user.name}!
 
         p.
-            Je gebruikt een vroeg prototype van #{app.name}, en dit product is voorlopig nog niet klaar.<br>
-            <br>
+            Je gebruikt een vroeg prototype van #{app.name}, en dit product is voorlopig nog niet klaar.#[br]
+            #[br]
             #{app.name} is op dit moment in de pre-alpha staat en bevat waarschijnlijk nog bugs, glitches en andere ongewilde praktijken.
 
         .button-list
@@ -21,5 +21,23 @@ block content
             a.ui-btn.clr-warning(href='/logout', title='Logout') Logout
 
     div(data-role='nd2tab', data-tab='games')
-        p.
-            Show the games list here!
+        - var fadeDelay = -0.1;
+
+        ul(data-role='listview')
+            if games.games.active.length > 0
+                li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Actieve spellen
+                each game in games.games.active
+                    li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): a(href='/game/' + game.id)= game.name
+                        span.ui-li-count() #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
+
+            li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Nieuwste open spellen
+            if games.games.open.length > 0
+                each game in games.games.open
+                    li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): a(href='/game/' + game.id)= game.name
+                        span.ui-li-count() #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
+            else
+                li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen spellen in deze categorie...
+
+        br
+        a.ui-btn.wow.fadeInUp(href='/games', data-wow-delay=(fadeDelay += 0.1) + 's', title='View all games...') Alle spellen bekijken...
+
