@@ -173,6 +173,7 @@ module.exports = {
         // Get the game and user
         const game = req.game;
         const user = req.session.user;
+        const point = req.point;
 
         // Call back if the game is invalid
         if(game === undefined) {
@@ -180,8 +181,14 @@ module.exports = {
             return;
         }
 
-        // The user must be an administrator
-        user.isAdmin(function(err, isAdmin) {
+        // Call back if the point is invalid
+        if(point === undefined) {
+            next(new Error('Ongeldig punt.'));
+            return;
+        }
+
+        // The user must have management rights
+        game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);
@@ -189,7 +196,7 @@ module.exports = {
             }
 
             // Make sure the user is an administrator
-            if(!isAdmin) {
+            if(!hasPermission) {
                 LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
                 return;
             }
@@ -221,7 +228,7 @@ module.exports = {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De latitude van het punt mist.\n\n' +
-                        'Ga alstublieft terug en vul de gewenste latitude voor het punt in dat u wilt aanmaken.' +
+                        'Ga alstublieft terug en vul de gewenste latitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
                     });
                     return;
@@ -230,7 +237,7 @@ module.exports = {
                 // Show an error page
                 LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                     message: 'De latitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
-                    'Ga alstublieft terug en vul een juiste latitude voor het punt in dat u wilt aanmaken.' +
+                    'Ga alstublieft terug en vul een juiste latitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
                 });
                 return;
@@ -243,7 +250,7 @@ module.exports = {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De longitude van het punt mist.\n\n' +
-                        'Ga alstublieft terug en vul de gewenste longitude voor het punt in dat u wilt aanmaken.' +
+                        'Ga alstublieft terug en vul de gewenste longitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
                     });
                     return;
@@ -252,7 +259,7 @@ module.exports = {
                 // Show an error page
                 LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                     message: 'De longitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
-                    'Ga alstublieft terug en vul een juiste longitude voor het punt in dat u wilt aanmaken.' +
+                    'Ga alstublieft terug en vul een juiste longitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
                 });
                 return;
@@ -267,27 +274,21 @@ module.exports = {
                 longitude: Validator.parseLongitude(pointLng)
             });
 
-            // Create the point
-            PointDatabase.addPoint(pointNameFormatted, game, user, pointCoord, function(err, pointModel) {
-                // Call back errors
+            // Set the point properties
+            point.setName(pointNameFormatted, function(err) {
                 if(err !== null) {
                     next(err);
                     return;
                 }
 
-                // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'gamepointcreate', 'Punt aangemaakt', {
-                    page: {
-                        leftButton: 'back'
-                    },
-                    created: true,
-                    game: {
-                        id: game.getIdHex()
-                    },
-                    point: {
-                        id: pointModel.getIdHex(),
-                        name: pointNameFormatted
+                point.setLocation(pointCoord, function(err) {
+                    if(err !== null) {
+                        next(err);
+                        return;
                     }
+
+                    // Redirect to the points overview page
+                    res.redirect('../../../points');
                 });
             });
         });

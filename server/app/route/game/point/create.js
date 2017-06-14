@@ -160,7 +160,7 @@ module.exports = {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De latitude van het punt mist.\n\n' +
-                        'Ga alstublieft terug en vul de gewenste latitude voor het punt in dat u wilt aanmaken.' +
+                        'Ga alstublieft terug en vul de gewenste latitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
                     });
                     return;
@@ -169,7 +169,7 @@ module.exports = {
                 // Show an error page
                 LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                     message: 'De latitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
-                    'Ga alstublieft terug en vul een juiste latitude voor het punt in dat u wilt aanmaken.' +
+                    'Ga alstublieft terug en vul een juiste latitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
                 });
                 return;
@@ -182,7 +182,7 @@ module.exports = {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De longitude van het punt mist.\n\n' +
-                        'Ga alstublieft terug en vul de gewenste longitude voor het punt in dat u wilt aanmaken.' +
+                        'Ga alstublieft terug en vul de gewenste longitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
                     });
                     return;
@@ -191,7 +191,7 @@ module.exports = {
                 // Show an error page
                 LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                     message: 'De longitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
-                    'Ga alstublieft terug en vul een juiste longitude voor het punt in dat u wilt aanmaken.' +
+                    'Ga alstublieft terug en vul een juiste longitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
                 });
                 return;
