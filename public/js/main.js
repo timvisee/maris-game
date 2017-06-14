@@ -4673,32 +4673,32 @@ function initPointSelectMap() {
     // Get the map container
     var mapContainer = pageElement.find('#point-map-container');
 
-    // Return early if there's no map container on this page
-    if(mapContainer.length <= 0) {
-		// Remove the map
-		if(pointSelectMap !== null) {
-			console.log('Destroying point selection map');
-			
-			// Remove the existing point selection marker
-			if(pointSelectMarker !== null) {
-				pointSelectMap.removeLayer(pointSelectMarker);
-				pointSelectMarker = null;
-			}
-
-			// Remove the existing point selection circle
-			if(pointSelectCircle !== null) {
-				pointSelectMap.removeLayer(pointSelectCircle);
-				pointSelectCircle = null;
-			}
-
-			// Remove the leaflet map
-			pointSelectMap.remove();
-
-			pointSelectMap = null;
+	// Remove the existing map on an old page
+	if(pointSelectMap !== null) {
+		console.log('Destroying point selection map');
+		
+		// Remove the existing point selection marker
+		if(pointSelectMarker !== null) {
+			pointSelectMap.removeLayer(pointSelectMarker);
+			pointSelectMarker = null;
 		}
 
-		return;
+		// Remove the existing point selection circle
+		if(pointSelectCircle !== null) {
+			pointSelectMap.removeLayer(pointSelectCircle);
+			pointSelectCircle = null;
+		}
+
+		// Remove the leaflet map
+		pointSelectMap.remove();
+
+		// Set the selection map
+		pointSelectMap = null;
 	}
+
+    // Return early if there's no map container on this page
+    if(mapContainer.length <= 0)
+		return;
 
 	// Get the longitude and latitude fields
     var latField = pageElement.find('#field-point-lat');
