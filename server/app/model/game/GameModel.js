@@ -261,9 +261,12 @@ GameModel.prototype.isHost = function(user, callback) {
         return;
     }
 
+    // Store a reference to this
+    const self = this;
+
     // Determine whether the user is game host
     latch.then(function() {
-        this.getUser(function(err, host) {
+        self.getUser(function(err, host) {
             // Call back errors
             if(err !== null) {
                 callback(err, false);
