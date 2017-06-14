@@ -20,13 +20,18 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var util = require('util');
+
+var ObjectId = require('mongodb').ObjectId;
 
 var Core = require('../../../Core');
 var GameDatabase = require('./GameDatabase');
 var BaseModel = require('../../database/BaseModel');
 var ConversionFunctions = require('../../database/ConversionFunctions');
 var UserModel = require('../user/UserModel');
+var GameUserModel = require('../gameuser/GameUserModel');
+var User = require('../../live/user/User');
 var CallbackLatch = require('../../util/CallbackLatch');
 
 /**
@@ -208,6 +213,81 @@ GameModel.prototype.getUser = function(callback) {
  * @callback GameModel~getUserCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
  * @param {UserModel} User.
+ */
+
+/**
+ * Check whether the given user is host of this game.
+ *
+ * @param {User|UserModel|GameUserModel|ObjectId|string} user The user to check for.
+ * @param {GameModel~isHostCallback} callback Callback with the result.
+ */
+GameModel.prototype.isHost = function(user, callback) {
+    // Call back if the user is null or undefined
+    if(user === null || user === undefined)
+        callback(null, false);
+
+    // Create a callback latch
+    var latch = new CallbackLatch();
+
+    // Get the user ID from a user model or live user
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+
+    // Get the user ID from a game user model
+    else if(user instanceof GameUserModel) {
+        latch.add();
+        user.getUser(function(err, userModel) {
+            // Call back errors
+            if(err !== null) {
+                callback(err, false);
+                return;
+            }
+
+            // Set the user instance
+            user = userModel.getId();
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    }
+
+    // Convert a string ID to an ID
+    else if(_.isString(user) && ObjectId.isValid(user))
+        user = new ObjectId(user);
+
+    // Call back an error if the user isn't an object ID yet
+    else if(!(user instanceof ObjectId)) {
+        callback(new Error('Invalid or unsupported user instance given.'), false);
+        return;
+    }
+
+    // Determine whether the user is game host
+    latch.then(function() {
+        this.getUser(function(err, host) {
+            // Call back errors
+            if(err !== null) {
+                callback(err, false);
+                return;
+            }
+
+            // Make sure the user isn't null
+            if(host === null) {
+                callback(err, false);
+                return;
+            }
+
+            // Call back the result
+            callback(null, host.getId().equals(user));
+        });
+    });
+};
+
+/**
+ * Called with the user or when an error occurred.
+ *
+ * @callback GameModel~isHostCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {boolean} True if the user is host, false if not.
  */
 
 /**
@@ -452,7 +532,7 @@ GameModel.prototype.hasManagePermission = function(user, callback) {
 
     // Check whether the user is host of this game
     latch.add();
-    this.getUser(function(err, host) {
+    this.isHost(user, function(err, isHost) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -461,14 +541,8 @@ GameModel.prototype.hasManagePermission = function(user, callback) {
             return;
         }
 
-        // Make sure a valid user was fetched, resolve the latch if not
-        if(host === undefined) {
-            latch.resolve();
-            return;
-        }
-
-        // Call back true if the user is host of the game
-        if(host.getId().equals(user.getId())) {
+        // Call back if the user is host
+        if(isHost) {
             if(!calledBack)
                 callback(null, true);
             calledBack = true;

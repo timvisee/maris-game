@@ -171,7 +171,7 @@ router.get('/:game', function(req, res, next) {
 
     // Determine whether the user is game host
     latch.add();
-    game.getUser(function(err, host) {
+    game.isHost(user, function(err, isHost) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -180,14 +180,8 @@ router.get('/:game', function(req, res, next) {
             return;
         }
 
-        // Make sure the user isn't null
-        if(host === null) {
-            userObject.isHost = false;
-            return;
-        }
-
         // Set whether the user is
-        userObject.isHost = host.getId().equals(user.getId());
+        userObject.isHost = isHost;
 
         // Resolve the latch
         latch.resolve();

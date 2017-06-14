@@ -125,7 +125,7 @@ Game.prototype.getName = function(callback) {
 };
 
 /**
- * Get a user from this game.
+ * Get a live user from this game.
  *
  * @param {UserModel|ObjectId|string} user User instance or user ID.
  * @param {Game~getUserCallback} callback Called with the user or when an error occurred.
