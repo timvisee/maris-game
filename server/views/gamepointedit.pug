@@ -13,4 +13,10 @@ block content
         input(type='text', name='field-point-lng', id='field-point-lng', value=point.longitude, data-clear-btn='true', data-randomize='true')
 
         br
-        button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Punt aanpassen
+        .button-list
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
+                i.zmdi.zmdi-edit
+                | &nbsp;&nbsp;Punt aanpassen
+            a.ui-btn.clr-warning(href=page.url + '/../delete', title='Punt verwijderen')
+                i.zmdi.zmdi-delete
+                | &nbsp;&nbsp;Punt verwijderen
