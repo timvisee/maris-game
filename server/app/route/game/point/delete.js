@@ -196,17 +196,48 @@ module.exports = {
                 return;
             }
 
-            // TODO: Also delete the live point instance!
+            // Callback latch to render the page
+            var latch = new CallbackLatch();
 
-            // Delete the point
-            point.delete(function(err) {
+            // Get the live point
+            latch.add();
+            point.getLivePoint(function(err, livePoint) {
                 // Call back errors
                 if(err !== null) {
                     next(err);
                     return;
                 }
 
-                // Redirect to the points overview page
+                // Delete it if a live point is loaded
+                if(livePoint !== null) {
+                    livePoint.destroy(function(err) {
+                        // Call back errors
+                        if(err !== null) {
+                            next(err);
+                            return;
+                        }
+
+                        // Resolve the latch
+                        latch.resolve();
+                    });
+                    return;
+                }
+
+                // Just delete the point if no live instance is loaded
+                point.delete(function(err) {
+                    // Call back errors
+                    if(err !== null) {
+                        next(err);
+                        return;
+                    }
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+            });
+
+            // Go back to the points overview page when done
+            latch.then(function() {
                 res.redirect('/game/' + game.getIdHex() + '/points');
             });
         });

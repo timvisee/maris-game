@@ -395,6 +395,40 @@ Point.prototype.isUserInRange = function(liveUser, callback) {
 };
 
 /**
+ * Destroy the point.
+ *
+ * @param {Point~destroyCallback} callback Called when the point is destroyed, or when an error occurred.
+ */
+Point.prototype.destroy = function(callback) {
+    // Store this instance
+    const self = this;
+
+    // Delete the point model
+    this.getPointModel().delete(function(err) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Unload this point and remove it from the manager
+        self.getGame().pointManager.unloadPoint(self);
+
+        // TODO: Send an update to all clients because this point has been destroyed. Clients should move from that page.
+
+        // We're done, call back
+        callback(null);
+    });
+};
+
+/**
+ * Called when the point is destroyed or when an error occurred.
+ *
+ * @callback Point~destroyCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ */
+
+/**
  * Get the point as a string.
  *
  * @return {String} String representation.
