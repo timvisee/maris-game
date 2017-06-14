@@ -288,7 +288,7 @@ module.exports = {
                     }
 
                     // Redirect to the points overview page
-                    res.redirect('../../../points');
+                    res.redirect('/game/' + game.getIdHex() + '/points');
                 });
             });
         });
