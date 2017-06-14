@@ -20,9 +20,11 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var crypto = require('crypto');
 
 var Core = require('../../../../Core');
+var Coordinate = require('../../../coordinate/Coordinate');
 var Validator = require('../../../validator/Validator');
 var PointDatabase = require('../../../model/point/PointDatabase');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
@@ -134,7 +136,7 @@ module.exports = {
             // Validate game name
             if(!Validator.isValidPointName(pointName)) {
                 // Show a warning if the user hadn't filled in their point name
-                if(pointName.length === 0) {
+                if(_.isEmpty(pointName) || pointName.length === 0) {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De naam van het punt mist.\n\n' +
@@ -154,7 +156,7 @@ module.exports = {
             // Validate the latitude
             if(!Validator.isValidLatitude(pointLat)) {
                 // Show a warning if the user hadn't filled in their point latitude
-                if(pointName.length === 0) {
+                if(_.isEmpty(pointLat) || pointLat.length === 0) {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De latitude van het punt mist.\n\n' +
@@ -176,7 +178,7 @@ module.exports = {
             // Validate the longitude
             if(!Validator.isValidLongitude(pointLng)) {
                 // Show a warning if the user hadn't filled in their point longitude
-                if(pointName.length === 0) {
+                if(_.isEmpty(pointLng) || pointLng.length === 0) {
                     // Show an error page
                     LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
                         message: 'De longitude van het punt mist.\n\n' +
@@ -196,7 +198,7 @@ module.exports = {
             }
 
             // Format the point name
-            var pointName = Validator.formatPointName(pointName);
+            var pointNameFormatted = Validator.formatPointName(pointName);
 
             // Create the location
             var pointCoord = new Coordinate({
@@ -205,7 +207,7 @@ module.exports = {
             });
 
             // Create the point
-            PointDatabase.addPoint(pointName, game, user, pointCoord, function(err, pointModel) {
+            PointDatabase.addPoint(pointNameFormatted, game, user, pointCoord, function(err, pointModel) {
                 // Call back errors
                 if(err !== null) {
                     next(err);
@@ -223,9 +225,9 @@ module.exports = {
                     },
                     point: {
                         id: pointModel.getIdHex(),
-                        name: pointName
+                        name: pointNameFormatted
                     }
-                } );
+                });
             });
         });
     },
