@@ -158,6 +158,37 @@ PointModelManager.prototype.isValidPointId = function(id, callback) {
  */
 
 /**
+ * Get a point by it's point ID.
+ *
+ * @param {ObjectId|string} id The point ID.
+ * @param {PointModelManager~getPointByIdCallback} callback Called with the point or when an error occurred.
+ */
+PointModelManager.prototype.getPointById = function(id, callback) {
+    // Store the current instance
+    const self = this;
+
+    // Check whether the point ID is valid
+    this.isValidPointId(id, function(err, result) {
+        // Call back errors
+        if(err !== null) {
+            callback(err, null);
+            return;
+        }
+
+        // Call back the result
+        callback(null, result ? self._instanceManager.create(id) : null);
+    })
+};
+
+/**
+ * Called with the point or when an error occurred.
+ *
+ * @callback PointModelManager~getPointByIdCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {PointModel|null} Point instance, or null if no point was found for the given ID.
+ */
+
+/**
  * Get all points for the given game or user.
  *
  * @param {GameModel} [game] Game to get the points for.

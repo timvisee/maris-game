@@ -4651,17 +4651,18 @@ function initPointSelectMap() {
 	// Get the longitude and latitude fields
     var latField = pageElement.find('#field-point-lat');
     var lngField = pageElement.find('#field-point-lng');
+    var latValue = pageElement.find('#value-point-lat');
+    var lngValue = pageElement.find('#value-point-lng');
 
-    //// Make sure any map is available inside the container
-    //if(mapContainer.find("div.leaflet-map-pane").length <= 0) {
-    //    // Reset the map instance, to cause it to be created again
-    //    map = null;
-    //}
+	// Determine whether this is editable
+	var editable = latField.length > 0 && lngField.length > 0;
 
-    // TODO: Update the size of the map!
-
-    // Use the last known player location when possible
+    // Pick a default location
     var latlng = [52.06387, 4.248329];
+
+	// Set the latlng if values are available
+	if(!editable && latValue.length > 0 && lngValue.length > 0)
+		latlng = [parseFloat(latValue.html()), parseFloat(lngValue.html())];
 
     // Create a map if none has been created yet
     if(pointSelectMap == null) {
@@ -4687,39 +4688,31 @@ function initPointSelectMap() {
             attribution: 'Hosted by <a href="https://timvisee.com/" target="_blank">timvisee.com</a>'
         }).addTo(pointSelectMap);
 
-		// Put a marker on the map, or move an existing one when the map is clicked
-		pointSelectMap.on('click', function onMapClick(e) {
+		// Place the point at the given location
+		function placePoint(latlng) {
             // Set the latitude and longitude in the fields
-            latField.val(e.latlng.lat);
-            lngField.val(e.latlng.lng);
+			if(editable) {
+				latField.val(latlng.lat);
+				lngField.val(latlng.lng);
+			}
 
 			// Determine whether to create or reuse a marker
 			if(pointSelectMarker === null) {
 				// Create and configure the marker
-				pointSelectMarker = new L.marker(e.latlng, {draggable: 'true'});
+				pointSelectMarker = new L.marker(latlng, {draggable: editable ? true : false});
 
 				// Create a player range circle
 				// TODO: Fetch the range value from the game configuration
-				pointSelectCircle = L.circle(e.latlng, 10, {draggable: 'true'});
+				pointSelectCircle = L.circle(latlng, 10, {draggable: editable ? true : false});
 				pointSelectCircle.setStyle({
 					opacity: 0.4
 				});
 
 				// Make the marker draggable
-				pointSelectMarker.on('dragend', function(event) {
-					// Get the marker and position
-					var marker = event.target;
-					var position = marker.getLatLng();
-
-					// Set the latitude and longitude in the fields
-					latField.val(position.lat);
-					lngField.val(position.lng);
-
-					// Update the marker, and pan to it
-					pointSelectMarker.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
-					pointSelectCircle.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
-					pointSelectMap.panTo(new L.LatLng(position.lat, position.lng))
-				});
+				if(editable)
+					pointSelectMarker.on('dragend', function(event) {
+						placePoint(event.target.getLatLng());
+					});
 
 				// Add the marker to the map
 				pointSelectMap.addLayer(pointSelectMarker);
@@ -4727,13 +4720,26 @@ function initPointSelectMap() {
 
 			} else {
 				// Update the position of the existing marker and circle
-				pointSelectMarker.setLatLng(e.latlng);
-				pointSelectCircle.setLatLng(e.latlng);
+				pointSelectMarker.setLatLng(latlng);
+				pointSelectCircle.setLatLng(latlng);
 			}
-		});
+
+			// Pan to the point
+			pointSelectMap.panTo(latlng)
+		}
+
+		// Put a marker on the map, or move an existing one when the map is clicked
+		if(editable)
+			pointSelectMap.on('click', function onMapClick(e) {
+				placePoint(e.latlng);
+			});
 
         // Invalidate the map size, because the container size might be changed
         pointSelectMap.invalidateSize();
+
+		// Place the point if the map isn't editable
+		if(!editable && latValue.length > 0 && lngValue.length > 0)
+			placePoint(latlng);
     }
 }
 

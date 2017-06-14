@@ -1,0 +1,18 @@
+extends page
+
+block content
+    div(align="center")
+        table.table-list.ui-responsive
+            tr: td Naam
+                td= point.name
+
+        #point-map-container
+
+        table.table-list.ui-responsive
+            tr: td Latitude
+                td(id='value-point-lat')= point.latitude
+            tr: td Longitude
+                td(id='value-point-lng')= point.longitude
+
+    br
+    a.ui-btn(href=page.url + '/manage', title='Punt aanpassen', data-ajax='false') Punt aanpassen

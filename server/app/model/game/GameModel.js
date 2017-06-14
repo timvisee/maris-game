@@ -42,7 +42,7 @@ var CallbackLatch = require('../../util/CallbackLatch');
  *
  * @param {ObjectId} id Game ID object.
  *
- * @returns {GameTeamModel} Game instance.
+ * @returns {GameModel} Game instance.
  */
 var GameModel = function(id) {
     /**

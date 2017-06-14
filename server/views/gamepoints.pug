@@ -8,7 +8,7 @@ block content
 
         if game.points.length > 0
             each point in game.points
-                li: a.wow.fadeInUp(href=page.url + '/' + point.id, data-wow-delay=(fadeDelay += 0.1) + 's')= point.name
+                li: a.wow.fadeInUp(href=page.url + '/../point/' + point.id, data-wow-delay=(fadeDelay += 0.1) + 's')= point.name
         else
             li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen punten beschikbaar...
 

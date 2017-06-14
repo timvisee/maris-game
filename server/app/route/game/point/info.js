@@ -25,10 +25,6 @@ var crypto = require('crypto');
 var Core = require('../../../../Core');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var CallbackLatch = require('../../../util/CallbackLatch');
-var PointParam = require('../../../router/middleware/PointParam');
-
-var pageCreate = require('./create');
-var pageInfo = require('./info');
 
 // Export the module
 module.exports = {
@@ -42,15 +38,8 @@ module.exports = {
         // Store the module instance
         const self = module.exports;
 
-        // Add the point middleware
-        PointParam.attach(router);
-
         // Route the points list
-        router.get('/:game/points', self.get);
-
-        // Route other point pages
-        pageCreate.route(router);
-        pageInfo.route(router);
+        router.get('/:game/point/:point', self.get);
     },
 
     /**
@@ -65,13 +54,20 @@ module.exports = {
         if(!req.requireValidSession())
             return;
 
-        // Get the game and user
+        // Get the game, user and point
         const game = req.game;
         const user = req.session.user;
+        const point = req.point;
 
         // Call back if the game is invalid
         if(game === undefined) {
             next(new Error('Ongeldig spel.'));
+            return;
+        }
+
+        // Call back if the point is invalid
+        if(point === undefined) {
+            next(new Error('Ongeldig punt.'));
             return;
         }
 
@@ -89,20 +85,25 @@ module.exports = {
                 return;
             }
 
-            // Create a game object
-            var gameObject = {
-                points: []
+            // Create the page options object
+            var options = {
+                page: {
+                    leftButton: 'back'
+                },
+                point: {
+                    name: '',
+                    latitude: 0,
+                    longitude: 0
+                }
             };
 
             // Create a callback latch for the games properties
             var latch = new CallbackLatch();
-
-            // Make sure we only call back once
             var calledBack = false;
 
-            // Fetch the game name
+            // Fetch the point name
             latch.add();
-            game.getName(function(err, name) {
+            point.getName(function(err, name) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -112,15 +113,15 @@ module.exports = {
                 }
 
                 // Set the property
-                gameObject.name = name;
+                options.point.name = name;
 
                 // Resolve the latch
                 latch.resolve();
             });
 
-            // Fetch the points, fill the points list and determine the count
+            // Fetch the latitude
             latch.add();
-            Core.model.pointModelManager.getPoints(game, undefined, function(err, points) {
+            point.getLocation(function(err, location) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -129,39 +130,9 @@ module.exports = {
                     return;
                 }
 
-                // Loop through the points, and parse each of them
-                points.forEach(function(point) {
-                    // Return early if we called back already
-                    if(calledBack)
-                        return;
-
-                    // Create a point object
-                    var pointObject = {
-                        id: point.getIdHex(),
-                        name: undefined
-                    };
-
-                    // Get the name of the point
-                    latch.add();
-                    point.getName(function(err, pointName) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the name
-                        pointObject.name = pointName;
-
-                        // Push the point object into the points list
-                        gameObject.points.push(pointObject);
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-                });
+                // Set the property
+                options.point.latitude = location.latitude;
+                options.point.longitude = location.longitude;
 
                 // Resolve the latch
                 latch.resolve();
@@ -171,12 +142,8 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'gamepoints', gameObject.name, {
-                        page: {
-                            leftButton: 'back'
-                        },
-                        game: gameObject
-                    });
+                    LayoutRenderer.render(req, res, next, 'gamepointinfo', options.point.name, options);
+                calledBack = true;
             });
         });
     },
