@@ -117,11 +117,11 @@ Router.prototype.init = function(callback) {
 
         // Show an error page, render the stack trace if we're in development mode
         res.status(err.status || 500);
-        LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
-            message: '<i>Je hebt het internet kappot gemaakt!</i>\n\n' +
-            'We kunnen de pagina niet voor je laden omdat er aan onze kant een fout is opgetreden.\n\n' +
-            'De website administrators zijn nu aan het stressen, rondrenn, op knoppen aan het slaan, systemen aan het herstarten...\n\n' +
-            'Een team of tovenaars en magiërs is losgelaten om de situatie op te lossen.',
+        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            message: 'We kunnen de pagina niet voor je laden omdat er aan onze kant een fout is opgetreden.\n\n' +
+            'De website administrators zijn nu aan het stressen, rondrennen, op knoppen aan het slaan, systemen aan het herstarten...\n\n' +
+            'Een team van tovenaars en magiërs is losgelaten om de situatie op te lossen.\n\n' +
+            'Ga terug en probeer het later opnieuw.',
             showStacktrace: dev && err.status !== 404,
             statusCode: err.status,
             stacktrace: !dev ? {} : {
