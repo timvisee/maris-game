@@ -155,20 +155,25 @@ module.exports = {
 
         // Create a callback latch to fetch the user rights
         var latch = new CallbackLatch();
-
-        // Create a game, user and teams object
-        var gameObject = {};
-        var userObject = {};
-
-        // Make sure we only call back once
         var calledBack = false;
 
         // Store this instance
         const self = module.exports;
 
+        // Create a page options object
+        var options = {
+            page: {
+                leftButton: 'back'
+            },
+            game: {},
+            user: {
+                hasPermission: false
+            }
+        };
+
         // Determine whether the user has permission to manage this game
         latch.add();
-        game.hasManagePermission(user, function(err, result) {
+        game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -178,7 +183,7 @@ module.exports = {
             }
 
             // Set the result
-            userObject.hasPermission = result;
+            options.user.hasPermission = hasPermission;
 
             // Resolve the latch
             latch.resolve();
@@ -186,7 +191,7 @@ module.exports = {
 
         // Get the game object
         latch.add();
-        self.getGameUserListObject(game, category, function(err, result) {
+        self.getGameUserListObject(game, category, function(err, gameObject) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -196,7 +201,7 @@ module.exports = {
             }
 
             // Set the game object
-            gameObject = result;
+            options.game = gameObject;
 
             // Resolve the latch
             latch.resolve();
@@ -204,14 +209,7 @@ module.exports = {
 
         // Render the page when everything is fetched successfully
         latch.then(function() {
-            // Render the game players page
-            LayoutRenderer.render(req, res, next, 'gameplayer', gameObject.name, {
-                page: {
-                    leftButton: 'back'
-                },
-                game: gameObject,
-                user: userObject
-            });
+            LayoutRenderer.render(req, res, next, 'gameplayer', options.game.name, options);
         });
     },
 
@@ -233,8 +231,6 @@ module.exports = {
 
         // Create a callback latch for the games properties
         var latch = new CallbackLatch();
-
-        // Make sure we only call back once
         var calledBack = false;
 
         // Fetch the game name
@@ -279,7 +275,6 @@ module.exports = {
             gameObject.users.users = [];
 
             // Loop through each user
-            latch.add(users.length);
             users.forEach(function(user) {
                 // Create an user object
                 var userObject = {
@@ -287,6 +282,7 @@ module.exports = {
                 };
 
                 // Get the first name of the user
+                latch.add();
                 user.getName(function(err, name) {
                     // Call back errors
                     if(err !== null) {
@@ -315,6 +311,7 @@ module.exports = {
         latch.then(function() {
             if(!calledBack)
                 callback(null, gameObject);
+            calledBack = true;
         });
     }
 

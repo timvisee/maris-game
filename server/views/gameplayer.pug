@@ -17,6 +17,7 @@ block content
                 span.ui-li-count()= game.users.count.spectators
 
             if game.users.count.requested == 0
+                li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Wachtende gebruikers
                 li: a.wow.fadeInUp(href=page.url + '/requested', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Aanvragen...
                     span.ui-li-count()= game.users.count.requested
 
