@@ -869,7 +869,59 @@ var Maris = {
 
             // Determine whether this is Chrome, return the result
             return (isChromium != undefined && isOpera == false && isIEedge == false);
-        }
+        },
+
+		/**
+		 * Check whether the given latitude is valid.
+		 *
+		 * @param {string} lat Latitude to check.
+         *
+         * @return {boolean} True if valid, false if not.
+		 */
+		isValidLatitude: function(lat) {
+			// Return false if null
+			if(lat === null || lat === undefined)
+				return false;
+
+			// Trim
+			lat = lat.trim();
+
+			// Make sure the string matches the regex
+			if(lat.match(/^-?0*\d{1,2}(\.\d+)?$/i) === null)
+				return false;
+
+			// Parse the value as float
+			lat = parseFloat(lat);
+
+			// Return the result and make sure it's in range
+			return !isNaN(lat) && lat >= -90 && lat <= 90;
+		},
+
+		/**
+		 * Check whether the given longitude is valid.
+		 *
+		 * @param {string} lng Longitude to check.
+         *
+         * @return {boolean} True if valid, false if not.
+		 */
+		isValidLongitude: function(lng) {
+			// Return false if null
+			if(lng === null || lng === undefined)
+				return false;
+
+			// Trim
+			lng = lng.trim();
+
+			// Make sure the string matches the regex
+			if(lng.match(/^-?0*\d{1,3}(\.\d+)?$/i) === null)
+				return false;
+
+			// Parse the value as float
+			lng = parseFloat(lng);
+
+			// Return the result and make sure it's in range
+			return !isNaN(lng) && lng >= -180 && lng <= 180;
+		}
     }
 };
 
@@ -4661,8 +4713,38 @@ function initPointSelectMap() {
     var latlng = [52.06387, 4.248329];
 
 	// Set the latlng if values are available
-	if(!editable && latValue.length > 0 && lngValue.length > 0)
-		latlng = [parseFloat(latValue.html()), parseFloat(lngValue.html())];
+	var parsedValid = false;
+	function parseLatLng() {
+		if(!editable && latValue.length > 0 && lngValue.length > 0) {
+			latlng = new L.latLng(parseFloat(latValue.html()), parseFloat(lngValue.html()));
+			parsedValid = true;
+
+		} else if(editable && latField.length > 0 && lngField.length > 0) {
+			// Get the values
+			var lat = latField.val();
+			var lng = lngField.val();
+
+			// The latitude and longitude values must not be empty
+			if(lat.trim().length <= 0 && lng.trim().length <= 0) {
+				parsedValid = false;
+				return;
+			}
+
+			// The latitude and longitude values must be valid
+			if(!Maris.utils.isValidLatitude(lat) || !Maris.utils.isValidLongitude(lng)) {
+				parsedValid = false;
+				return;
+			}
+
+			latlng = new L.latLng(parseFloat(lat), parseFloat(lng));
+			parsedValid = true;
+
+		} else
+			parsedValid = false;
+	}
+
+	// Parse the current latitude and longitude if configured
+	parseLatLng();
 
     // Create a map if none has been created yet
     if(pointSelectMap == null) {
@@ -4689,9 +4771,9 @@ function initPointSelectMap() {
         }).addTo(pointSelectMap);
 
 		// Place the point at the given location
-		function placePoint(latlng) {
+		function placePoint(latlng, updateFields) {
             // Set the latitude and longitude in the fields
-			if(editable) {
+			if(editable && updateFields !== false) {
 				latField.val(latlng.lat);
 				lngField.val(latlng.lng);
 			}
@@ -4738,8 +4820,26 @@ function initPointSelectMap() {
         pointSelectMap.invalidateSize();
 
 		// Place the point if the map isn't editable
-		if(!editable && latValue.length > 0 && lngValue.length > 0)
+		if(parsedValid)
 			placePoint(latlng);
+
+		// Listen for field changes, update the map accordingly
+		if(editable && latField.length > 0 && lngField.length > 0) {
+			// Parse and process the input
+			function parseInput() {
+				// Parse
+				parseLatLng();
+
+				// Update
+				placePoint(latlng, false);
+
+				return true;
+			}
+			
+			// Start listening
+			latField.bind('input', parseInput);
+			lngField.bind('input', parseInput);
+		}
     }
 }
 

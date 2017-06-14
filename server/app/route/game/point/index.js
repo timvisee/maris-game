@@ -29,6 +29,7 @@ var PointParam = require('../../../router/middleware/PointParam');
 
 var pageCreate = require('./create');
 var pageInfo = require('./info');
+var pageEdit = require('./edit');
 
 // Export the module
 module.exports = {
@@ -51,6 +52,7 @@ module.exports = {
         // Route other point pages
         pageCreate.route(router);
         pageInfo.route(router);
+        pageEdit.route(router);
     },
 
     /**

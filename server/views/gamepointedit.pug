@@ -1,0 +1,16 @@
+extends page
+
+block content
+    form(method='POST', action=page.url + '/#')
+        label(for='field-point-name') Puntnaam:
+        input(type='text', name='field-point-name', id='field-point-name', value=point.name, data-clear-btn='true', data-randomize='true')
+
+        #point-map-container
+
+        label(for='field-point-lat') Latitude:
+        input(type='text', name='field-point-lat', id='field-point-lat', value=point.latitude, data-clear-btn='true', data-randomize='true')
+        label(for='field-point-lng') Longitude:
+        input(type='text', name='field-point-lng', id='field-point-lng', value=point.longitude, data-clear-btn='true', data-randomize='true')
+
+        br
+        button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Punt aanpassen
