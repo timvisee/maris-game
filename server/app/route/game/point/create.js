@@ -215,7 +215,7 @@ module.exports = {
                 }
 
                 // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'gamecreate', 'Punt aangemaakt', {
+                LayoutRenderer.render(req, res, next, 'gamepointcreate', 'Punt aangemaakt', {
                     page: {
                         leftButton: 'back'
                     },

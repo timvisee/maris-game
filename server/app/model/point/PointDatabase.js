@@ -70,25 +70,6 @@ PointDatabase.addPoint = function (name, game, user, location, callback) {
     // Create a callback latch
     var latch = new CallbackLatch();
 
-    // Create a variable for the game configuration
-    var gameConfig = null;
-
-    // Get the configuration for this game
-    latch.add();
-    game.getConfig(function(err, result) {
-        // Call back errors
-        if(err !== null) {
-            callback(err);
-            return;
-        }
-
-        // Set the game config
-        gameConfig = result;
-
-        // Resolve the latch
-        latch.resolve();
-    });
-
     // Add the point to the database when we're ready
     latch.then(function() {
         // Create the object to insert

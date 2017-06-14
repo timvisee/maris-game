@@ -21,7 +21,7 @@ block content
             input(type='text', name='field-point-lng', id='field-point-lng', value='', data-clear-btn='true', data-randomize='true')
 
             br
-            button.ui-btn.ui-btn-raised.clr-primary(type='submit') Punt aanmaken
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Punt aanmaken
 
     else
         p Het punt is succesvol aangemaakt.
@@ -35,5 +35,5 @@ block content
 
         br
         .button-list
-            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/points', title='Puntenoverzicht') Puntenoverzicht
-            a.ui-btn.ui-btn-raised(href='/game/' + game.id + '/point/' + point.id, title='Punt bekijken') Punt bekijken
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/points', title='Puntenoverzicht', data-ajax='false') Puntenoverzicht
+            a.ui-btn(href='/game/' + game.id + '/point/' + point.id, title='Punt bekijken', data-ajax='false') Punt bekijken
