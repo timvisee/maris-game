@@ -24,7 +24,7 @@ block content
                     p.game-data-load-label: i Geen opdrachten beschikbaar...
 
     div(data-role='nd2tab', data-tab='info')
-        if (user.isHost || user.isAdmin)
+        if user.isHost || user.isAdmin
             if game.usersCount.requested > 0
                 .nd2-card.wow.fadeInUp
                     .card-title.has-supporting-text

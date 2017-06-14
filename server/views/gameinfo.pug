@@ -30,3 +30,15 @@ block content
         .card-action
             .row.between-xs: .col-xs-12: .box
                 a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/../players', data-transition='slide') Deelnemers
+
+    if user.isHost || user.isAdmin
+        .nd2-card.wow.fadeInUp
+            .card-title.has-supporting-text
+                h3.card-primary-title Spelbeheer
+
+            .card-supporting-text.has-action.has-title.
+                Bezoek de beheerpagina om het spel te starten.
+
+            .card-action
+                .row.between-xs: .col-xs-12: .box
+                    a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/../manage', data-transition='slide') Beheer

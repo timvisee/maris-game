@@ -52,6 +52,7 @@ module.exports = {
             return;
 
         // Get the game
+        const user = req.session.user;
         const game = req.game;
 
         // Call back if the game is invalid
@@ -63,7 +64,20 @@ module.exports = {
         }
 
         // Create a game object
-        var gameObject = {};
+        var options = {
+            page: {
+                leftButton: 'back'
+            },
+            game: {
+                name: '',
+                stage: 0,
+                users: {}
+            },
+            user: {
+                isHost: false,
+                isAdmin: false
+            }
+        };
 
         // Create a callback latch for the games properties
         var latch = new CallbackLatch();
@@ -83,7 +97,7 @@ module.exports = {
             }
 
             // Set the property
-            gameObject.name = name;
+            options.game.name = name;
 
             // Resolve the latch
             latch.resolve();
@@ -101,7 +115,7 @@ module.exports = {
             }
 
             // Set the property
-            gameObject.stage = stage;
+            options.game.stage = stage;
 
             // Resolve the latch
             latch.resolve();
@@ -119,9 +133,45 @@ module.exports = {
             }
 
             // Set the property
-            gameObject.users = {
+            options.game.users = {
                 usersCount
             };
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Check whether the user is an administrator
+        latch.add();
+        user.isAdmin(function(err, isAdmin) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    next(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the admin state
+            options.user.isAdmin = isAdmin;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Check whether the user is the host
+        latch.add();
+        game.isHost(user, function(err, isHost) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    next(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the host state
+            options.user.isHost = isHost;
 
             // Resolve the latch
             latch.resolve();
@@ -131,12 +181,7 @@ module.exports = {
         latch.then(function() {
             // Render the game page if we didn't call back yet
             if(!calledBack)
-                LayoutRenderer.render(req, res, next, 'gameinfo', gameObject.name, {
-                    page: {
-                        leftButton: 'back'
-                    },
-                    game: gameObject
-                });
+                LayoutRenderer.render(req, res, next, 'gameinfo', options.game.name, options);
         });
     }
 };
