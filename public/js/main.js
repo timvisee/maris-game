@@ -4785,7 +4785,7 @@ function initPointSelectMap() {
 
 				// Create a player range circle
 				// TODO: Fetch the range value from the game configuration
-				pointSelectCircle = L.circle(latlng, 10, {draggable: editable ? true : false});
+				pointSelectCircle = L.circle(latlng, 15, {draggable: editable ? true : false});
 				pointSelectCircle.setStyle({
 					opacity: 0.4
 				});

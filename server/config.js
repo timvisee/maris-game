@@ -362,7 +362,7 @@ config.validation.gameNameMaxLength = 128;
  * The range of a point in a game as radius from the center in meters.
  * @type {number}
  */
-config.game.pointRange = 10;
+config.game.pointRange = 15;
 
 /**
  * Location decay time in milliseconds.
