@@ -1,5 +1,8 @@
-### NodeJS
+### Vim
+# Vim swap files
+.*.swp
 
+### NodeJS
 # Logs
 logs
 *.log
