@@ -47,9 +47,10 @@ AssignmentDatabase.DB_COLLECTION_NAME = 'assignment';
  * @param {UserModel} user User that created this assignment.
  * @param {boolean} answerText True to answer with text, false if not.
  * @param {boolean} answerFile True to answer with a file, false if not.
+ * @param {boolean} retry True to allow users to retry the assignment when it's rejected.
  * @param {AssignmentDatabase~addAssignmentCallback} callback Called on success or on failure.
  */
-AssignmentDatabase.addAssignment = function (name, description, game, user, answerText, answerFile, callback) {
+AssignmentDatabase.addAssignment = function (name, description, game, user, answerText, answerFile, retry, callback) {
     // Get the database instance
     var db = MongoUtil.getConnection();
 
@@ -82,7 +83,8 @@ AssignmentDatabase.addAssignment = function (name, description, game, user, answ
             user_id: user.getId(),
             game_id: game.getId(),
             answer_text: answerText,
-            answer_file: answerFile
+            answer_file: answerFile,
+            retry
         };
 
         // Insert the assignment into the database
