@@ -342,6 +342,18 @@ config.validation.pointNameMinLength = 1;
 config.validation.pointNameMaxLength = 64;
 
 /**
+ * Minimum number of assignment name characters.
+ * @type {int}
+ */
+config.validation.assignmentNameMinLength = 1;
+
+/**
+ * Maximum number of assignment name characters.
+ * @type {int}
+ */
+config.validation.assignmentNameMaxLength = 128;
+
+/**
  * Minimum number of game name characters.
  * @type {int}
  */

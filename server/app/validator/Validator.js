@@ -310,5 +310,51 @@ Validator.isValidLongitude = function(longitude) {
     return !isNaN(longitude) && longitude >= -180 && longitude <= 180;
 };
 
+/**
+ * Format the the given assignment name.
+ *
+ * @param {string} assignmentName Assignment name.
+ *
+ * @return {string} The formatted assignment name.
+ */
+Validator.formatAssignmentName = function(assignmentName) {
+    // Trim the assignment name, and return
+    return assignmentName.trim();
+};
+
+/**
+ * Check whether the given assignment name is valid.
+ *
+ * @param {string} assignmentName Assignment name.
+ *
+ * @return {boolean} True if the assignment name is valid, false if not.
+ */
+Validator.isValidAssignmentName = function(assignmentName) {
+    // Make sure the assignment name isn't undefined or null
+    if(assignmentName === undefined || assignmentName === null)
+        return false;
+
+    // Trim the assignment name
+    assignmentName = assignmentName.trim();
+
+    // Count the number of characters
+    const charCount = assignmentName.length;
+
+    // Make sure the length is within bounds
+    return (charCount >= config.validation.assignmentNameMinLength && charCount <= config.validation.assignmentNameMaxLength);
+};
+
+/**
+ * Format the the given assignment description.
+ *
+ * @param {string} assignmentDescription Assignment description.
+ *
+ * @return {string} The formatted assignment description.
+ */
+Validator.formatAssignmentDescription = function(assignmentDescription) {
+    // Trim the assignment description, and return
+    return assignmentDescription.trim();
+};
+
 // Export the class
 module.exports = Validator;
