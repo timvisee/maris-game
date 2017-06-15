@@ -68,8 +68,8 @@ var UserModel = function(id) {
             },
             is_admin: {
                 redis: {
-                    from: (isAdmin) => isAdmin !== '0',
-                    to: (isAdmin) => isAdmin ? '1' : '0'
+                    from: ConversionFunctions.boolFromRedis,
+                    to: ConversionFunctions.boolToRedis
                 }
             }
         }

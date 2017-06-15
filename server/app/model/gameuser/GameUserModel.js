@@ -25,6 +25,7 @@ var util = require('util');
 var Core = require('../../../Core');
 var GameUserDatabase = require('./GameUserDatabase');
 var BaseModel = require('../../database/BaseModel');
+var ConversionFunctions = require('../../database/ConversionFunctions');
 
 /**
  * GameUserModel class.
@@ -128,40 +129,14 @@ var GameUserModel = function(id) {
             },
             is_participant: {
                 redis: {
-                    /**
-                     * Convert the string value to a boolean.
-                     *
-                     * @param {string} bool Boolean as a string.
-                     * @return {boolean} Boolean value.
-                     */
-                    from: (bool) => bool !== '0',
-
-                    /**
-                     * Convert the boolean value to a string.
-                     *
-                     * @param {boolean} bool Boolean value.
-                     * @return {string} Boolean as a string.
-                     */
-                    to: (bool) => bool ? 1 : 0
+                    from: ConversionFunctions.boolFromRedis,
+                    to: ConversionFunctions.boolToRedis
                 }
             },
             is_spectator: {
                 redis: {
-                    /**
-                     * Convert the string value to a boolean.
-                     *
-                     * @param {string} bool Boolean as a string.
-                     * @return {boolean} Boolean value.
-                     */
-                    from: (bool) => bool !== '0',
-
-                    /**
-                     * Convert the boolean value to a string.
-                     *
-                     * @param {boolean} bool Boolean value.
-                     * @return {string} Boolean as a string.
-                     */
-                    to: (bool) => bool ? 1 : 0
+                    from: ConversionFunctions.boolFromRedis,
+                    to: ConversionFunctions.boolToRedis
                 }
             }
         }

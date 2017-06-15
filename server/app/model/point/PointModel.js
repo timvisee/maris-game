@@ -251,7 +251,6 @@ PointModel.prototype.setName = function(name, callback) {
     this.setField('name', name, callback);
 };
 
-
 /**
  * Get the game for the point.
  *

@@ -22,6 +22,21 @@
 
 // Export the module
 module.exports = {
+    /**
+     * Convert a serialized Redis boolean value to a JavaScript boolean.
+     *
+     * @param {String} value Redis value.
+     * @return {boolean} JavaScript boolean.
+     */
+    boolFromRedis: (value) => value !== '0',
+
+    /**
+     * Convert a JavaScript boolean to a serialized Redis boolean.
+     *
+     * @param {boolean} value JavaScript boolean.
+     * @return {String} Redis boolean.
+     */
+    boolToRedis: (value) => value ? '1' : '0',
 
     /**
      * Deserialize a Date from a string.
