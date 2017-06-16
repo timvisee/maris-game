@@ -1,10 +1,10 @@
-# assignment
-# Collection containing all created factories
+# submission
+# Collection containing all assignment submissions (user answers).
 
 _id : ID                   Assignment ID.
 assignment_id : ID         ID of the assignment this is a submission for.
 user_id : ID               ID of the user that submitted this assignment.
 approve_user_id : ID|null  ID of the user that approved this submission, or null if not approved yet.
-approved : boolean         True if the submission has been approved, false if not.
+approve_state : int        The approval state. (0 = none, 1 = accepted, 2 = rejected)
 [answer_text : string]     Text answer a user has submitted.
 [answer_file : string]     File name as answer a user has submitted.

@@ -1,5 +1,5 @@
 # assignment
-# Collection containing all created factories
+# Collection containing all configured assignments.
 
 _id : ID                Assignment ID.
 name : string           Assignment name.
