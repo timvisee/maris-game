@@ -41,6 +41,7 @@ var SessionModelManager = require('./app/model/session/SessionModelManager');
 var GameModelManager = require('./app/model/game/GameModelManager');
 var PointModelManager = require('./app/model/point/PointModelManager');
 var AssignmentModelManager = require('./app/model/assignment/AssignmentModelManager');
+var SubmissionModelManager = require('./app/model/submission/SubmissionModelManager');
 var GameUserModelManager = require('./app/model/gameuser/GameUserModelManager');
 var RealTime = require('./app/realtime/RealTime');
 var PortUtils = require('./app/util/PortUtils');
@@ -413,7 +414,8 @@ App.prototype._initModelManagers = function(callback) {
     modelManagers.push(Core.model.gameModelManager = new GameModelManager());
     modelManagers.push(Core.model.gameUserModelManager = new GameUserModelManager());
     modelManagers.push(Core.model.pointModelManager = new PointModelManager());
-    modelManagers.push(Core.model.assignmentModelManager = new PointModelManager());
+    modelManagers.push(Core.model.assignmentModelManager = new AssignmentModelManager());
+    modelManagers.push(Core.model.submissionModelManager = new SubmissionModelManager());
 
     // Create an interval to clear all internal model caches
     setInterval(function() {

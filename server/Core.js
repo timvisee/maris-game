@@ -50,6 +50,34 @@ Core.model.userModelManager = null;
 Core.model.sessionModelManager = null;
 
 /**
+ * Game model manager.
+ *
+ * @type {GameModelManager|null} Game model manager, or null if it isn't instantiated yet.
+ */
+Core.model.gameModelManager = null;
+
+/**
+ * Point model manager.
+ *
+ * @type {PointModelManager|null} Point model manager, or null if it isn't instantiated yet.
+ */
+Core.model.pointModelManager = null;
+
+/**
+ * Assignment model manager.
+ *
+ * @type {AssignmentModelManager|null} Assignment model manager, or null if it isn't instantiated yet.
+ */
+Core.model.assignmentModelManager = null;
+
+/**
+ * Submission model manager.
+ *
+ * @type {SubmissionModelManager|null} Submission model manager, or null if it isn't instantiated yet.
+ */
+Core.model.SubmissionModelManager = null;
+
+/**
  * HTTP(S) server instance.
  *
  * @type {*} Server instance.
