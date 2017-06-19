@@ -273,7 +273,7 @@ AssignmentModel.prototype.getDescription = function(callback) {
  * @param {AssignmentModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
 AssignmentModel.prototype.setDescription = function(description, callback) {
-    this.setField('description', name, callback);
+    this.setField('description', description, callback);
 };
 
 /**

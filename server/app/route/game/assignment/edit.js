@@ -302,15 +302,15 @@ module.exports = {
             // Create a function for setter callbacks
             var setterCallback = function(err) {
                 // Return if the error is null, or if we already called back
-                if(err === null || calledBack)
+                if(err === null || calledBack) {
+                    // Resolve the latch and return
+                    latch.resolve();
                     return;
+                }
 
                 // Pass the error along and set the called back state
                 next(err);
                 calledBack = true;
-
-                // Resolve the latch
-                latch.resolve();
             };
 
             // Update the assignment

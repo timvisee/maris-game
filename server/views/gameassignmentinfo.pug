@@ -9,19 +9,19 @@ block content
                 td= assignment.description
             tr: td Tekst antwoord:
                 td
-                    if(assignment.answer_text)
+                    if assignment.answer_text
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
             tr: td Bestand antwoord:
                 td
-                    if(assignment.answer_text)
+                    if assignment.answer_file
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
             tr: td Meerdere pogingen:
                 td
-                    if(assignment.retry)
+                    if assignment.retry
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee

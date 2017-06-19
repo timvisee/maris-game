@@ -196,8 +196,17 @@ module.exports = {
 
             // TODO: Delete the live assignment if there is any
 
-            // Go back to the assignments overview page when done
-            res.redirect('/game/' + game.getIdHex() + '/assignments');
+            // Delete the model
+            assignment.delete(function(err) {
+                // Call back errors
+                if(err !== null) {
+                    next(err);
+                    return;
+                }
+
+                // Go back to the assignments overview page when done
+                res.redirect('/game/' + game.getIdHex() + '/assignments');
+            });
         });
     },
 };
