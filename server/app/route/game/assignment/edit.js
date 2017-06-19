@@ -28,6 +28,7 @@ var Coordinate = require('../../../coordinate/Coordinate');
 var Validator = require('../../../validator/Validator');
 var AssignmentDatabase = require('../../../model/assignment/AssignmentDatabase');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
+var CallbackLatch = require('../../../util/CallbackLatch');
 
 // Export the module
 module.exports = {
@@ -42,8 +43,8 @@ module.exports = {
         const self = module.exports;
 
         // Route the assignments creation page
-        router.get('/:game/assignment/create', (req, res, next) => self.get(req, res, next));
-        router.post('/:game/assignment/create', (req, res, next) => self.post(req, res, next));
+        router.get('/:game/assignment/:assignment/edit', (req, res, next) => self.get(req, res, next));
+        router.post('/:game/assignment/:assignment/edit', (req, res, next) => self.post(req, res, next));
     },
 
     /**
@@ -58,13 +59,20 @@ module.exports = {
         if(!req.requireValidSession())
             return;
 
-        // Get the game and user
+        // Get the game, user and assignment
         const game = req.game;
         const user = req.session.user;
+        const assignment = req.assignment;
 
         // Call back if the game is invalid
         if(game === undefined) {
             next(new Error('Ongeldig spel.'));
+            return;
+        }
+
+        // Call back if the assignment is invalid
+        if(assignment === undefined) {
+            next(new Error('Ongeldig opdracht.'));
             return;
         }
 
@@ -77,17 +85,125 @@ module.exports = {
             }
 
             // Handle no permission situations
-            if (!hasPermission) {
+            if(!hasPermission) {
                 LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
                 return;
             }
 
-            // Show the assignment creation page
-            LayoutRenderer.render(req, res, next, 'gameassignmentcreate', 'Punt aanmaken', {
+            // Create the page options object
+            var options = {
                 page: {
                     leftButton: 'back'
                 },
-                created: false
+                assignment: {
+                    name: '',
+                    description: '',
+                    answer_text: false,
+                    answer_file: false,
+                    retry: false
+                }
+            };
+
+            // Create a callback latch for the games properties
+            var latch = new CallbackLatch();
+            var calledBack = false;
+
+            // Fetch the name
+            latch.add();
+            assignment.getName(function(err, name) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.name = name;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Fetch the description
+            latch.add();
+            assignment.getDescription(function(err, description) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.description = description;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Fetch the text answer state
+            latch.add();
+            assignment.getAnswerText(function(err, answerText) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.answer_text = answerText;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Fetch the file answer state
+            latch.add();
+            assignment.getAnswerFile(function(err, answerFile) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.answer_file = answerFile;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Fetch the retry state
+            latch.add();
+            assignment.isRetry(function(err, retry) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.retry = retry;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Render the page when we're ready
+            latch.then(function() {
+                // Render the game page if we didn't call back yet
+                if(!calledBack)
+                    LayoutRenderer.render(req, res, next, 'gameassignmentedit', options.assignment.name, options);
+                calledBack = true;
             });
         });
     },
@@ -114,6 +230,7 @@ module.exports = {
         // Get the game and user
         const game = req.game;
         const user = req.session.user;
+        const assignment = req.assignment;
 
         // Call back if the game is invalid
         if(game === undefined) {
@@ -121,8 +238,14 @@ module.exports = {
             return;
         }
 
-        // The user must be an administrator
-        user.isAdmin(function(err, isAdmin) {
+        // Call back if the assignment is invalid
+        if(assignment === undefined) {
+            next(new Error('Ongeldig opdracht.'));
+            return;
+        }
+
+        // The user must have management rights
+        game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);
@@ -130,7 +253,7 @@ module.exports = {
             }
 
             // Make sure the user is an administrator
-            if(!isAdmin) {
+            if(!hasPermission) {
                 LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
                 return;
             }
@@ -172,29 +295,35 @@ module.exports = {
             assignmentAnswerFile= assignmentAnswerFile === 'true';
             assignmentRetry = assignmentRetry === 'true';
 
-            // Create the assignment
-            AssignmentDatabase.addAssignment(assignmentName, assignmentDescription, game, user, assignmentAnswerText, assignmentAnswerFile, assignmentRetry, function(err, assignmentModel) {
-                // Call back errors
-                if(err !== null) {
-                    next(err);
-                    return;
-                }
+            // Create a latch for updating the assignment
+            var latch = new CallbackLatch();
+            var calledBack = false;
 
-                // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'gameassignmentcreate', 'Opdracht aangemaakt', {
-                    page: {
-                        leftButton: 'back'
-                    },
-                    created: true,
-                    game: {
-                        id: game.getIdHex()
-                    },
-                    assignment: {
-                        id: assignmentModel.getIdHex(),
-                        name: assignmentName,
-                        description: assignmentDescription
-                    }
-                });
+            // Create a function for setter callbacks
+            var setterCallback = function(err) {
+                // Return if the error is null, or if we already called back
+                if(err === null || calledBack)
+                    return;
+
+                // Pass the error along and set the called back state
+                next(err);
+                calledBack = true;
+
+                // Resolve the latch
+                latch.resolve();
+            };
+
+            // Update the assignment
+            latch.add(5);
+            assignment.setName(assignmentName, setterCallback);
+            assignment.setDescription(assignmentDescription, setterCallback);
+            assignment.setAnswerText(assignmentAnswerText, setterCallback);
+            assignment.setAnswerFile(assignmentAnswerFile, setterCallback);
+            assignment.setRetry(assignmentRetry, setterCallback);
+
+            // Redirect to the assignments overview page when done
+            latch.then(function() {
+                res.redirect('/game/' + game.getIdHex() + '/assignments');
             });
         });
     },

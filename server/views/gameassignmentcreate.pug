@@ -8,20 +8,20 @@ block content
 
         form(method='POST', action=page.url + '/#')
             label(for='field-assignment-name') Naam:
-            input(type='text', name='field-assignment-description', id='field-assignment-description', value='', data-clear-btn='true', data-randomize='true')
+            input(type='text', name='field-assignment-name', id='field-assignment-name', value='', data-clear-btn='true', data-randomize='true')
             label(for='field-assignment-description') Beschrijving:
             textarea(name='field-assignment-description', id='field-assignment-description', value='', data-clear-btn='true', data-randomize='true')
 
             .row
                 .col-xs: .box
-                    label(for='field-assignment-text') Text antwoord:
-                    select(name='field-assignment-text', id='field-assignment-text', data-role='flipswitch', selected='selected')
+                    label(for='field-assignment-answer-text') Text antwoord:
+                    select(name='field-assignment-answer-text', id='field-assignment-answer-text', data-role='flipswitch', selected='selected')
                         option(value='false') NEE
                         option(value='true') JA
 
                 .col-xs: .box
-                    label(for='field-assignment-file') Bestand antwoord:
-                    select(name='field-assignment-file', id='field-assignment-file', data-role='flipswitch')
+                    label(for='field-assignment-answer-file') Bestand antwoord:
+                    select(name='field-assignment-answer-file', id='field-assignment-answer-file', data-role='flipswitch')
                         option(value='false') NEE
                         option(value='true') JA
 

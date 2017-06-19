@@ -1,0 +1,35 @@
+extends page
+
+block content
+    form(method='POST', action=page.url + '/#')
+        label(for='field-assignment-name') Naam:
+        input(type='text', name='field-assignment-name', id='field-assignment-name', value=assignment.name, data-clear-btn='true', data-randomize='true')
+        label(for='field-assignment-description') Beschrijving:
+        textarea(name='field-assignment-description', id='field-assignment-description', value=assignment.description, data-clear-btn='true', data-randomize='true')
+
+        .row
+            .col-xs: .box
+                label(for='field-assignment-text') Text antwoord:
+                select(name='field-assignment-text', id='field-assignment-text', data-role='flipswitch', selected=assignment.answer_text)
+                    option(value='false') NEE
+                    option(value='true') JA
+
+            .col-xs: .box
+                label(for='field-assignment-file') Bestand antwoord:
+                select(name='field-assignment-file', id='field-assignment-file', data-role='flipswitch', selected=assignment.answer_file)
+                    option(value='false') NEE
+                    option(value='true') JA
+
+        label(for='field-assignment-retry') Meerdere pogingen:
+        select(name='field-assignment-retry', id='field-assignment-retry', data-role='flipswitch', selected=assignment.retry)
+            option(value='false') NEE
+            option(value='true') JA
+
+        br
+        .button-list
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
+                i.zmdi.zmdi-edit
+                | &nbsp;&nbsp;Punt aanpassen
+            a.ui-btn.clr-warning(href=page.url + '/../delete', title='Punt verwijderen')
+                i.zmdi.zmdi-delete
+                | &nbsp;&nbsp;Punt verwijderen
