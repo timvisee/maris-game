@@ -197,7 +197,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'gameassignmentinfo', options.assignment.name, options);
+                    LayoutRenderer.render(req, res, next, 'game/assignment/info', options.assignment.name, options);
                 calledBack = true;
             });
         });

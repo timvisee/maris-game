@@ -83,7 +83,7 @@ module.exports = {
             }
 
             // Show the assignment creation page
-            LayoutRenderer.render(req, res, next, 'gameassignmentcreate', 'Punt aanmaken', {
+            LayoutRenderer.render(req, res, next, 'game/assignment/create', 'Punt aanmaken', {
                 page: {
                     leftButton: 'back'
                 },
@@ -181,7 +181,7 @@ module.exports = {
                 }
 
                 // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'gameassignmentcreate', 'Opdracht aangemaakt', {
+                LayoutRenderer.render(req, res, next, 'game/assignment/creategameassignmentcreate', 'Opdracht aangemaakt', {
                     page: {
                         leftButton: 'back'
                     },
