@@ -23,38 +23,38 @@
 var Core = require('../../../Core');
 
 /**
- * PointParam middleware class.
+ * AssignmentParam middleware class.
  *
  * @class
  * @constructor
  */
-var PointParam = function() {};
+var AssignmentParam = function() {};
 
 /**
  * Attach the middleware.
  *
  * @param router Express app router.
  */
-PointParam.attach = function(router) {
-    // Point parameter parsing middleware
-    router.param('point', function(req, res, next, point) {
-        // Get the point ID
-        var pointId = req.params.point;
+AssignmentParam.attach = function(router) {
+    // Assignment parameter parsing middleware
+    router.param('assignment', function(req, res, next, assignment) {
+        // Get the assignment ID
+        var assignmentId = req.params.assignment;
 
-        // Validate the point ID
-        Core.model.pointModelManager.getPointById(pointId, function(err, point) {
+        // Validate the assignment ID
+        Core.model.assignmentModelManager.getAssignmentById(assignmentId, function(err, assignment) {
             // Call back errors
             if(err !== null) {
                 next(err);
                 return;
             }
 
-            // Set the point in the request object if it isn't null, and move to the next
-            req.point = point !== null ? point : undefined;
+            // Set the assignment in the request object if it isn't null, and move to the next
+            req.assignment = assignment !== null ? assignment : undefined;
             next();
         });
     });
 };
 
 // Export the class
-module.exports = PointParam;
+module.exports = AssignmentParam;

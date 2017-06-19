@@ -30,6 +30,7 @@ var pageJoin = require('./join');
 var pageInfo = require('./info');
 var pagePlayers = require('./players');
 var pagePoints = require('./point/index');
+var pageAssignments = require('./assignment/index');
 var pageManage = require('./manage');
 
 var Core = require('../../../Core');
@@ -58,6 +59,9 @@ pagePlayers.route(router);
 
 // Route the game points page
 pagePoints.route(router);
+
+// Route the game assignments page
+pageAssignments.route(router);
 
 // Route the game management page
 pageManage.route(router);
