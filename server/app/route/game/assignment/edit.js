@@ -146,7 +146,7 @@ module.exports = {
 
             // Fetch the text answer state
             latch.add();
-            assignment.getAnswerText(function(err, answerText) {
+            assignment.isAnswerText(function(err, answerText) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -164,7 +164,7 @@ module.exports = {
 
             // Fetch the file answer state
             latch.add();
-            assignment.getAnswerFile(function(err, answerFile) {
+            assignment.isAnswerFile(function(err, answerFile) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)

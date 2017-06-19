@@ -5,10 +5,11 @@ block content
         p U staat op het punt de volgende opdracht te verwijderen.
 
         form(method='POST', action=page.url + '/#')
-            tr: td Naam
-                td= assignment.name
-            tr: td Beschrijving
-                td= assignment.description
+            table.table-list.ui-responsive
+                tr: td Naam
+                    td= assignment.name
+                tr: td Beschrijving
+                    td= assignment.description
 
             p.
                 Deze actie kan niet worden teruggedraaid.#[br]

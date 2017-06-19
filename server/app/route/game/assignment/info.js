@@ -39,7 +39,7 @@ module.exports = {
         const self = module.exports;
 
         // Route the points list
-        router.get('/:game/point/:point', self.get);
+        router.get('/:game/assignment/:assignment', self.get);
     },
 
     /**
@@ -141,7 +141,7 @@ module.exports = {
 
             // Fetch the text answer state
             latch.add();
-            assignment.getAnswerText(function(err, answerText) {
+            assignment.isAnswerText(function(err, answerText) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -159,7 +159,7 @@ module.exports = {
 
             // Fetch the file answer state
             latch.add();
-            assignment.getAnswerFile(function(err, answerFile) {
+            assignment.isAnswerFile(function(err, answerFile) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
