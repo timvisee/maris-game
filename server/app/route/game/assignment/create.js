@@ -122,7 +122,7 @@ module.exports = {
         }
 
         // The user must be an administrator
-        user.isAdmin(function(err, isAdmin) {
+        game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);
@@ -130,7 +130,7 @@ module.exports = {
             }
 
             // Make sure the user is an administrator
-            if(!isAdmin) {
+            if(!hasPermission) {
                 LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
                 return;
             }
