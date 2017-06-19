@@ -147,7 +147,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'gamepointedit', options.point.name, options);
+                    LayoutRenderer.render(req, res, next, 'game/point/edit', options.point.name, options);
                 calledBack = true;
             });
         });

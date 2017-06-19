@@ -83,7 +83,7 @@ module.exports = {
             }
 
             // Show the point creation page
-            LayoutRenderer.render(req, res, next, 'gamepointcreate', 'Punt aanmaken', {
+            LayoutRenderer.render(req, res, next, 'game/point/create', 'Punt aanmaken', {
                 page: {
                     leftButton: 'back'
                 },
@@ -215,7 +215,7 @@ module.exports = {
                 }
 
                 // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'gamepointcreate', 'Punt aangemaakt', {
+                LayoutRenderer.render(req, res, next, 'game/point/create', 'Punt aangemaakt', {
                     page: {
                         leftButton: 'back'
                     },
