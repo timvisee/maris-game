@@ -1,0 +1,17 @@
+extends page
+
+block content
+    ul(data-role='listview')
+        - var fadeDelay = -0.1;
+
+        li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Opdrachten
+
+        if game.assignments.length > 0
+            each assignment in game.assignments
+                li: a.wow.fadeInUp(href=page.url + '/../assignment/' + assignment.id, data-wow-delay=(fadeDelay += 0.1) + 's')= assignment.name
+        else
+            li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen opdrachten beschikbaar...
+
+    br
+    .button-list
+        a.ui-btn.ui-btn-raised.clr-primary.wow.fadeInUp(href=page.url + '/../assignment/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuwe opdracht aanmaken') Opdracht aanmaken
