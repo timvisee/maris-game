@@ -51,7 +51,7 @@ router.get('/', function(req, res, next) {
 
         // Make sure the user is an administrator
         if(!isAdmin) {
-            LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+            LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
             return;
         }
 
@@ -87,7 +87,7 @@ router.post('/', function(req, res, next) {
 
         // Make sure the user is an administrator
         if(!isAdmin) {
-            LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+            LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
             return;
         }
 

@@ -134,7 +134,7 @@ module.exports = {
         latch.then(function() {
             // Make sure the user has permission to manage the game
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 

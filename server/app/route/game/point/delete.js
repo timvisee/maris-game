@@ -86,7 +86,7 @@ module.exports = {
 
             // Handle no permission situations
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -192,7 +192,7 @@ module.exports = {
 
             // Make sure the user is an administrator
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'nopermission', 'Oeps!');
+                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
