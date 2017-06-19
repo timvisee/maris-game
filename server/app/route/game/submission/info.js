@@ -302,7 +302,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'gamesubmissioninfo', options.submission.name, options);
+                    LayoutRenderer.render(req, res, next, 'game/submission/info', options.submission.name, options);
                 calledBack = true;
             });
         });
