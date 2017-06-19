@@ -119,7 +119,7 @@ router.get('/', function(req, res, next) {
 
     // Render the games page
     latch.then(function() {
-        LayoutRenderer.render(req, res, next, 'gamelist', 'Spellen', options);
+        LayoutRenderer.render(req, res, next, 'game/list', 'Spellen', options);
     });
 });
 
@@ -221,7 +221,7 @@ function renderGameList(req, res, next, stage, limit, category, pageTitle) {
 
     // Complete the latch and render the page
     latch.then(function() {
-        LayoutRenderer.render(req, res, next, 'gamelist', pageTitle, options);
+        LayoutRenderer.render(req, res, next, 'game/list', pageTitle, options);
     });
 }
 

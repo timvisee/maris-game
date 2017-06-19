@@ -109,7 +109,7 @@ module.exports = {
                 }
 
                 // Render the game page
-                LayoutRenderer.render(req, res, next, 'gamejoin', 'Aangevraagd', {
+                LayoutRenderer.render(req, res, next, 'game/join', 'Aangevraagd', {
                     page: {
                         leftButton: 'none',
                         rightButton: 'none'

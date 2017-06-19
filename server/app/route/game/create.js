@@ -56,7 +56,7 @@ router.get('/', function(req, res, next) {
         }
 
         // Show the game creation page
-        LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aanmaken', {
+        LayoutRenderer.render(req, res, next, 'game/create', 'Spel aanmaken', {
             page: {
                 leftButton: 'back'
             },
@@ -120,7 +120,7 @@ router.post('/', function(req, res, next) {
             }
 
             // Show the game creation page
-            LayoutRenderer.render(req, res, next, 'gamecreate', 'Spel aangemaakt', {
+            LayoutRenderer.render(req, res, next, 'game/create', 'Spel aangemaakt', {
                 page: {
                     leftButton: 'back'
                 },

@@ -139,7 +139,7 @@ module.exports = {
             }
 
             // Render the game management page
-            LayoutRenderer.render(req, res, next, 'gamemanage', gameObject.name, {
+            LayoutRenderer.render(req, res, next, 'game/manage', gameObject.name, {
                 page: {
                     leftButton: 'back'
                 },
