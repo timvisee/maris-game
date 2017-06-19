@@ -181,7 +181,7 @@ module.exports = {
                 }
 
                 // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'game/assignment/creategameassignmentcreate', 'Opdracht aangemaakt', {
+                LayoutRenderer.render(req, res, next, 'game/assignment/create', 'Opdracht aangemaakt', {
                     page: {
                         leftButton: 'back'
                     },
