@@ -5,7 +5,7 @@ block content
         label(for='field-assignment-name') Naam:
         input(type='text', name='field-assignment-name', id='field-assignment-name', value=assignment.name, data-clear-btn='true', data-randomize='true')
         label(for='field-assignment-description') Beschrijving:
-        textarea(name='field-assignment-description', id='field-assignment-description', value=assignment.description, data-clear-btn='true', data-randomize='true')
+        textarea(name='field-assignment-description', id='field-assignment-description', data-clear-btn='true', data-randomize='true')= assignment.description
 
         .row
             .col-xs: .box
