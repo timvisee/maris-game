@@ -1,0 +1,24 @@
+extends page
+
+block content
+    div(align="center")
+        p U staat op het punt de volgende opdracht te verwijderen.
+
+        form(method='POST', action=page.url + '/#')
+            tr: td Naam
+                td= assignment.name
+            tr: td Beschrijving
+                td= assignment.description
+
+            p.
+                Deze actie kan niet worden teruggedraaid.#[br]
+                Weet u zeker dat u wilt doorgaan?
+
+            br
+            .button-list
+                a.ui-btn.ui-btn-raised.clr-primary(href='#', data-rel='back', data-direction='reverse', title='Nee, ga terug')
+                    i.zmdi.zmdi-arrow-back
+                    | &nbsp;&nbsp;Nee, ga terug
+                button.ui-btn.clr-warning(type='submit', title='Ja, verwijder deze opdracht', data-ajax='false')
+                    i.zmdi.zmdi-delete
+                    | &nbsp;&nbsp;Ja, verwijder
