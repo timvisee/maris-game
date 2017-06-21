@@ -501,14 +501,21 @@ GameModel.prototype.getTeams = function(callback) {
 /**
  * Check whether the given user has permission to manage this game.
  * A user will have permission if it's the host of the game, or if the user is administrator.
+ * If the user is null or undefined, false is always called back.
  *
- * @param {UserModel|ObjectId|string} user User to check.
+ * @param {UserModel|ObjectId|string|null|undefined} user User to check.
  * @param {GameModel~hasManagePermissionCallback} callback Called with the result or when an error occurred.
  */
 GameModel.prototype.hasManagePermission = function(user, callback) {
     // Create a callback latch
     var latch = new CallbackLatch();
     var calledBack = false;
+
+    // Call back if the user is null or undefined
+    if(user === null || user === undefined) {
+        callback(null, false);
+        return;
+    }
 
     // Check whether the user is administrator
     latch.add();
