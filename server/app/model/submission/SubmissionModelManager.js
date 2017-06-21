@@ -193,10 +193,11 @@ SubmissionModelManager.prototype.getSubmissionById = function(id, callback) {
  *
  * @param {GameModel} [game] Game to get the submissions for.
  * @param {UserModel} [user] User to get the submissions for.
+ * @param {AssignmentModel} [assignment] Assignment to get the submissions for.
  * @param {SubmissionModelManager~getSubmissionsCallback} callback Called with the result or when an error occurred.
  */
 // TODO: Add Redis caching to this function?
-SubmissionModelManager.prototype.getSubmissions = function(game, user, callback) {
+SubmissionModelManager.prototype.getSubmissions = function(game, user, assignment, callback) {
     // Create the query object
     var queryObject = {};
 
@@ -205,18 +206,23 @@ SubmissionModelManager.prototype.getSubmissions = function(game, user, callback)
         game = null;
     if(user === undefined)
         user = null;
+    if(assignment === undefined)
+        user = null;
 
     // Add the game and user to the query object if specified
     if(game !== null)
         queryObject.game_id = game.getId();
     if(user !== null)
         queryObject.user_id = user.getId();
+    if(assignment !== null)
+        queryObject.assignment_id = assignment.getId();
 
     // Create a callback latch
     var latch = new CallbackLatch();
 
     // Determine the Redis cache key
     var redisCacheKey = REDIS_KEY_ROOT + ':' + (game !== null ? game.getIdHex() : '0' ) +
+        ':' + (user !== null ? user.getIdHex() : '0' ) +
         ':' + (user !== null ? user.getIdHex() : '0' ) + ':getSubmissions';
 
     // Store this instance
