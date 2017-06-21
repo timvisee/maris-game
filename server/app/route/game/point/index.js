@@ -31,6 +31,7 @@ var pageCreate = require('./create');
 var pageInfo = require('./info');
 var pageEdit = require('./edit');
 var pageDelete = require('./delete');
+var pageSubmissionCreate = require('./submission/create');
 
 // Export the module
 module.exports = {
@@ -55,6 +56,7 @@ module.exports = {
         pageInfo.route(router);
         pageEdit.route(router);
         pageDelete.route(router);
+        pageSubmissionCreate.route(router);
     },
 
     /**

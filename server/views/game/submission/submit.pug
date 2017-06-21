@@ -1,0 +1,52 @@
+extends ../../base/page
+
+block content
+    unless created
+        p.
+            Vul op deze pagina uw antwoord in, en klik op de knop om uw antwoord in te zenden.
+
+        div(align="center")
+            table.table-list.ui-responsive
+                tr: td Naam
+                    td= assignment.name
+                tr: td Beschrijving
+                    td= assignment.description
+
+        br
+        form(method='POST', action=page.url + '/#')
+            if assignment.allow_text
+                label(for='field-submission-text') Antwoord:
+                textarea(name='field-submission-text', id='field-submission-text', value='', data-clear-btn='true', data-randomize='true')
+
+            if assignment.allow_file
+                label(for='field-submission-text') Bestand:
+                input(type='file', name='field-submission-file', id='field-submission-file')
+
+            br
+            .button-list
+                button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Antwoord inzenden
+                a.ui-btn(href='#', data-rel='back', data-direction='reverse', data-wow-delay='0.4s')
+                    i.zmdi.zmdi-arrow-back
+                    | &nbsp;&nbsp;Ga terug
+
+    else
+        p.
+            Het antwoord is ingezonden.#[br]
+            #[br]
+            Een docuent moet uw inzending goedkeuren voordat u punten kunt verdienen met deze opdracht.
+
+        div(align="center")
+            table.table-list.ui-responsive
+                tr: td Opdracht
+                    td= assignment.name
+                tr: td Beschrijving
+                    td= assignment.description
+                tr: td Antwoord
+                    td= submission.text
+
+        p Klik op de onderstaande knop om terug te gaan naar het opdrachtenoverzicht.
+
+        br
+        .button-list
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false') Opdrachtenoverzicht
+            a.ui-btn(href='/game/' + game.id + '/assignment/' + assignment.id, title='Opdracht bekijken', data-ajax='false') Opdracht bekijken

@@ -536,6 +536,8 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                                 return;
                             }
 
+                            // TODO: Fix this. The shop manager isn't used anymore in this game.
+
                             // Get the shop instance for this user if there is any, and determine whether the user is a shop
                             const liveShop = visible && liveGame.shopManager.getShopByUser(otherLiveUser);
                             const isShop = liveShop != null;
