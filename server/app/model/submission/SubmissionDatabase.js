@@ -46,7 +46,7 @@ SubmissionDatabase.DB_COLLECTION_NAME = 'submission';
  * @param {UserModel} user User that created this submission.
  * @param {UserModel|null} approveUser User that approved (or rejected) this submission, null if the submission hasn't
  *                                     been approved yet.
- * @param {int|null} approveState The approval state of the submission. Null to use the `NONE` state.
+ * @param {int|null} approveState The approval state of the submission. Null to use the `PENDING` state.
  *                                See {@see ApprovalState}.
  * @param {string|null} answerText Text answer a user has submitted, or null.
  * @param {string|null} answerFile File name of a file a user has submitted, or null.
@@ -58,7 +58,7 @@ SubmissionDatabase.addSubmission = function (assignment, user, approveUser, appr
 
     // Set the approve state
     if(approveState === null || approveState === undefined)
-        approveState = ApprovalState.NONE;
+        approveState = ApprovalState.PENDING;
 
     // The approval state must be valid
     if(!ApprovalState.isValid(approveState)) {

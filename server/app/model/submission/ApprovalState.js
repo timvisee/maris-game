@@ -25,8 +25,8 @@ var _ = require('lodash');
 // Approval state constants
 var ApprovalState = {};
 
-// None state, not yet approved nor rejected.
-ApprovalState.NONE = 0;
+// Pending state, not yet approved nor rejected.
+ApprovalState.PENDING = 0;
 
 // Approved state
 ApprovalState.APPROVED = 1;

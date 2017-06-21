@@ -293,7 +293,7 @@ module.exports = {
                     submissionFile = null;
 
                 // Create the point
-                SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.NONE, submissionText, submissionFile, function(err, submissionModel) {
+                SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.PENDING, submissionText, submissionFile, function(err, submissionModel) {
                     // Call back errors
                     if(err !== null) {
                         next(err);
