@@ -238,6 +238,8 @@ module.exports = {
                 return;
             }
 
+            // TODO: Make sure there isn't a submission already.
+
             // Check whether to allow text and file answers
             var allowText = false;
             var allowFile = false;
@@ -291,7 +293,7 @@ module.exports = {
                     submissionFile = null;
 
                 // Create the point
-                SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.NONE, submissionText, submissionFile, function(err, pointModel) {
+                SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.NONE, submissionText, submissionFile, function(err, submissionModel) {
                     // Call back errors
                     if(err !== null) {
                         next(err);
@@ -308,7 +310,9 @@ module.exports = {
                             id: game.getIdHex()
                         },
                         submission: {
-                            text: submissionText
+                            id: submissionModel.getIdHex(),
+                            text: submissionText,
+                            file: submissionFile
                         }
                     };
 

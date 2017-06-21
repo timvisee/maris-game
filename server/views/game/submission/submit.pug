@@ -41,12 +41,21 @@ block content
                     td= assignment.name
                 tr: td Beschrijving
                     td= assignment.description
-                tr: td Antwoord
-                    td= submission.text
 
-        p Klik op de onderstaande knop om terug te gaan naar het opdrachtenoverzicht.
+                // Show text submissions
+                unless submission.text == null
+                    tr: td Inzending
+                        td= submission.text
+
+                // Show file submissions
+                unless submission.file == null
+                    tr: td Inzending
+                        td: i(style='color: gray;') Bestand
+
+        br
+        p Klik op de onderstaande knop om terug te gaan naar het spel.
 
         br
         .button-list
-            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false') Opdrachtenoverzicht
-            a.ui-btn(href='/game/' + game.id + '/assignment/' + assignment.id, title='Opdracht bekijken', data-ajax='false') Opdracht bekijken
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id, title='Terug naar het spel', data-ajax='false') Terug naar het spel
+            a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken', data-ajax='false') Inzending bekijken

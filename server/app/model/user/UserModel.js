@@ -26,7 +26,6 @@ var Core = require('../../../Core');
 var UserDatabase = require('./UserDatabase');
 var BaseModel = require('../../database/BaseModel');
 var ConversionFunctions = require('../../database/ConversionFunctions');
-var CallbackLatch = require('../../util/CallbackLatch');
 
 /**
  * UserModel class.
