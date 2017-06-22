@@ -20,9 +20,13 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var crypto = require('crypto');
 
 var Core = require('../../../../Core');
+var Coordinate = require('../../../coordinate/Coordinate');
+var Validator = require('../../../validator/Validator');
+var AssignmentDatabase = require('../../../model/assignment/AssignmentDatabase');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../util/CallbackLatch');
@@ -39,16 +43,16 @@ module.exports = {
         // Store the module instance
         const self = module.exports;
 
-        // Attach the submission middleware
+        // Attach the submission parameter middleware
         SubmissionParam.attach(router);
 
-        // Route the submissions list
-        router.get('/:game/submission/:submission/edit', self.get);
-        router.post('/:game/submission/:submission/edit', self.post);
+        // Route the assignments creation page
+        router.get('/:game/submission/:submission/delete', (req, res, next) => self.get(req, res, next));
+        router.post('/:game/submission/:submission/delete', (req, res, next) => self.post(req, res, next));
     },
 
     /**
-     * Get page.
+     * Get page for assignment creation.
      *
      * @param req Express request object.
      * @param res Express response object.
@@ -72,7 +76,7 @@ module.exports = {
 
         // Call back if the submission is invalid
         if(submission === undefined) {
-            next(new Error('Ongeldige inzending.'));
+            next(new Error('Ongeldig inzending.'));
             return;
         }
 
@@ -97,11 +101,8 @@ module.exports = {
                 },
                 submission: {
                     assignment: {
-                        id: null,
                         name: '',
-                        description: '',
-                        allow_text: true,
-                        allow_file: false
+                        description: ''
                     },
                     user: {
                         id: null,
@@ -112,15 +113,16 @@ module.exports = {
                         id: null,
                         name: null
                     },
-                    answer_text: null
-                },
+                    answer_text: null,
+                    answer_file: null
+                }
             };
 
             // Create a callback latch for the games properties
             var latch = new CallbackLatch();
             var calledBack = false;
 
-            // Get the assignment
+            // Get the submission
             latch.add();
             submission.getAssignment(function(err, assignment) {
                 // Call back errors
@@ -131,16 +133,8 @@ module.exports = {
                     return;
                 }
 
-                // Return when null
-                if(assignment === null) {
-                    latch.resolve();
-                    return;
-                }
-
-                // Set the assignment ID
-                options.submission.assignment.id = assignment.getIdHex();
-
-                // Get the assignment name, and reuse the already created latch
+                // Fetch the assignment name
+                latch.add();
                 assignment.getName(function(err, name) {
                     // Call back errors
                     if(err !== null) {
@@ -150,14 +144,14 @@ module.exports = {
                         return;
                     }
 
-                    // Set the name
+                    // Set the property
                     options.submission.assignment.name = name;
 
                     // Resolve the latch
                     latch.resolve();
                 });
 
-                // Get the assignment description
+                // Fetch the description
                 latch.add();
                 assignment.getDescription(function(err, description) {
                     // Call back errors
@@ -168,48 +162,15 @@ module.exports = {
                         return;
                     }
 
-                    // Set the description
+                    // Set the property
                     options.submission.assignment.description = description;
 
                     // Resolve the latch
                     latch.resolve();
                 });
 
-                // Check whether to allow text submissions
-                latch.add();
-                assignment.isAnswerText(function(err, answerText) {
-                    // Handle errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            next(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set whether to allow text submissions
-                    options.submission.assignment.allow_text = answerText;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Check whether to allow file submissions
-                latch.add();
-                assignment.isAnswerFile(function(err, answerFile) {
-                    // Handle errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            next(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set whether to allow file submissions
-                    options.submission.assignment.allow_file = answerFile;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
+                // Resolve the latch
+                latch.resolve();
             });
 
             // Get the user
@@ -306,7 +267,7 @@ module.exports = {
                 });
             });
 
-            // Fetch the answer text
+            // Get the text answer
             latch.add();
             submission.getAnswerText(function(err, answerText) {
                 // Call back errors
@@ -317,8 +278,26 @@ module.exports = {
                     return;
                 }
 
-                // Set the property
+                // Set the text answer
                 options.submission.answer_text = answerText;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Get the file answer
+            latch.add();
+            submission.getAnswerFile(function(err, answerFile) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the file answer
+                options.submission.answer_file = answerFile;
 
                 // Resolve the latch
                 latch.resolve();
@@ -328,29 +307,25 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'game/submission/edit', 'Inzending aanpassen', options);
+                    LayoutRenderer.render(req, res, next, 'game/submission/delete', 'Inzending verwijderen', options);
                 calledBack = true;
             });
         });
     },
 
     /**
-     * Post page for point creation.
+     * Post page for assignment creation.
      *
      * @param req Express request object.
      * @param res Express response object.
      * @param next Express next callback.
      */
     post: (req, res, next) => {
-        // Get the login field values
-        var submissionText = req.body['field-submission-text'];
-        var submissionFile = req.body['field-submission-file'];
-
         // Make sure the user has a valid session
         if(!req.requireValidSession())
             return;
 
-        // Get the game, user and assignment
+        // Get the game, user and submission
         const game = req.game;
         const user = req.session.user;
         const submission = req.submission;
@@ -367,10 +342,7 @@ module.exports = {
             return;
         }
 
-        // Store the module instance
-        const self = module.exports;
-
-        // The user must be an administrator
+        // The user must have management rights
         game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
@@ -384,118 +356,19 @@ module.exports = {
                 return;
             }
 
-            // Get the assignment for this submission
-            submission.getAssignment(function(err, assignment) {
-                // Make sure the assignment isn't null
-                if(assignment === null || assignment === undefined)
-                    err = new Error('Failed to fetch assignment for this submission.');
+            // TODO: Delete the live submission if there is any
 
+            // Delete the model
+            submission.delete(function(err) {
                 // Call back errors
                 if(err !== null) {
                     next(err);
                     return;
                 }
 
-                // Create a callback latch
-                var latch = new CallbackLatch();
-                var calledBack = false;
-
-                // Check whether to allow text and file answers
-                var allowText = false;
-                var allowFile = false;
-
-                // Check whether text answers are allowed
-                latch.add();
-                assignment.isAnswerText(function(err, result) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            next(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set whether text is allowed
-                    allowText = result;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Check whether file answers are allowed
-                latch.add();
-                assignment.isAnswerFile(function(err, result) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            next(err);
-                        calledBack = true;
-                        return;
-                    }
-
-                    // Set whether file is allowed
-                    allowFile = result;
-
-                    // Resolve the latch
-                    latch.resolve();
-                });
-
-                // Resolve the latch
-                latch.then(function() {
-                    // Process the text input
-                    if(allowText === null || allowText === undefined || !allowText || submissionText.trim().length <= 0)
-                        submissionText = null;
-                    if(allowFile === null || allowFile === undefined || !allowFile || submissionFile.trim().length <= 0)
-                        submissionFile = null;
-
-                    // Show an error if both values are null
-                    if(allowText === null && allowFile === null) {
-                        // Show an error page
-                        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
-                            message: 'Voer alstublieft een antwoord in om uw inzending aan te passen.\n\n' +
-                            'Ga alstublieft terug en vul een antwoord in.'
-                        });
-                        return;
-                    }
-
-                    // Reset the latch to it's identity
-                    latch.identity();
-
-                    // Set the text field
-                    latch.add();
-                    submission.setAnswerText(submissionText, function(err) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-
-                    // Set the file field
-                    latch.add();
-                    submission.setAnswerFile(submissionFile, function(err) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
-
-                    // Redirect to the submission info page
-                    latch.then(function() {
-                        res.redirect('/game/' + game.getIdHex() + '/submission/' + submission.getIdHex());
-                    });
-                });
+                // Go back to the submission overview page when done
+                // TODO: Maybe redirect to a different, possibly better page?
+                res.redirect('/game/' + game.getIdHex() + '/');
             });
         });
     },
