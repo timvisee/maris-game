@@ -307,7 +307,7 @@ module.exports = {
 
             // Check whether the user has management permissions for this submission
             latch.add();
-            submission.hasManagePermission(function(err, hasPermission) {
+            submission.hasManagePermission(user, function(err, hasPermission) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
