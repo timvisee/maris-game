@@ -75,8 +75,8 @@ module.exports = {
             return;
         }
 
-        // The player must have the ability to manage this game
-        game.hasManagePermission(user, function(err, hasPermission) {
+        // The player must have the ability to view this submission
+        submission.hasViewPermission(user, function(err, hasPermission) {
             // Handle errors
             if(err !== null) {
                 next(err);
@@ -110,7 +110,8 @@ module.exports = {
                         name: null
                     },
                     answer_text: null,
-                    answer_file: null
+                    answer_file: null,
+                    manage_permission: false
                 }
             };
 
@@ -299,6 +300,24 @@ module.exports = {
 
                 // Set the property
                 options.submission.answer_file = answerFile;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Check whether the user has management permissions for this submission
+            latch.add();
+            submission.hasManagePermission(function(err, hasPermission) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.submission.manage_permission = hasPermission;
 
                 // Resolve the latch
                 latch.resolve();

@@ -76,8 +76,8 @@ module.exports = {
             return;
         }
 
-        // The player must have the ability to manage this game
-        game.hasManagePermission(user, function(err, hasPermission) {
+        // The player must have submission management permission
+        submission.hasManagePermission(user, function(err, hasPermission) {
             // Handle errors
             if(err !== null) {
                 next(err);
@@ -370,8 +370,8 @@ module.exports = {
         // Store the module instance
         const self = module.exports;
 
-        // The user must be an administrator
-        game.hasManagePermission(user, function(err, hasPermission) {
+        // The player must have submission management permission
+        submission.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);
