@@ -32,8 +32,8 @@ var LayoutRenderer = require('../../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../../util/CallbackLatch');
 
-// Define the create module
-var create = {
+// Define and export the module
+module.exports = {
     /**
      * Route the player pages.
      *
@@ -80,6 +80,9 @@ var create = {
             return;
         }
 
+        // Store the module instance
+        const self = module.exports;
+
         // The player must have the ability to manage this game
         game.hasManagePermission(user, function(err, hasPermission) {
             // Handle errors
@@ -95,7 +98,7 @@ var create = {
             }
 
             // Check if an answer has already been submitted
-            create.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
+            self.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
                 // Handle errors
                 if(err !== null) {
                     next(err);
@@ -241,6 +244,9 @@ var create = {
             return;
         }
 
+        // Store the module instance
+        const self = module.exports;
+
         // The user must be an administrator
         game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
@@ -256,7 +262,7 @@ var create = {
             }
 
             // Check whether an answer has already been submitted, show the proper pages if that's the case
-            create.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
+            self.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -560,6 +566,3 @@ var create = {
      * @type {boolean} True if the request has been processed, false if not.
      */
 };
-
-// Export the module
-module.exports = create;
