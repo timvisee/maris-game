@@ -57,6 +57,10 @@ var ModelInstanceManager = function(modelConstructor) {
  * @return {Object} Model object instance.
  */
 ModelInstanceManager.prototype.create = function(id, localCache) {
+    // Return if the ID is null or undefined
+    if(id === null || id === undefined)
+        return id;
+
     // Parse the ID
     id = this._parseId(id);
 

@@ -241,7 +241,13 @@ module.exports = {
                     return;
                 }
 
-                // Set the user ID
+                // Return if the approval user is null or undefined
+                if(approveUser === undefined || approveUser === null) {
+                    latch.resolve();
+                    return;
+                }
+
+                // Set the approval user ID
                 options.submission.approve_user.id = approveUser.getIdHex();
 
                 // Get the name of the approval user
@@ -302,7 +308,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'game/submission/info', options.submission.name, options);
+                    LayoutRenderer.render(req, res, next, 'game/submission/info', 'Inzending', options);
                 calledBack = true;
             });
         });

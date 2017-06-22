@@ -12,7 +12,7 @@ block content
             tr: td Status
                 td
                     if submission.approve_state == 0
-                        span(style='color: gray; font-style: italic;') Niks
+                        span(style='color: gray; font-style: italic;') In afwachting
                     else if submission.approve_state == 1
                         span(style='color: green;') Goedgekeurd
                     else if submission.approve_state == 2
