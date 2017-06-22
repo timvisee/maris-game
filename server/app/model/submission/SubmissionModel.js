@@ -360,7 +360,7 @@ SubmissionModel.prototype.setApproveUser = function(approveUser, callback) {
  * @param {SubmissionModel~getApprovalStateCallback} callback Called with approval state or when an error occurred.
  */
 SubmissionModel.prototype.getApprovalState = function(callback) {
-    this.getField('approval_state', callback);
+    this.getField('approve_state', callback);
 };
 
 /**
@@ -378,7 +378,7 @@ SubmissionModel.prototype.getApprovalState = function(callback) {
  * @param {SubmissionModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
 SubmissionModel.prototype.setApprovalState = function(approvalState, callback) {
-    this.setField('approval_state', approvalState, callback);
+    this.setField('approve_state', approvalState, callback);
 };
 
 /**

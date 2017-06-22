@@ -95,7 +95,7 @@ var create = {
             }
 
             // Check if an answer has already been submitted
-            create.checkIfSubmitted(user, assignment, req, res, next, function(err, complete) {
+            create.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
                 // Handle errors
                 if(err !== null) {
                     next(err);
@@ -112,6 +112,9 @@ var create = {
                         leftButton: 'back'
                     },
                     created: false,
+                    game: {
+                        id: game.getIdHex()
+                    },
                     assignment: {
                         id: assignment.getIdHex(),
                         name: null,
@@ -253,7 +256,7 @@ var create = {
             }
 
             // Check whether an answer has already been submitted, show the proper pages if that's the case
-            create.checkIfSubmitted(user, assignment, req, res, next, function(err, complete) {
+            create.checkIfSubmitted(game, user, assignment, req, res, next, function(err, complete) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -401,6 +404,7 @@ var create = {
      * approved or rejected.
      * A page will be shown to the user telling why s/he can't submit a new answer.
      *
+     * @param {GameModel} game Current game.
      * @param {UserModel} user Current user.
      * @param {AssignmentModel} assignment Current assignment.
      * @param {object} req Express request object.
@@ -408,12 +412,18 @@ var create = {
      * @param {function} next Express next callback.
      * @param {checkIfSubmittedCallback} callback Called with the result, or when an error occurred.
      */
-    checkIfSubmitted: function(user, assignment, req, res, next, callback) {
+    checkIfSubmitted: function(game, user, assignment, req, res, next, callback) {
         // Get all submissions for this user, on this assignment
         Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
             // Call back errors
             if (err !== null) {
                 callback(err);
+                return;
+            }
+
+            // Call back if we didn't find any submissions
+            if(submissions.length <= 0) {
+                callback(null, false);
                 return;
             }
 
@@ -431,13 +441,13 @@ var create = {
 
             // Separate each submission in their own category
             latch.add(submissions.length);
-            submissions.forEach(function (submission) {
+            submissions.forEach(function(submission) {
                 // Just stop when we've already called back
                 if(calledBack)
                     return;
 
                 // Get the state for the submission
-                submission.getApprovalState(function (err, state) {
+                submission.getApprovalState(function(err, state) {
                     // Call back errors
                     if (err !== null) {
                         callback(err);
@@ -475,58 +485,70 @@ var create = {
                 latch.resolve();
             });
 
-            // Don't submit answers if there's already one pending, show a button to view the pending submission
-            if (pending.length > 0) {
-                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending in afwachting', {
-                    message: 'U heeft al een antwoord ingezonden, deze is nu in afwachting voor een beoordeling van een docent.\n\n' +
-                    'Ga terug of bekijk de inzending.',
-                    hideBackButton: false,
-                    submission: {
-                        id: pending[0].getIdHex()
-                    }
-                });
+            // Process the submissions when all have been fetched
+            latch.then(function() {
+                // Don't submit answers if there's already one pending, show a button to view the pending submission
+                if (pending.length > 0) {
+                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending in afwachting', {
+                        message: 'U heeft al een antwoord ingezonden, en is nu in afwachting voor een beoordeling van een docent.\n\n' +
+                        'Ga terug of bekijk de inzending.',
+                        hideBackButton: false,
+                        game: {
+                            id: game.getIdHex()
+                        },
+                        submission: {
+                            id: pending[0].getIdHex()
+                        }
+                    });
 
-                // Call back and return
-                callback(null, true);
-                return;
-            }
+                    // Call back and return
+                    callback(null, true);
+                    return;
+                }
 
-            // Don't submit answers if there's already one approved, show a button to view the approved submission
-            if (approved.length > 0) {
-                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending goedgekeurd', {
-                    message: 'Uw inzending voor deze opdracht is al goedgekeurd.\n\n' +
-                    'Ga terug of bekijk de inzending.',
-                    hideBackButton: false,
-                    submission: {
-                        id: approved[0].getIdHex()
-                    }
-                });
+                // Don't submit answers if there's already one approved, show a button to view the approved submission
+                if (approved.length > 0) {
+                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending goedgekeurd', {
+                        message: 'Uw inzending voor deze opdracht is al goedgekeurd.\n\n' +
+                        'Ga terug of bekijk de inzending.',
+                        hideBackButton: false,
+                        game: {
+                            id: game.getIdHex()
+                        },
+                        submission: {
+                            id: approved[0].getIdHex()
+                        }
+                    });
 
-                // Call back and return
-                callback(null, true);
-                return;
-            }
+                    // Call back and return
+                    callback(null, true);
+                    return;
+                }
 
-            // Don't submit answers if there's already one rejected, show a button to view the rejected submission,
-            // and the user can't retry
-            if (rejected.length > 0 && !canRetry) {
-                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending afgekeurd', {
-                    message: 'Uw inzending voor deze opdracht is afgekeurd.\n\n' +
-                    'Voor deze opdracht kunt u geen nieuw antwoord inzenden.\n\n' +
-                    'Ga terug of bekijk de inzending.',
-                    hideBackButton: false,
-                    submission: {
-                        id: rejected[0].getIdHex()
-                    }
-                });
+                // Don't submit answers if there's already one rejected, show a button to view the rejected submission,
+                // and the user can't retry
+                if (rejected.length > 0 && !canRetry) {
+                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending afgekeurd', {
+                        message: 'Uw inzending voor deze opdracht is afgekeurd.\n\n' +
+                        'Voor deze opdracht kunt u geen nieuw antwoord inzenden.\n\n' +
+                        'Ga terug of bekijk de inzending.',
+                        hideBackButton: false,
+                        game: {
+                            id: game.getIdHex()
+                        },
+                        submission: {
+                            id: rejected[0].getIdHex()
+                        }
+                    });
 
-                // Call back and return
-                callback(null, true);
-                return;
-            }
+                    // Call back and return
+                    callback(null, true);
+                    return;
+                }
 
-            // Call back
-            callback(null, false);
+                // Call back
+                callback(null, false);
+            });
         });
     }
 

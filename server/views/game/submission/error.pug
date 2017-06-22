@@ -1,4 +1,4 @@
-extends base/page
+extends ../../base/page
 
 block content
     //- Print the status message
@@ -8,9 +8,9 @@ block content
     .button-list
         //- Show the back button
         unless hideBackButton
-            a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug') Ga terug
+            a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug')
                 i.zmdi.zmdi-arrow-back.ui-pull-left
-                | &nbsp;Ga terug
+                | &nbsp;&nbsp;Ga terug
 
         //- Show the submission view button
         unless submission.id == null
