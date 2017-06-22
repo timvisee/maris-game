@@ -16,7 +16,7 @@ block content
         form(method='POST', action=page.url + '/#')
             if assignment.allow_text
                 label(for='field-submission-text') Antwoord:
-                textarea(name='field-submission-text', id='field-submission-text', value='', data-clear-btn='true', data-randomize='true')
+                textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')
 
             if assignment.allow_file
                 label(for='field-submission-text') Bestand:
