@@ -444,10 +444,20 @@ module.exports = {
                 // Resolve the latch
                 latch.then(function() {
                     // Process the text input
-                    if(!allowText || submissionText.trim().length <= 0)
+                    if(allowText === null || allowText === undefined || !allowText || submissionText.trim().length <= 0)
                         submissionText = null;
-                    if(!allowFile || submissionFile.trim().length <= 0)
+                    if(allowFile === null || allowFile === undefined || !allowFile || submissionFile.trim().length <= 0)
                         submissionFile = null;
+
+                    // Show an error if both values are null
+                    if(allowText === null && allowFile === null) {
+                        // Show an error page
+                        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                            message: 'Voer alstublieft een antwoord in om uw inzending aan te passen.\n\n' +
+                            'Ga alstublieft terug en vul een antwoord in.'
+                        });
+                        return;
+                    }
 
                     // Reset the latch to it's identity
                     latch.identity();

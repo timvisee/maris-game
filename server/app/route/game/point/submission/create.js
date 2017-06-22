@@ -322,10 +322,20 @@ module.exports = {
                 // Resolve the latch
                 latch.then(function() {
                     // Set the text and file values to null if they're not allowed
-                    if(!allowText)
+                    if(allowText === null || allowText === undefined || !allowText || allowText.trim().length <= 0)
                         submissionText = null;
-                    if(!allowFile)
+                    if(allowFile === null || allowFile === undefined || !allowFile || allowFile.trim().length <= 0)
                         submissionFile = null;
+
+                    // Show an error if both values are null
+                    if(allowText === null && allowFile === null) {
+                        // Show an error page
+                        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                            message: 'Voer alstublieft een antwoord in om in te zenden.\n\n' +
+                            'Ga alstublieft terug en vul een antwoord in.'
+                        });
+                        return;
+                    }
 
                     // Create the point
                     SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.PENDING, submissionText, submissionFile, function(err, submissionModel) {
