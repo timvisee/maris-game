@@ -27,6 +27,7 @@ var SubmissionDatabase = require('./SubmissionDatabase');
 var BaseModel = require('../../database/BaseModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 var Coordinate = require('../../coordinate/Coordinate');
+var ApprovalState = require("./ApprovalState.js");
 
 /**
  * SubmissionModel class.
@@ -567,6 +568,53 @@ SubmissionModel.prototype.hasViewPermission = function(user, callback) {
  * @callback SubmissionModel~hasViewPermissionCallback
  * @param {Error|null} Error instance if an error occurred.
  * @param {boolean} True if the user has permission to view the submission, false if not.
+ */
+
+/**
+ * Check whether the given user has permission to edit this submission.
+ * A user will have permission if it's the submitter of the submission, if it's the the host of the game,
+ * or if the user is administrator.
+ * If the user is null or undefined, false is always called back.
+ *
+ * @param {UserModel|ObjectId|string|null|undefined} user User to check.
+ * @param {SubmissionModel~hasEditPermissionCallback} callback Called with the result or when an error occurred.
+ */
+SubmissionModel.prototype.hasEditPermission = function(user, callback) {
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Call back if the user is null or undefined
+    if(user === null || user === undefined) {
+        callback(null, false);
+        return;
+    }
+
+    // Store a reference to this
+    const self = this;
+
+    // Get the approval state
+    this.getApprovalState(function(err, approvalState) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Determine whether to fall back to the management or approval permissions depending on the approval state
+        if(approvalState === ApprovalState.PENDING)
+            self.hasManagePermission(user, callback);
+        else
+            self.hasApprovalPermission(user, callback);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback SubmissionModel~hasEditPermissionCallback
+ * @param {Error|null} Error instance if an error occurred.
+ * @param {boolean} True if the user has permission to edit the submission, false if not.
  */
 
 /**

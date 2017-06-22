@@ -78,7 +78,7 @@ module.exports = {
         }
 
         // The player must have submission management permission
-        submission.hasManagePermission(user, function(err, hasPermission) {
+        submission.hasEditPermission(user, function(err, hasPermission) {
             // Handle errors
             if(err !== null) {
                 next(err);
@@ -372,7 +372,7 @@ module.exports = {
         const self = module.exports;
 
         // The player must have submission management permission
-        submission.hasManagePermission(user, function(err, hasPermission) {
+        submission.hasEditPermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);

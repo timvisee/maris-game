@@ -26,6 +26,7 @@ var Core = require('../../../../Core');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../util/CallbackLatch');
+var ApprovalState = require("../../../model/submission/ApprovalState.js");
 
 // Export the module
 module.exports = {
@@ -111,6 +112,7 @@ module.exports = {
                     },
                     answer_text: null,
                     answer_file: null,
+                    edit_permission: false,
                     manage_permission: false,
                     approval_permission: false
                 }
@@ -301,6 +303,24 @@ module.exports = {
 
                 // Set the property
                 options.submission.answer_file = answerFile;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Check whether the user has edit permissions for this submission
+            latch.add();
+            submission.hasEditPermission(user, function(err, hasPermission) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.submission.edit_permission = hasPermission;
 
                 // Resolve the latch
                 latch.resolve();
