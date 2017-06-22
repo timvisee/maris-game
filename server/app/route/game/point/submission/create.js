@@ -32,9 +32,8 @@ var LayoutRenderer = require('../../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../../util/CallbackLatch');
 
-// Export the module
-module.exports = {
-
+// Define the create module
+var create = {
     /**
      * Route the player pages.
      *
@@ -95,99 +94,114 @@ module.exports = {
                 return;
             }
 
-            // Create a page options object
-            var options = {
-                page: {
-                    leftButton: 'back'
-                },
-                created: false,
-                assignment: {
-                    id: assignment.getIdHex(),
-                    name: null,
-                    description: null,
-                    allow_text: true,
-                    allow_file: false
-                }
-            };
-
-            // Create a latch
-            var latch = new CallbackLatch();
-            var calledBack = false;
-
-            // Get the assignment name
-            latch.add();
-            assignment.getName(function(err, name) {
+            // Check if an answer has already been submitted
+            create.checkIfSubmitted(user, assignment, req, res, next, function(err, complete) {
                 // Handle errors
                 if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
+                    next(err);
                     return;
                 }
 
-                // Set the assignment name
-                options.assignment.name = name;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Get the assignment description
-            latch.add();
-            assignment.getDescription(function(err, description) {
-                // Handle errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
+                // Stop if already complete
+                if(complete)
                     return;
-                }
 
-                // Set the assignment description
-                options.assignment.description = description;
+                // Create a page options object
+                var options = {
+                    page: {
+                        leftButton: 'back'
+                    },
+                    created: false,
+                    assignment: {
+                        id: assignment.getIdHex(),
+                        name: null,
+                        description: null,
+                        allow_text: true,
+                        allow_file: false
+                    }
+                };
 
-                // Resolve the latch
-                latch.resolve();
+                // Create a latch
+                var latch = new CallbackLatch();
+                var calledBack = false;
+
+                // Get the assignment name
+                latch.add();
+                assignment.getName(function(err, name) {
+                    // Handle errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the assignment name
+                    options.assignment.name = name;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Get the assignment description
+                latch.add();
+                assignment.getDescription(function(err, description) {
+                    // Handle errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the assignment description
+                    options.assignment.description = description;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Check whether to allow text submissions
+                latch.add();
+                assignment.isAnswerText(function(err, answerText) {
+                    // Handle errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether to allow text submissions
+                    options.assignment.allow_text = answerText;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Check whether to allow file submissions
+                latch.add();
+                assignment.isAnswerFile(function(err, answerFile) {
+                    // Handle errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether to allow file submissions
+                    options.assignment.allow_file = answerFile;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Show the submission creation page
+                latch.then(function() {
+                    LayoutRenderer.render(req, res, next, 'game/submission/submit', 'Antwoord inzenden', options);
+                });
             });
-
-            // Check whether to allow text submissions
-            latch.add();
-            assignment.isAnswerText(function(err, answerText) {
-                // Handle errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set whether to allow text submissions
-                options.assignment.allow_text = answerText;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Check whether to allow file submissions
-            latch.add();
-            assignment.isAnswerFile(function(err, answerFile) {
-                // Handle errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set whether to allow file submissions
-                options.assignment.allow_file = answerFile;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Show the submission creation page
-            LayoutRenderer.render(req, res, next, 'game/submission/submit', 'Antwoord inzenden', options);
         });
     },
 
@@ -238,88 +252,292 @@ module.exports = {
                 return;
             }
 
-            // TODO: Make sure there isn't a submission already.
+            // Check whether an answer has already been submitted, show the proper pages if that's the case
+            create.checkIfSubmitted(user, assignment, req, res, next, function(err, complete) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
 
-            // Check whether to allow text and file answers
-            var allowText = false;
-            var allowFile = false;
+                // Return if completed
+                if(complete)
+                    return;
+
+                // Create a callback latch
+                var latch = new CallbackLatch();
+                var calledBack = false;
+
+                // Check whether to allow text and file answers
+                var allowText = false;
+                var allowFile = false;
+
+                // Check whether text answers are allowed
+                latch.add();
+                assignment.isAnswerText(function(err, result) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether text is allowed
+                    allowText = result;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Check whether file answers are allowed
+                latch.add();
+                assignment.isAnswerFile(function(err, result) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether file is allowed
+                    allowFile = result;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Resolve the latch
+                latch.then(function() {
+                    // Set the text and file values to null if they're not allowed
+                    if(!allowText)
+                        submissionText = null;
+                    if(!allowFile)
+                        submissionFile = null;
+
+                    // Create the point
+                    SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.PENDING, submissionText, submissionFile, function(err, submissionModel) {
+                        // Call back errors
+                        if(err !== null) {
+                            next(err);
+                            return;
+                        }
+
+                        // Create a page options object
+                        var options = {
+                            page: {
+                                leftButton: 'back'
+                            },
+                            created: true,
+                            game: {
+                                id: game.getIdHex()
+                            },
+                            assignment: {
+                                id: null,
+                                name: '',
+                                description: ''
+                            },
+                            submission: {
+                                id: submissionModel.getIdHex(),
+                                text: submissionText,
+                                file: submissionFile
+                            }
+                        };
+
+                        // Reset the latch to it's identity
+                        latch.identity();
+
+                        // Get the assignment name
+                        latch.add();
+                        assignment.getName(function(err, name) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the name
+                            options.assignment.name = name;
+
+                            // Resolve the latch
+                            latch.resolve();
+                        });
+
+                        // Get the assignment description
+                        latch.add();
+                        assignment.getDescription(function(err, description) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the description
+                            options.assignment.description = description;
+
+                            // Resolve the latch
+                            latch.resolve();
+                        });
+
+                        // Show the game creation page
+                        latch.then(function() {
+                            LayoutRenderer.render(req, res, next, 'game/submission/submit', 'Antwoord ingezonden', options);
+                        });
+                    });
+                });
+            });
+        });
+    },
+
+    /**
+     * Check whether the user is able to submit new answers, because there might be a submission pending,
+     * approved or rejected.
+     * A page will be shown to the user telling why s/he can't submit a new answer.
+     *
+     * @param {UserModel} user Current user.
+     * @param {AssignmentModel} assignment Current assignment.
+     * @param {object} req Express request object.
+     * @param {object} res Express response object.
+     * @param {function} next Express next callback.
+     * @param {checkIfSubmittedCallback} callback Called with the result, or when an error occurred.
+     */
+    checkIfSubmitted: function(user, assignment, req, res, next, callback) {
+        // Get all submissions for this user, on this assignment
+        Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
+            // Call back errors
+            if (err !== null) {
+                callback(err);
+                return;
+            }
+
+            // Create a list of pending, approved and rejected submissions
+            var pending = [];
+            var approved = [];
+            var rejected = [];
+
+            // Check whether the user has the ability to retry this assignment
+            var canRetry = false;
 
             // Create a callback latch
             var latch = new CallbackLatch();
             var calledBack = false;
 
-            // Check whether text answers are allowed
-            latch.add();
-            assignment.isAnswerText(function(err, result) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
+            // Separate each submission in their own category
+            latch.add(submissions.length);
+            submissions.forEach(function (submission) {
+                // Just stop when we've already called back
+                if(calledBack)
                     return;
-                }
 
-                // Set whether text is allowed
-                allowText = result;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Check whether file answers are allowed
-            latch.add();
-            assignment.isAnswerFile(function(err, result) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        next(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set whether file is allowed
-                allowFile = result;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Resolve the latch
-            latch.then(function() {
-                // Set the text and file values to null if they're not allowed
-                if(!allowText)
-                    submissionText = null;
-                if(!allowFile)
-                    submissionFile = null;
-
-                // Create the point
-                SubmissionDatabase.addSubmission(assignment, user, null, ApprovalState.PENDING, submissionText, submissionFile, function(err, submissionModel) {
+                // Get the state for the submission
+                submission.getApprovalState(function (err, state) {
                     // Call back errors
-                    if(err !== null) {
-                        next(err);
+                    if (err !== null) {
+                        callback(err);
                         return;
                     }
 
-                    // Create a page options object
-                    var options = {
-                        page: {
-                            leftButton: 'back'
-                        },
-                        created: true,
-                        game: {
-                            id: game.getIdHex()
-                        },
-                        submission: {
-                            id: submissionModel.getIdHex(),
-                            text: submissionText,
-                            file: submissionFile
-                        }
-                    };
+                    // Put the submission in the proper section
+                    if (state === ApprovalState.PENDING)
+                        pending.push(submission);
+                    else if (state === ApprovalState.APPROVED)
+                        approved.push(submission);
+                    else if (state === ApprovalState.REJECTED)
+                        rejected.push(submission);
 
-                    // Show the game creation page
-                    LayoutRenderer.render(req, res, next, 'game/point/create', 'Antwoord ingezonden', options);
+                    // Resolve the latch
+                    latch.resolve();
                 });
             });
+
+            // Check whether the user can retry
+            latch.add();
+            assignment.isRetry(function (err, result) {
+                // Call back errors
+                if (err !== null) {
+                    if (!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set whether the user can retry
+                canRetry = result;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Don't submit answers if there's already one pending, show a button to view the pending submission
+            if (pending.length > 0) {
+                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending in afwachting', {
+                    message: 'U heeft al een antwoord ingezonden, deze is nu in afwachting voor een beoordeling van een docent.\n\n' +
+                    'Ga terug of bekijk de inzending.',
+                    hideBackButton: false,
+                    submission: {
+                        id: pending[0].getIdHex()
+                    }
+                });
+
+                // Call back and return
+                callback(null, true);
+                return;
+            }
+
+            // Don't submit answers if there's already one approved, show a button to view the approved submission
+            if (approved.length > 0) {
+                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending goedgekeurd', {
+                    message: 'Uw inzending voor deze opdracht is al goedgekeurd.\n\n' +
+                    'Ga terug of bekijk de inzending.',
+                    hideBackButton: false,
+                    submission: {
+                        id: approved[0].getIdHex()
+                    }
+                });
+
+                // Call back and return
+                callback(null, true);
+                return;
+            }
+
+            // Don't submit answers if there's already one rejected, show a button to view the rejected submission,
+            // and the user can't retry
+            if (rejected.length > 0 && !canRetry) {
+                LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending afgekeurd', {
+                    message: 'Uw inzending voor deze opdracht is afgekeurd.\n\n' +
+                    'Voor deze opdracht kunt u geen nieuw antwoord inzenden.\n\n' +
+                    'Ga terug of bekijk de inzending.',
+                    hideBackButton: false,
+                    submission: {
+                        id: rejected[0].getIdHex()
+                    }
+                });
+
+                // Call back and return
+                callback(null, true);
+                return;
+            }
+
+            // Call back
+            callback(null, false);
         });
-    },
+    }
+
+    /**
+     * Called with the result, or when an error occurred.
+     *
+     * @callback checkIfSubmittedCallback
+     * @type {Error|null} Error if an error occurred, false if not.
+     * @type {boolean} True if the request has been processed, false if not.
+     */
 };
+
+// Export the module
+module.exports = create;

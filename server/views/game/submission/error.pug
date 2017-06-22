@@ -1,0 +1,18 @@
+extends base/page
+
+block content
+    //- Print the status message
+    p: +format(message)
+
+    br
+    .button-list
+        //- Show the back button
+        unless hideBackButton
+            a.ui-btn.ui-btn-raised.clr-primary(href='/', data-rel='back', data-direction='reverse', title='Ga terug') Ga terug
+                i.zmdi.zmdi-arrow-back.ui-pull-left
+                | &nbsp;Ga terug
+
+        //- Show the submission view button
+        unless submission.id == null
+            a.ui-btn(href='/' + game.id + '/submission/' + submission.id, title='Inzending bekijken') Inzending bekijken
+
