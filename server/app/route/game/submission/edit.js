@@ -25,6 +25,7 @@ var crypto = require('crypto');
 var Core = require('../../../../Core');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../router/middleware/SubmissionParam');
+var SubmissionDatabase = require('../../../model/submission/SubmissionDatabase');
 var CallbackLatch = require('../../../util/CallbackLatch');
 
 // Export the module
@@ -44,6 +45,7 @@ module.exports = {
 
         // Route the submissions list
         router.get('/:game/submission/:submission/edit', self.get);
+        router.post('/:game/submission/:submission/edit', self.post);
     },
 
     /**
@@ -329,6 +331,162 @@ module.exports = {
                 if(!calledBack)
                     LayoutRenderer.render(req, res, next, 'game/submission/edit', 'Inzending aanpassen', options);
                 calledBack = true;
+            });
+        });
+    },
+
+    /**
+     * Post page for point creation.
+     *
+     * @param req Express request object.
+     * @param res Express response object.
+     * @param next Express next callback.
+     */
+    post: (req, res, next) => {
+        // Get the login field values
+        var submissionText = req.body['field-submission-text'];
+        var submissionFile = req.body['field-submission-file'];
+
+        // Make sure the user has a valid session
+        if(!req.requireValidSession())
+            return;
+
+        // Get the game, user and assignment
+        const game = req.game;
+        const user = req.session.user;
+        const submission = req.submission;
+
+        // Call back if the game is invalid
+        if(game === undefined) {
+            next(new Error('Ongeldig spel.'));
+            return;
+        }
+
+        // Call back if the submission is invalid
+        if(submission === undefined) {
+            next(new Error('Ongeldige inzending.'));
+            return;
+        }
+
+        // Store the module instance
+        const self = module.exports;
+
+        // The user must be an administrator
+        game.hasManagePermission(user, function(err, hasPermission) {
+            // Call back errors
+            if(err !== null) {
+                next(err);
+                return;
+            }
+
+            // Make sure the user is an administrator
+            if(!hasPermission) {
+                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                return;
+            }
+
+            // Get the assignment for this submission
+            submission.getAssignment(function(err, assignment) {
+                // Make sure the assignment isn't null
+                if(assignment === null || assignment === undefined)
+                    err = new Error('Failed to fetch assignment for this submission.');
+
+                // Call back errors
+                if(err !== null) {
+                    next(err);
+                    return;
+                }
+
+                // Create a callback latch
+                var latch = new CallbackLatch();
+                var calledBack = false;
+
+                // Check whether to allow text and file answers
+                var allowText = false;
+                var allowFile = false;
+
+                // Check whether text answers are allowed
+                latch.add();
+                assignment.isAnswerText(function(err, result) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether text is allowed
+                    allowText = result;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Check whether file answers are allowed
+                latch.add();
+                assignment.isAnswerFile(function(err, result) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether file is allowed
+                    allowFile = result;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Resolve the latch
+                latch.then(function() {
+                    // Process the text input
+                    if(!allowText || submissionText.trim().length <= 0)
+                        submissionText = null;
+                    if(!allowFile || submissionFile.trim().length <= 0)
+                        submissionFile = null;
+
+                    // Reset the latch to it's identity
+                    latch.identity();
+
+                    // Set the text field
+                    latch.add();
+                    submission.setAnswerText(submissionText, function(err) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                next(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Resolve the latch
+                        latch.resolve();
+                    });
+
+                    // Set the file field
+                    latch.add();
+                    submission.setAnswerFile(submissionFile, function(err) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                next(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Resolve the latch
+                        latch.resolve();
+                    });
+
+                    // Redirect to the submission info page
+                    latch.then(function() {
+                        res.redirect('/game/' + game.getIdHex() + '/submission/' + submission.getIdHex());
+                    });
+                });
             });
         });
     },
