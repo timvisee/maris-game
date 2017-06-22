@@ -191,27 +191,22 @@ SubmissionModelManager.prototype.getSubmissionById = function(id, callback) {
 /**
  * Get all submissions for the given game or user.
  *
- * @param {GameModel} [game] Game to get the submissions for.
  * @param {UserModel} [user] User to get the submissions for.
  * @param {AssignmentModel} [assignment] Assignment to get the submissions for.
  * @param {SubmissionModelManager~getSubmissionsCallback} callback Called with the result or when an error occurred.
  */
 // TODO: Add Redis caching to this function?
-SubmissionModelManager.prototype.getSubmissions = function(game, user, assignment, callback) {
+SubmissionModelManager.prototype.getSubmissions = function(user, assignment, callback) {
     // Create the query object
     var queryObject = {};
 
     // Convert undefined values to null
-    if(game === undefined)
-        game = null;
     if(user === undefined)
         user = null;
     if(assignment === undefined)
         user = null;
 
-    // Add the game and user to the query object if specified
-    if(game !== null)
-        queryObject.game_id = game.getId();
+    // Add the user and assignment to the query object if specified
     if(user !== null)
         queryObject.user_id = user.getId();
     if(assignment !== null)
@@ -221,8 +216,7 @@ SubmissionModelManager.prototype.getSubmissions = function(game, user, assignmen
     var latch = new CallbackLatch();
 
     // Determine the Redis cache key
-    var redisCacheKey = REDIS_KEY_ROOT + ':' + (game !== null ? game.getIdHex() : '0' ) +
-        ':' + (user !== null ? user.getIdHex() : '0' ) +
+    var redisCacheKey = REDIS_KEY_ROOT + ':' + (user !== null ? user.getIdHex() : '0' ) +
         ':' + (user !== null ? user.getIdHex() : '0' ) + ':getSubmissions';
 
     // Store this instance
@@ -320,7 +314,7 @@ SubmissionModelManager.prototype.getSubmissions = function(game, user, assignmen
 };
 
 /**
- * Called with the array of submissions for the given game and or user.
+ * Called with the array of submissions for the given user and or assignment.
  *
  * @callback SubmissionModelManager~getSubmissionsCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
