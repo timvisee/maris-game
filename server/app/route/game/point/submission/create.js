@@ -322,9 +322,9 @@ module.exports = {
                 // Resolve the latch
                 latch.then(function() {
                     // Set the text and file values to null if they're not allowed
-                    if(allowText === null || allowText === undefined || !allowText || allowText.trim().length <= 0)
+                    if(allowText === null || allowText === undefined || !allowText || (_.isString(allowText) && allowText.trim().length <= 0))
                         submissionText = null;
-                    if(allowFile === null || allowFile === undefined || !allowFile || allowFile.trim().length <= 0)
+                    if(allowFile === null || allowFile === undefined || !allowFile || (_.isString(allowFile) && allowFile.trim().length <= 0))
                         submissionFile = null;
 
                     // Show an error if both values are null

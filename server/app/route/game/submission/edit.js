@@ -20,6 +20,7 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var crypto = require('crypto');
 
 var Core = require('../../../../Core');
@@ -443,9 +444,9 @@ module.exports = {
                 // Resolve the latch
                 latch.then(function() {
                     // Process the text input
-                    if(allowText === null || allowText === undefined || !allowText || submissionText.trim().length <= 0)
+                    if(allowText === null || allowText === undefined || !allowText || (_.isString(submissionText) && submissionText.trim().length <= 0))
                         submissionText = null;
-                    if(allowFile === null || allowFile === undefined || !allowFile || submissionFile.trim().length <= 0)
+                    if(allowFile === null || allowFile === undefined || !allowFile || (_.isString(submissionFile) && submissionFile.trim().length <= 0))
                         submissionFile = null;
 
                     // Show an error if both values are null
