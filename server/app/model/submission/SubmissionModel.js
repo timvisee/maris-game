@@ -529,7 +529,37 @@ SubmissionModel.prototype.delete = function(callback) {
  * @param {UserModel|ObjectId|string|null|undefined} user User to check.
  * @param {SubmissionModel~hasViewPermissionCallback} callback Called with the result or when an error occurred.
  */
-SubmissionModel.prototype.hasViewPermission = SubmissionModel.prototype.hasManagePermission;
+SubmissionModel.prototype.hasViewPermission = function(user, callback) {
+    // Create a reference to this
+    const self = this;
+
+    // Get the game
+    self.getGame(function(err, game) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Get the game state
+        game.getStage(function(err, stage) {
+            // Call back errors
+            if(err !== null) {
+                callback(err);
+                return;
+            }
+
+            // Call back true if the stage is 2
+            if(stage === 2) {
+                callback(null, true);
+                return;
+            }
+
+            // Check whether the user has management permissions
+            self.hasManagePermission(user, callback);
+        });
+    });
+};
 
 /**
  * Called with the result or when an error occurred.
