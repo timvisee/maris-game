@@ -1,6 +1,17 @@
 extends ../../base/page
 
 block content
+    // Show the approval buttons
+    if submission.approval_permission
+        .button-list
+            a.ui-btn.clr-btn-green.clr-btn-accent-green(href=page.url + '/approve/accept', title='Inzending accepteren')
+                i.zmdi.zmdi-check
+                | &nbsp;&nbsp;Inzending goedkeuren
+            a.ui-btn.clr-btn-red.clr-btn-accent-red(href=page.url + '/approve/reject', title='Inzending afwijzen')
+                i.zmdi.zmdi-close
+                | &nbsp;&nbsp;Inzending afkeuren
+            hr
+
     div(align="center")
         table.table-list.ui-responsive
             tr: td Voor
@@ -27,7 +38,7 @@ block content
                 tr: td Bestand
                     td= submission.answer_file
 
-    // Show management buttons if the user has permission to manage
+    // Show management buttons
     if submission.manage_permission
         br
         .button-list

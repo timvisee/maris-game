@@ -34,6 +34,7 @@ var pageAssignments = require('./assignment/index');
 var pageSubmissionInfo = require('./submission/info');
 var pageSubmissionEdit = require('./submission/edit');
 var pageSubmissionDelete = require('./submission/delete');
+var pageSubmissionApprove = require('./submission/approve');
 var pageManage = require('./manage');
 
 var Core = require('../../../Core');
@@ -74,6 +75,9 @@ pageSubmissionEdit.route(router);
 
 // Route the submission delete page
 pageSubmissionDelete.route(router);
+
+// Route the submission approval page
+pageSubmissionApprove.route(router);
 
 // Route the game management page
 pageManage.route(router);

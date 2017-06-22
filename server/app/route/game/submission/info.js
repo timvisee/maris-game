@@ -111,7 +111,8 @@ module.exports = {
                     },
                     answer_text: null,
                     answer_file: null,
-                    manage_permission: false
+                    manage_permission: false,
+                    approval_permission: false
                 }
             };
 
@@ -318,6 +319,24 @@ module.exports = {
 
                 // Set the property
                 options.submission.manage_permission = hasPermission;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Check whether the user has approval permissions for this submission
+            latch.add();
+            submission.hasApprovalPermission(user, function(err, hasPermission) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.submission.approval_permission = hasPermission;
 
                 // Resolve the latch
                 latch.resolve();

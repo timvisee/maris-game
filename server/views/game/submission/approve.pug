@@ -1,0 +1,42 @@
+extends ../../base/page
+
+block content
+    div(align="center")
+        if approval_state == 0
+            p Weet u zeker dat u de goedkeuring van deze inzending ongedaan wilt maken?
+        else if approal_state == 1
+            p Weet u zeker dat u deze inzending wilt goedkeuren?
+        else if approval_state == 2
+            p Weet u zeker dat u deze inzending wilt goedkeuren?
+
+        form(method='POST', action=page.url + '/#')
+            table.table-list.ui-responsive
+                tr: td Voor
+                    td= submission.assignment.name
+                tr: td Beschrijving
+                    td= submission.assignment.description
+                unless submission.answer_text == null
+                    tr: td Antwoord
+                        td= submission.answer_text
+                unless submission.answer_file == null
+                    tr: td Bestand
+                        td= submission.answer_file
+
+            br
+            .button-list
+                if approval_state == 0
+                    button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, goedkeuring ongedaan maken', data-ajax='false')
+                        i.zmdi.zmdi-undo
+                        | &nbsp;&nbsp;Ja, ongedaan maken
+                else if approval_state == 1
+                    button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, keur de inzending goed', data-ajax='false')
+                        i.zmdi.zmdi-check
+                        | &nbsp;&nbsp;Ja, inzending goedkeuren
+                else if approval_state == 2
+                    button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, keur de inzending af', data-ajax='false')
+                        i.zmdi.zmdi-close
+                        | &nbsp;&nbsp;Ja, inzending afkeuren
+
+                a.ui-btn(href='#', data-rel='back', data-direction='reverse', title='Nee, ga terug')
+                    i.zmdi.zmdi-arrow-back
+                    | &nbsp;&nbsp;Nee, ga terug
