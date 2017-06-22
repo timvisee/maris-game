@@ -23,14 +23,14 @@
 var _ = require('lodash');
 var crypto = require('crypto');
 
-var Core = require('../../../../Core');
-var Coordinate = require('../../../coordinate/Coordinate');
-var Validator = require('../../../validator/Validator');
-var AssignmentDatabase = require('../../../model/assignment/AssignmentDatabase');
-var LayoutRenderer = require('../../../layout/LayoutRenderer');
-var SubmissionParam = require('../../../router/middleware/SubmissionParam');
-var CallbackLatch = require('../../../util/CallbackLatch');
-var ApprovalState = require('../../../model/submission/ApprovalState');
+var Core = require('../../../../../Core');
+var Coordinate = require('../../../../coordinate/Coordinate');
+var Validator = require('../../../../validator/Validator');
+var AssignmentDatabase = require('../../../../model/assignment/AssignmentDatabase');
+var LayoutRenderer = require('../../../../layout/LayoutRenderer');
+var SubmissionParam = require('../../../../router/middleware/SubmissionParam');
+var CallbackLatch = require('../../../../util/CallbackLatch');
+var ApprovalState = require('../../../../model/submission/ApprovalState');
 
 // Export the module
 module.exports = {
@@ -119,7 +119,7 @@ module.exports = {
                         answer_text: null,
                         answer_file: null
                     },
-                    approval_state: approvalState
+                    approve_state: approvalState
                 };
 
                 // Create a callback latch for the games properties
@@ -224,7 +224,7 @@ module.exports = {
 
                     // Render the game page if we didn't call back yet
                     if(!calledBack)
-                        LayoutRenderer.render(req, res, next, 'game/submission/approve', pageTitle, options);
+                        LayoutRenderer.render(req, res, next, 'game/submission/approve/approve', pageTitle, options);
                     calledBack = true;
                 });
             });

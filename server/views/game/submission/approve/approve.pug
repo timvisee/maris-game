@@ -1,13 +1,13 @@
-extends ../../base/page
+extends ../../../base/page
 
 block content
     div(align="center")
-        if approval_state == 0
+        if approve_state == 0
             p Weet u zeker dat u de goedkeuring van deze inzending ongedaan wilt maken?
-        else if approal_state == 1
-            p Weet u zeker dat u deze inzending wilt goedkeuren?
-        else if approval_state == 2
-            p Weet u zeker dat u deze inzending wilt goedkeuren?
+        else if approve_state == 1
+            p Weet u zeker dat u deze inzending wilt <span style='color: green;'>goedkeuren</span>?
+        else if approve_state == 2
+            p Weet u zeker dat u deze inzending wilt <span style='color: red;'>afkeuren</span>?
 
         form(method='POST', action=page.url + '/#')
             table.table-list.ui-responsive
@@ -24,15 +24,15 @@ block content
 
             br
             .button-list
-                if approval_state == 0
+                if approve_state == 0
                     button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, goedkeuring ongedaan maken', data-ajax='false')
                         i.zmdi.zmdi-undo
                         | &nbsp;&nbsp;Ja, ongedaan maken
-                else if approval_state == 1
+                else if approve_state == 1
                     button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, keur de inzending goed', data-ajax='false')
                         i.zmdi.zmdi-check
                         | &nbsp;&nbsp;Ja, inzending goedkeuren
-                else if approval_state == 2
+                else if approve_state == 2
                     button.ui-btn.ui-btn-raised.clr-primary(type='submit', title='Ja, keur de inzending af', data-ajax='false')
                         i.zmdi.zmdi-close
                         | &nbsp;&nbsp;Ja, inzending afkeuren

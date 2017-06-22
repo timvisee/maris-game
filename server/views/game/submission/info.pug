@@ -2,7 +2,7 @@ extends ../../base/page
 
 block content
     // Show the approval buttons
-    if submission.approval_permission
+    if submission.approval_permission && submission.approve_state == 0
         .button-list
             a.ui-btn.clr-btn-green.clr-btn-accent-green(href=page.url + '/approve/accept', title='Inzending accepteren')
                 i.zmdi.zmdi-check
@@ -39,12 +39,17 @@ block content
                     td= submission.answer_file
 
     // Show management buttons
-    if submission.manage_permission
+    if submission.manage_permission || submission.approval_permission
         br
         .button-list
-            a.ui-btn(href=page.url + '/edit', title='Inzending aanpassen')
-                i.zmdi.zmdi-edit
-                | &nbsp;&nbsp;Inzending aanpassen
-            a.ui-btn.clr-warning(href=page.url + '/delete', title='Inzending verwijderen')
-                i.zmdi.zmdi-delete
-                | &nbsp;&nbsp;Inzending verwijderen
+            if submission.approval_permission && submission.approve_state != 0
+                a.ui-btn(href=page.url + '/approve', title='Goedkeuring status aanpassen')
+                    i.zmdi.zmdi-undo
+                    | &nbsp;&nbsp;Goedkeuring status aanpassen
+            if submission.manage_permission
+                a.ui-btn(href=page.url + '/edit', title='Inzending aanpassen')
+                    i.zmdi.zmdi-edit
+                    | &nbsp;&nbsp;Inzending aanpassen
+                a.ui-btn.clr-warning(href=page.url + '/delete', title='Inzending verwijderen')
+                    i.zmdi.zmdi-delete
+                    | &nbsp;&nbsp;Inzending verwijderen
