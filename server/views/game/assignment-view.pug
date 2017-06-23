@@ -1,35 +1,53 @@
 // List of assignments
 ul(data-role='listview').game-assignments-list
     // Section for when assignments are available
-    li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Beschikbaar
-    li: a.wow.fadeInUp(href='/games/open', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Beschikbare opdracht 1
-        span.ui-li-count 3
-    li: a.wow.fadeInUp(href='/games/open', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Beschikbare opdracht 2
-        span.ui-li-count 1
+    if submissions.available.length > 0
+        li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar (' + submissions.available.length + ')'
+        each submission in submissions.available
+            li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
+                span.ui-li-count
+                    i.zmdi.zmdi-puzzle-piece.ui-pull-left.
+                        &nbsp;&nbsp;
+                    = submission.points
 
     // Label for assignments that are pending
     if submissions.pending.length > 0
-        li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') In afwachting
+        li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'In afwachting (' + submissions.pending.length + ')'
         each submission in submissions.pending
             li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
-                span.ui-li-count= submission.points + '?'
+                span.ui-li-count
+                    i.zmdi.zmdi-more.ui-pull-left.
+                        &nbsp;&nbsp;
+                    = submission.points
 
     // Label for assignments that are rated
     if submissions.rated.length > 0
-        li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Beoordeeld
+        li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beoordeeld (' + submissions.rated.length + ')'
         each submission in submissions.rated
             li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
                 if submission.approve_state == 1
-                    span.ui-li-count(style='color: green;')= submission.points
+                    span.ui-li-count(style='color: green;')
+                        i.zmdi.zmdi-thumb-up.ui-pull-left.
+                            &nbsp;&nbsp;
+                        = submission.points
                 else if submission.approve_state == 2
-                    span.ui-li-count(style='color: green;')= submission.points
+                    span.ui-li-count(style='color: red;')
+                        i.zmdi.zmdi-thumb-down.ui-pull-left.
+                            &nbsp;&nbsp;
+                        = submission.points
                 else
-                    span.ui-li-count= submission.points
+                    span.ui-li-count
+                        i.zmdi.zmdi-thumb-up-down.ui-pull-left.
+                            &nbsp;&nbsp;
+                        = submission.points
+
+    // Availability notice for when no assignments are available
+    if submissions.available.length == 0
+        li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Beschikbaar (0)
+            p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's').
+                Geen opdrachten beschikbaar...#[br]
+                Loop naar een punt op de kaart,#[br]
+                om opdrachten uit te kunnen voeren.
 
 // Label for when there are no assignments
-div.game-assignments-none(align='center')
-    p.game-data-load-label: i.
-        Geen opdrachten beschikbaar...#[br]
-        #[br]
-        Loop naar een punt op de kaart,#[br]
-        om opdrachten uit te kunnen voeren.
+//div.game-assignments-none(align='center')
