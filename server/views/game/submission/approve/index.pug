@@ -27,13 +27,13 @@ block content
     .button-list
         if submission.approve_state != 1
             a.ui-btn.clr-btn-green.clr-btn-accent-green(href=page.url + '/accept', title='Inzending accepteren')
-                i.zmdi.zmdi-check
+                i.zmdi.zmdi-thumb-up
                 | &nbsp;&nbsp;Inzending goedkeuren
         if submission.approve_state != 2
             a.ui-btn.clr-btn-red.clr-btn-accent-red(href=page.url + '/reject', title='Inzending afwijzen')
-                i.zmdi.zmdi-close
+                i.zmdi.zmdi-thumb-down
                 | &nbsp;&nbsp;Inzending afkeuren
         if submission.approve_state != 0
             a.ui-btn(href=page.url + '/reset', title='Goedkeuring ongedaan maken voor deze inzending')
-                i.zmdi.zmdi-undo
+                i.zmdi.zmdi-thumb-up-down
                 | &nbsp;&nbsp;Goedkeuring ongedaan maken
