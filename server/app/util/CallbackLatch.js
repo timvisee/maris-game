@@ -23,16 +23,35 @@
 /**
  * Constructor.
  *
+ * @param {int} [count=0] Default count.
+ * @param {boolean} [single=true] True to only call back once, false to ignore this limit.
+ * @param {function} [callback] Function to call back to.
+ *
  * @returns {CallbackLatch} CallbackLatch instance.
  */
-var CallbackLatch = function() {
+var CallbackLatch = function(count, single, callback) {
 
     /**
      * Number of callbacks we're waiting for.
      *
      * @private
      */
-    this._count = 0;
+    this._count = (count !== null && count !== undefined) ? count : 0;
+
+    /**
+     * Set whether this callback latch should only call back once.
+     * @type {boolean} True if called, false if not.
+     * @private
+     */
+    this._single = (single !== null && single !== undefined) ? single : true;
+
+    /**
+     * Determine whether the callback has been called.
+     *
+     * @type {boolean} True if called, false if not.
+     * @private
+     */
+    this._called = false;
 
     /**
      * Final callback, that should be called after everything else is done.
@@ -40,15 +59,17 @@ var CallbackLatch = function() {
      * @type {function|null}
      * @private
      */
-    this._finalCallback = null;
+    this._finalCallback = (single !== null && single !== undefined) ? callback : null;
 };
 
 /**
  * Set the callback latch object to it's identity.
+ * This also resets the called state.
  */
 CallbackLatch.prototype.identity = function() {
     this._count = 0;
     this._finalCallback = null;
+    this._called = false;
 };
 
 /**
@@ -73,8 +94,8 @@ CallbackLatch.prototype.resolve = function() {
     this._count--;
 
     // Call the callback if the counter reached zero
-    if(this._count <= 0 && this._finalCallback != null)
-        this._finalCallback();
+    if(this._count <= 0)
+        this._invokeCallback();
 };
 
 /**
@@ -88,7 +109,57 @@ CallbackLatch.prototype.then = function(callback) {
 
     // Call the callback if the counter reached zero
     if(this._count <= 0)
-        callback();
+        this._invokeCallback();
+};
+
+/**
+ * Check whether single callback mode is enabled on this callback latch.
+ *
+ * @return {boolean} True if enabled, false if not.
+ */
+CallbackLatch.isSingle = function() {
+    return this._single;
+};
+
+/**
+ * Set whether single callback mode is enabled on this callback latch.
+ *
+ * @param {boolean} single True if enabled, false if not.
+ */
+CallbackLatch.setSingle = function(single) {
+    this._single = single;
+};
+
+/**
+ * Check whether the callback has been called at least once.
+ * Note: This state is reset when the {@see identity()} method is invoked.
+ *
+ * @returns {boolean} True if called, false if not.
+ */
+CallbackLatch.isCalled = function() {
+    return this._called;
+};
+
+/**
+ * Invoke the callback.
+ * @private
+ */
+CallbackLatch.prototype._invokeCallback = function() {
+    // Only callback once
+    if(this._single && this._called) {
+        console.warn('Trying to invoke a callback a second time, while this callback latch is configured to only call back once.');
+        return;
+    }
+
+    // Make sure there's anything to call back to
+    if(this._finalCallback === null || this._finalCallback === undefined) {
+        console.warn('Unable to callback, this callback latch doesn\'t have a callback defined.');
+        return;
+    }
+
+    // Invoke the callback
+    this._finalCallback();
+    this._called = true;
 };
 
 // Export the user class
