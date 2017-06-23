@@ -36,6 +36,7 @@ var pageSubmissionEdit = require('./submission/edit');
 var pageSubmissionDelete = require('./submission/delete');
 var pageSubmissionApprove = require('./submission/approve');
 var pageManage = require('./manage');
+var viewAssignments = require('./assignment-view');
 
 var Core = require('../../../Core');
 var CallbackLatch = require('../../util/CallbackLatch');
@@ -104,8 +105,19 @@ router.get('/:game', function(req, res, next) {
     }
 
     // Create a game and user object
-    var gameObject = {};
-    var userObject = {};
+    var options = {
+        game: {
+            name: null,
+            stage: null,
+            userCount: 0,
+            userState: null
+        },
+        user: {
+            isHost: false,
+            isAdmin: false
+        },
+        submissions: null
+    };
 
     // Create a callback latch for the games properties
     var latch = new CallbackLatch();
@@ -125,7 +137,7 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set the property
-        gameObject.name = name;
+        options.game.name = name;
 
         // Resolve the latch
         latch.resolve();
@@ -143,7 +155,7 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set the property
-        gameObject.stage = stage;
+        options.game.stage = stage;
 
         // Resolve the latch
         latch.resolve();
@@ -161,7 +173,7 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set the property
-        gameObject.usersCount = usersCount;
+        options.game.usersCount = usersCount;
 
         // Resolve the latch
         latch.resolve();
@@ -179,7 +191,7 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set the property
-        gameObject.userState = userState;
+        options.game.userState = userState;
 
         // Resolve the latch
         latch.resolve();
@@ -197,7 +209,7 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set whether the user is
-        userObject.isHost = isHost;
+        options.user.isHost = isHost;
 
         // Resolve the latch
         latch.resolve();
@@ -215,7 +227,25 @@ router.get('/:game', function(req, res, next) {
         }
 
         // Set whether the user is administrator
-        userObject.isAdmin = isAdmin;
+        options.user.isAdmin = isAdmin;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Build the submissions field
+    latch.add();
+    viewAssignments.buildSubmissionsField(req, res, function(err, submissions) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                next(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the submissions field
+        options.submissions = submissions;
 
         // Resolve the latch
         latch.resolve();
@@ -225,10 +255,7 @@ router.get('/:game', function(req, res, next) {
     latch.then(function() {
         // Render the game page
         //noinspection JSCheckFunctionSignatures
-        LayoutRenderer.renderAndShow(req, res, next, 'game/index', gameObject.name, {
-            game: gameObject,
-            user: userObject
-        });
+        LayoutRenderer.renderAndShow(req, res, next, 'game/index', options.game.name, options);
     });
 });
 
