@@ -102,7 +102,8 @@ module.exports = {
                         id: submission.getIdHex(),
                         name: null,
                         approve_state: null,
-                        points: 1
+                        points: 1,
+                        retry: false
                     };
 
                     // Create a latch
@@ -135,6 +136,24 @@ module.exports = {
 
                             // Set the name
                             submissionObject.name = name;
+
+                            // Resolve the latch
+                            submissionLatch.resolve();
+                        });
+
+                        // Check whether the user can retry this submission
+                        submissionLatch.add();
+                        assignment.isRetry(function(err, retry) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set whether the user can retry
+                            submissionObject.retry = retry;
 
                             // Resolve the latch
                             submissionLatch.resolve();

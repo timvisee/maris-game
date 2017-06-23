@@ -32,6 +32,9 @@ ul(data-role='listview').game-assignments-list
                         = submission.points
                 else if submission.approve_state == 2
                     span.ui-li-count(style='color: red;')
+                        if submission.retry
+                            i.zmdi.zmdi-edit.ui-pull-left.
+                                &nbsp;&nbsp;
                         i.zmdi.zmdi-thumb-down.ui-pull-left.
                             &nbsp;&nbsp;
                         = submission.points
@@ -45,8 +48,8 @@ ul(data-role='listview').game-assignments-list
     if submissions.available.length == 0
         li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Beschikbaar (0)
             p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's').
-                Geen opdrachten beschikbaar...#[br]
-                Loop naar een punt op de kaart,#[br]
+                Hier geen opdrachten beschikbaar...#[br]
+                Loop naar een punt op de kaart#[br]
                 om opdrachten uit te kunnen voeren.
 
 // Label for when there are no assignments
