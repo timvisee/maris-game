@@ -51,12 +51,12 @@ router.get('/', function(req, res, next) {
 
         // Make sure the user is an administrator
         if(!isAdmin) {
-            LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+            LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
             return;
         }
 
         // Show the game creation page
-        LayoutRenderer.render(req, res, next, 'game/create', 'Spel aanmaken', {
+        LayoutRenderer.renderAndShow(req, res, next, 'game/create', 'Spel aanmaken', {
             page: {
                 leftButton: 'back'
             },
@@ -87,7 +87,7 @@ router.post('/', function(req, res, next) {
 
         // Make sure the user is an administrator
         if(!isAdmin) {
-            LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+            LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
             return;
         }
 
@@ -96,7 +96,7 @@ router.post('/', function(req, res, next) {
             // Show a warning if the user hadn't filled in their game name
             if(gameName.length === 0) {
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                     message: 'De naam van het spel mist.\n\n' +
                     'Ga alstublieft terug en vul een naam voor het spel in dat u wilt aanmaken.'
                 });
@@ -104,7 +104,7 @@ router.post('/', function(req, res, next) {
             }
 
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'De naam die u heeft ingevuld voor het spel is ongeldig.\n\n' +
                 'Ga alstublieft terug en vul een andere naam in.'
             });
@@ -120,7 +120,7 @@ router.post('/', function(req, res, next) {
             }
 
             // Show the game creation page
-            LayoutRenderer.render(req, res, next, 'game/create', 'Spel aangemaakt', {
+            LayoutRenderer.renderAndShow(req, res, next, 'game/create', 'Spel aangemaakt', {
                 page: {
                     leftButton: 'back'
                 },

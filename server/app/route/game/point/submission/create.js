@@ -198,7 +198,7 @@ module.exports = {
 
             // Show the submission creation page
             latch.then(function() {
-                LayoutRenderer.render(req, res, next, 'game/submission/submit', 'Antwoord inzenden', options);
+                LayoutRenderer.renderAndShow(req, res, next, 'game/submission/submit', 'Antwoord inzenden', options);
             });
         });
     },
@@ -315,7 +315,7 @@ module.exports = {
                 // Show an error if both values are null
                 if(allowText === null && allowFile === null) {
                     // Show an error page
-                    LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                         message: 'Voer alstublieft een antwoord in om in te zenden.\n\n' +
                         'Ga alstublieft terug en vul een antwoord in.'
                     });
@@ -392,7 +392,7 @@ module.exports = {
 
                     // Show the game creation page
                     latch.then(function() {
-                        LayoutRenderer.render(req, res, next, 'game/submission/submit', 'Antwoord ingezonden', options);
+                        LayoutRenderer.renderAndShow(req, res, next, 'game/submission/submit', 'Antwoord ingezonden', options);
                     });
                 });
             });
@@ -489,7 +489,7 @@ module.exports = {
             latch.then(function() {
                 // Don't submit answers if there's already one pending, show a button to view the pending submission
                 if (pending.length > 0) {
-                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending in afwachting', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'game/submission/error', 'Inzending in afwachting', {
                         message: 'U heeft al een antwoord ingezonden, en is nu in afwachting voor een beoordeling van een docent.\n\n' +
                         'Ga terug of bekijk de inzending.',
                         hideBackButton: false,
@@ -508,7 +508,7 @@ module.exports = {
 
                 // Don't submit answers if there's already one approved, show a button to view the approved submission
                 if (approved.length > 0) {
-                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending goedgekeurd', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'game/submission/error', 'Inzending goedgekeurd', {
                         message: 'Uw inzending voor deze opdracht is al goedgekeurd.\n\n' +
                         'Ga terug of bekijk de inzending.',
                         hideBackButton: false,
@@ -528,7 +528,7 @@ module.exports = {
                 // Don't submit answers if there's already one rejected, show a button to view the rejected submission,
                 // and the user can't retry
                 if (rejected.length > 0 && !canRetry) {
-                    LayoutRenderer.render(req, res, next, 'game/submission/error', 'Inzending afgekeurd', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'game/submission/error', 'Inzending afgekeurd', {
                         message: 'Uw inzending voor deze opdracht is afgekeurd.\n\n' +
                         'Voor deze opdracht kunt u geen nieuw antwoord inzenden.\n\n' +
                         'Ga terug of bekijk de inzending.',

@@ -15,17 +15,17 @@ block content
 
         if games.category == null
             li: a.wow.fadeInUp(href='/games/open', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Open spellen...
-                span.ui-li-count()= games.openCount
+                span.ui-li-count= games.openCount
             li: a.wow.fadeInUp(href='/games/active', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Actieve spellen...
-                span.ui-li-count()= games.activeCount
+                span.ui-li-count= games.activeCount
             li: a.wow.fadeInUp(href='/games/finished', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Afgeronde spellen...
-                span.ui-li-count()= games.finishedCount
+                span.ui-li-count= games.finishedCount
 
         else
             if games.games.length > 0
                 each game in games.games
                     li: a.wow.fadeInUp(href='/game/' + game.id, data-wow-delay=(fadeDelay += 0.1) + 's')= game.name
-                        span.ui-li-count() #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
+                        span.ui-li-count #{game.userCount} gebruiker#{game.userCount === 1 ? '' : 's'}
             else
                 li.wow.fadeInUp(data-wow-delay=(fadeDelay += 0.1) + 's'): i Geen spellen in deze categorie...
 

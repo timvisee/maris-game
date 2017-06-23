@@ -53,7 +53,7 @@ router.get('/', function(req, res, next) {
         pageVars.next = req.param('next');
 
     // Show the registration page
-    LayoutRenderer.render(req, res, next, 'account/register', 'Registreren', pageVars);
+    LayoutRenderer.renderAndShow(req, res, next, 'account/register', 'Registreren', pageVars);
 });
 
 // Register index
@@ -69,7 +69,7 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their username
         if(username.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Uw gebruikersnaam mist.\n\n' +
                 'Ga alstublieft terug en vul uw gebruikersnaam in.'
             });
@@ -77,7 +77,7 @@ router.post('/', function(req, res, next) {
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'De gebruikersnaam die u heeft ingevuld is ongeldig.\n\n' +
             'Ga alstublieft terug en controleer uw gebruikersnaam.'
         });
@@ -87,7 +87,7 @@ router.post('/', function(req, res, next) {
     // Compare passwords
     if(password !== passwordVerify) {
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'De wachtwoorden die u heeft ingevuld komen niet overeen.\n\n' +
             'Ga alstublieft terug en verifieer uw wachtwoorden.'
         });
@@ -99,7 +99,7 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their password
         if(password.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Uw wachtwoord mist.\n\n' +
                 'Ga alstublieft terug en vul uw wachtwoord in.'
             });
@@ -111,7 +111,7 @@ router.post('/', function(req, res, next) {
         const max = config.validation.passwordMaxLength;
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'Het wachtwoord wat u heeft ingevuld voldoet niet aan onze eisen.\n\n' +
             'Uw wachtwoord moet tussen de ' + min + ' en ' + max + ' karakters lang zijn.\n\n' +
             'Ga alstublieft terug en kies een ander wachtwoord.'
@@ -124,7 +124,7 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their name
         if(name.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Uw naam mist.\n\n' +
                 'Ga alstublieft terug en vul uw naam in.'
             });
@@ -132,7 +132,7 @@ router.post('/', function(req, res, next) {
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'De naam die u heeft ingevuld lijkt niet geldig te zijn.\n\n' +
             'Ga alstublieft terug en vul uw echte naam in.'
         });
@@ -149,7 +149,7 @@ router.post('/', function(req, res, next) {
 
         // Show an error page if the username is already used
         if(result) {
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Deze gebruikersnaam is al gebruikt.\n\n' +
                 'Als u al een account heeft met deze gebruikersnaam kunt u inloggen door op de onderstaande knop te drukken.\n\n' +
                 'Ga anders alstublieft terug en kies een andere gebruikersnaam.',
@@ -214,7 +214,7 @@ router.post('/', function(req, res, next) {
                     }
 
                     // Show registration success page
-                    LayoutRenderer.render(req, res, next, 'account/register', 'Succes', pageVars);
+                    LayoutRenderer.renderAndShow(req, res, next, 'account/register', 'Succes', pageVars);
                 });
             });
         });

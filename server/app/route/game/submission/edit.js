@@ -87,7 +87,7 @@ module.exports = {
 
             // Handle no permission situations
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -329,7 +329,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'game/submission/edit', 'Inzending aanpassen', options);
+                    LayoutRenderer.renderAndShow(req, res, next, 'game/submission/edit', 'Inzending aanpassen', options);
                 calledBack = true;
             });
         });
@@ -368,9 +368,6 @@ module.exports = {
             return;
         }
 
-        // Store the module instance
-        const self = module.exports;
-
         // The player must have submission management permission
         submission.hasEditPermission(user, function(err, hasPermission) {
             // Call back errors
@@ -381,7 +378,7 @@ module.exports = {
 
             // Make sure the user is an administrator
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -452,7 +449,7 @@ module.exports = {
                     // Show an error if both values are null
                     if(allowText === null && allowFile === null) {
                         // Show an error page
-                        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                             message: 'Voer alstublieft een antwoord in om uw inzending aan te passen.\n\n' +
                             'Ga alstublieft terug en vul een antwoord in.'
                         });

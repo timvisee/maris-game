@@ -86,7 +86,7 @@ module.exports = {
 
             // Handle no permission situations
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -202,7 +202,7 @@ module.exports = {
             latch.then(function() {
                 // Render the game page if we didn't call back yet
                 if(!calledBack)
-                    LayoutRenderer.render(req, res, next, 'game/assignment/edit', options.assignment.name, options);
+                    LayoutRenderer.renderAndShow(req, res, next, 'game/assignment/edit', options.assignment.name, options);
                 calledBack = true;
             });
         });
@@ -254,7 +254,7 @@ module.exports = {
 
             // Make sure the user is an administrator
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -263,7 +263,7 @@ module.exports = {
                 // Show a warning if the user hadn't filled in their assignment name
                 if(_.isEmpty(assignmentName) || assignmentName.length === 0) {
                     // Show an error page
-                    LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                         message: 'De naam van de opdracht mist.\n\n' +
                         'Ga alstublieft terug en vul een naam voor de opdracht in die u wilt aanmaken.'
                     });
@@ -271,7 +271,7 @@ module.exports = {
                 }
 
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                     message: 'De naam die u heeft ingevuld voor de opdracht is ongeldig.\n\n' +
                     'Ga alstublieft terug en vul een andere naam in.'
                 });

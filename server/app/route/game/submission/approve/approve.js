@@ -94,7 +94,7 @@ module.exports = {
 
             // Handle no permission situations
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -224,7 +224,7 @@ module.exports = {
 
                     // Render the game page if we didn't call back yet
                     if(!calledBack)
-                        LayoutRenderer.render(req, res, next, 'game/submission/approve/approve', pageTitle, options);
+                        LayoutRenderer.renderAndShow(req, res, next, 'game/submission/approve/approve', pageTitle, options);
                     calledBack = true;
                 });
             });
@@ -273,7 +273,7 @@ module.exports = {
 
             // Make sure the user is an administrator
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -330,7 +330,7 @@ module.exports = {
 
         else {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Er is iets fout gegaan bij het goed- of foutkeuren van een inzending.\n\n' +
                 'Ga alstublieft terug en probeer het opnieuw.'
             });

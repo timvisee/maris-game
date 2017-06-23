@@ -50,7 +50,7 @@ router.get('/', function(req, res, next) {
             pageOptions.next = req.param('next');
 
         // Render the index page
-        LayoutRenderer.render(req, res, next, 'index', appInfo.APP_NAME, pageOptions);
+        LayoutRenderer.renderAndShow(req, res, next, 'index', appInfo.APP_NAME, pageOptions);
         return;
     }
 
@@ -123,7 +123,7 @@ router.get('/', function(req, res, next) {
 
     // Render the games page
     latch.then(function() {
-        LayoutRenderer.render(req, res, next, 'dashboard', appInfo.APP_NAME, options);
+        LayoutRenderer.renderAndShow(req, res, next, 'dashboard', appInfo.APP_NAME, options);
     });
 });
 

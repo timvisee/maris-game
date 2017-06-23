@@ -27,6 +27,7 @@ var appInfo = require('../../appInfo');
 
 var MergeUtils = require('../util/MergeUtils');
 var CallbackLatch = require('../util/CallbackLatch');
+var Core = require("../../Core.js");
 
 /**
  * LayoutRenderer class.
@@ -37,7 +38,7 @@ var CallbackLatch = require('../util/CallbackLatch');
 var LayoutRenderer = function() {};
 
 /**
- * Render the layout.
+ * Prepare the configuration, for pages to render.
  *
  * @param req Express request object.
  * @param res Express response object.
@@ -45,10 +46,9 @@ var LayoutRenderer = function() {};
  * @param {string} pugName Pug name of the layout to render.
  * @param {string|undefined} [pageTitle] Preferred page title.
  * @param {Object|undefined} [options] Additional options.
- *
- * @return {Object} Layout options object.
+ * @param {LayoutRenderer~prepareConfigCallback} callback Callback with the result or when an error occurred.
  */
-LayoutRenderer.render = function(req, res, next, pugName, pageTitle, options) {
+LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, options, callback) {
     // Create a layout configuration object
     var config = {
         app: {
@@ -113,15 +113,89 @@ LayoutRenderer.render = function(req, res, next, pugName, pageTitle, options) {
         _.set(options, 'page.title', pageTitle);
     }
 
-    // Render the page when we're done
+    // Merge and call back the config
     latch.then(function() {
-        // Merge the layout configuration objects
-        config = MergeUtils.merge(config, options, true);
-
-        // Render the page
-        res.render(pugName, config);
+        callback(null, MergeUtils.merge(config, options, true));
     });
 };
+
+/**
+ * Called back with the result or when an error occurred.
+ *
+ * @callback LayoutRenderer~prepareConfigCallback
+ * @param {Error|null} Error instance when an error occurred, null otherwise.
+ * @param {object} Page object.
+ */
+
+/**
+ * Render and show the view.
+ *
+ * @param req Express request object.
+ * @param res Express response object.
+ * @param {function} next Callback for the next page.
+ * @param {string} pugName Pug name of the layout to render.
+ * @param {string|undefined} [pageTitle] Preferred page title.
+ * @param {Object|undefined} [options] Additional options.
+ */
+LayoutRenderer.renderAndShow = function(req, res, next, pugName, pageTitle, options) {
+    // Prepare the page config
+    this.prepareConfig(req, res, next, pugName, pageTitle, options, function(err, pageConfig) {
+        // Call back errors
+        if(err !== null) {
+            next(err);
+            return;
+        }
+
+        // Render and show the page
+        res.render(pugName, pageConfig);
+    });
+};
+
+/**
+ * Render the view and call back it's HTML.
+ *
+ * @param req Express request object.
+ * @param res Express response object.
+ * @param {function} next Callback for the next page.
+ * @param {string} pugName Pug name of the layout to render.
+ * @param {string|undefined} [pageTitle] Preferred page title.
+ * @param {Object|undefined} [options] Additional options.
+ * @param {LayoutRenderer~renderCallback} callback Called with the result or when an error occurred.
+ */
+LayoutRenderer.render = function(req, res, next, pugName, pageTitle, options, callback) {
+    // Prepare the page config
+    this.prepareConfig(req, res, next, pugName, pageTitle, options, function(err, pageConfig) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Render and show the page
+        Core.expressApp.render(pugName, pageConfig, function(err, source) {
+            // Parse undefined errors
+            if(err === undefined)
+                err = null;
+
+            // Call back errors
+            if(err !== null) {
+                callback(err);
+                return;
+            }
+
+            // Call back the source
+            callback(null, source);
+        });
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback LayoutRenderer~renderCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {string=undefined} Rendered view as HTML.
+ */
 
 // Export the class
 module.exports = LayoutRenderer;

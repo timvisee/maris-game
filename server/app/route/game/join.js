@@ -82,7 +82,7 @@ module.exports = {
             // Make sure the user hasn't requested already
             if(userState.requested) {
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Al aangevraagd', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Al aangevraagd', {
                     message: 'Het lijkt er op dat u al een aanvraag heeft gedaan om mee te doen aan dit spel.\n\n' +
                     'Wacht alstublieft op een docent die uw aanvraag kan accepteren.'
                 });
@@ -92,7 +92,7 @@ module.exports = {
             // Make sure the user hasn't joined already
             if(userState.participant) {
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Al deelnemer', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Al deelnemer', {
                     message: 'Het lijkt er op dat je al deelneemt aan dit spel.'
                 });
                 return;
@@ -109,7 +109,7 @@ module.exports = {
                 }
 
                 // Render the game page
-                LayoutRenderer.render(req, res, next, 'game/join', 'Aangevraagd', {
+                LayoutRenderer.renderAndShow(req, res, next, 'game/join', 'Aangevraagd', {
                     page: {
                         leftButton: 'none',
                         rightButton: 'none'
@@ -146,7 +146,7 @@ module.exports = {
         // Validate mail address
         if(nickname === undefined) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Whoops!', {
                 message: 'An error occurred while setting your nick name.\n\n' +
                 'Please go back and try it again.'
             });
@@ -156,7 +156,7 @@ module.exports = {
         // Validate nickname
         if(!Validator.isValidNickname(nickname)) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Whoops!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Whoops!', {
                 message: 'The nickname you\'ve entered isn\'t valid.\n\n' +
                 'Nicknames must be between ' + config.validation.nicknameMinLength +
                 ' and ' + config.validation.nicknameMaxLength + ' characters long. The field may be left blank if you ' +

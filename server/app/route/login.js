@@ -53,7 +53,7 @@ router.get('/', function(req, res, next) {
         pageVars.next = req.param('next');
 
     // Show the login page
-    LayoutRenderer.render(req, res, next, 'account/login', 'Inloggen', pageVars);
+    LayoutRenderer.renderAndShow(req, res, next, 'account/login', 'Inloggen', pageVars);
 });
 
 // Login index
@@ -67,7 +67,7 @@ router.post('/', function(req, res, next) {
         // Show a warning if the user hadn't filled in their mail address
         if(username.length === 0) {
             // Show an error page
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'Uw gebruikersnaam mist.\n\n' +
                 'Ga alstublieft terug en vul uw gebruikersnaam in.'
             });
@@ -75,7 +75,7 @@ router.post('/', function(req, res, next) {
         }
 
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'De gebruikersnaam die u heeft ingevult is ongeldig.\n\n' +
             'Ga alstublieft terug en vul een andere gebruikersnaam in.'
         });
@@ -85,7 +85,7 @@ router.post('/', function(req, res, next) {
     // Make sure a password is entered
     if(password.length === 0) {
         // Show an error page
-        LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+        LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
             message: 'Uw wachtwoord mist.\n\n' +
             'Ga alstublieft terug en vul uw wachtwoord in.'
         });
@@ -102,7 +102,7 @@ router.post('/', function(req, res, next) {
 
         // Show an error page if no user was found
         if(user === null) {
-            LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                 message: 'De combinatie van deze gebruikersnaam en dit wachtwoord is onbekend.\n\n' +
                 'Ga alstublieft terug, en verifieer uw gegevens.'
             });

@@ -78,12 +78,12 @@ module.exports = {
 
             // Handle no permission situations
             if (!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
             // Show the point creation page
-            LayoutRenderer.render(req, res, next, 'game/point/create', 'Punt aanmaken', {
+            LayoutRenderer.renderAndShow(req, res, next, 'game/point/create', 'Punt aanmaken', {
                 page: {
                     leftButton: 'back'
                 },
@@ -129,7 +129,7 @@ module.exports = {
 
             // Make sure the user is an administrator
             if(!hasPermission) {
-                LayoutRenderer.render(req, res, next, 'permission/nopermission', 'Oeps!');
+                LayoutRenderer.renderAndShow(req, res, next, 'permission/nopermission', 'Oeps!');
                 return;
             }
 
@@ -138,7 +138,7 @@ module.exports = {
                 // Show a warning if the user hadn't filled in their point name
                 if(_.isEmpty(pointName) || pointName.length === 0) {
                     // Show an error page
-                    LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                         message: 'De naam van het punt mist.\n\n' +
                         'Ga alstublieft terug en vul een naam voor het punt in dat u wilt aanmaken.'
                     });
@@ -146,7 +146,7 @@ module.exports = {
                 }
 
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                     message: 'De naam die u heeft ingevuld voor het punt is ongeldig.\n\n' +
                     'Ga alstublieft terug en vul een andere naam in.'
                 });
@@ -158,7 +158,7 @@ module.exports = {
                 // Show a warning if the user hadn't filled in their point latitude
                 if(_.isEmpty(pointLat) || pointLat.length === 0) {
                     // Show an error page
-                    LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                         message: 'De latitude van het punt mist.\n\n' +
                         'Ga alstublieft terug en vul de gewenste latitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
@@ -167,7 +167,7 @@ module.exports = {
                 }
 
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                     message: 'De latitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
                     'Ga alstublieft terug en vul een juiste latitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de latitude te bepalen.'
@@ -180,7 +180,7 @@ module.exports = {
                 // Show a warning if the user hadn't filled in their point longitude
                 if(_.isEmpty(pointLng) || pointLng.length === 0) {
                     // Show an error page
-                    LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                    LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                         message: 'De longitude van het punt mist.\n\n' +
                         'Ga alstublieft terug en vul de gewenste longitude voor het punt in dat u wilt aanmaken. ' +
                         'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
@@ -189,7 +189,7 @@ module.exports = {
                 }
 
                 // Show an error page
-                LayoutRenderer.render(req, res, next, 'error', 'Oeps!', {
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                     message: 'De longitude die u heeft ingevuld voor het punt is ongeldig.\n\n' +
                     'Ga alstublieft terug en vul een juiste longitude voor het punt in dat u wilt aanmaken. ' +
                     'Of klik op de kaart om een punt aan te maken en automatisch de longitude te bepalen.'
@@ -215,7 +215,7 @@ module.exports = {
                 }
 
                 // Show the game creation page
-                LayoutRenderer.render(req, res, next, 'game/point/create', 'Punt aangemaakt', {
+                LayoutRenderer.renderAndShow(req, res, next, 'game/point/create', 'Punt aangemaakt', {
                     page: {
                         leftButton: 'back'
                     },
