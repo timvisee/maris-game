@@ -19,9 +19,8 @@ block content
 
     if game.stage == 1 || user.isHost || user.isAdmin
         div(data-role='nd2tab', data-tab='assignments')
-            .game-assignments-list
-                div(align='center')
-                    p.game-data-load-label: i Geen opdrachten beschikbaar...
+            // Include the assignment view
+            include assignment-view
 
     div(data-role='nd2tab', data-tab='info')
         if user.isHost || user.isAdmin
