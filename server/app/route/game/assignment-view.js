@@ -105,6 +105,7 @@ module.exports = {
 
                     // Create a submission object
                     var submissionObject = {
+                        id: submission.getIdHex(),
                         name: null,
                         approve_state: null,
                         points: 1

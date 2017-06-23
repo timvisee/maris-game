@@ -107,6 +107,7 @@ router.get('/:game', function(req, res, next) {
     // Create a game and user object
     var options = {
         game: {
+            id: game.getIdHex(),
             name: null,
             stage: null,
             userCount: 0,
