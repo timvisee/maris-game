@@ -67,12 +67,6 @@ module.exports = {
                 return;
             }
 
-            // Call back if we didn't find any submissions
-            if(submissions.length <= 0) {
-                callback(null, {});
-                return;
-            }
-
             // Create a callback latch
             var latch = new CallbackLatch();
             var calledBack = false;
