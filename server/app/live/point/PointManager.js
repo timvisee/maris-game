@@ -329,8 +329,49 @@ PointManager.prototype.getGame = function() {
  * @param {function} callback callback(err, points) with an array of points.
  */
 PointManager.prototype.getVisiblePoints = function(user, callback) {
-    // TODO: Remove this?
-    throw new Error('Not implemented');
+    // Call back an error if the user is null or undefined
+    if(user === null || user === undefined) {
+        callback(new Error('User instance is null or undefined.'));
+        return;
+    }
+
+    // Define a list of points as result
+    var result = [];
+
+    // Create a callback latch
+    var latch = new CallbackLatch(this.points.length);
+    var calledBack = false;
+
+    // Loop through the list of points, and check whether the given user has assignments on it
+    this.points.forEach(function(point) {
+        // Return early if we already called back, and make sure the point is valid
+        if(calledBack || point === null || point === undefined)
+            return;
+
+        // Get the assignments for the user
+        // TODO: IMPORTANT: Use a count check, so we don't have to initialize every assignment in the background
+        point.getUserAssignmentAssignments(user, function(err, assignments) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Add the point if there are any assignments
+            if(assignments.length > 0)
+                result.push(point);
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    });
+
+    // Call back the list of points
+    latch.then(function() {
+        callback(null, result);
+    });
 };
 
 // Export the class
