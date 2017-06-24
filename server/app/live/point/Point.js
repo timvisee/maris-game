@@ -54,6 +54,22 @@ var Point = function(point, game) {
      */
     this._game = game;
 
+    /**
+     * Array containing live users this point is in range for.
+     *
+     * @type {Array} Array of live user objects.
+     * @private
+     */
+    this._userRangeMem = [];
+
+    /**
+     * Object containing all the users that have incomplete assignments at this point.
+     *
+     * @type {object} Object with users as key, with an array of assignment IDs as value.
+     * @private
+     */
+    this._userAssignmentMem = {};
+
     // Get and set the point ID
     if(point instanceof PointModel)
         this._id = point.getId();
@@ -393,6 +409,258 @@ Point.prototype.isUserInRange = function(liveUser, callback) {
         callback(null, pointLocation.isInRange(liveUser.getLocation(), config.game.pointRange));
     });
 };
+
+/**
+ * Check whether the given user is in the range memory.
+ *
+ * @param {User} liveUser User.
+ */
+Point.prototype.isInRangeMemory = function(liveUser) {
+    return this._userRangeMem.indexOf(liveUser) >= 0;
+};
+
+/**
+ * Set whether the given live user is in the range memory of the point.
+ *
+ * @param {User} liveUser Live user instance to set the state for.
+ * @param {boolean} inRange True to set the in range state to true, false otherwise.
+ * @return {boolean} True if the state changed, false if not.
+ */
+Point.prototype.setInRangeMemory = function(liveUser, inRange) {
+    // Get the memorized range state
+    const lastState = this.isInRangeMemory(liveUser);
+
+    // Return false if the state didn't change
+    if(lastState === inRange)
+        return false;
+
+    // Update the range array
+    if(inRange)
+        this._userRangeMem.push(liveUser);
+    else
+        this._userRangeMem.splice(this._userRangeMem.indexOf(liveUser), 1);
+
+    // Return the result
+    return true;
+};
+
+/**
+ * Check whether the given user is in the user assignment memory.
+ * That would indicate that the user has assignments at this point.
+ *
+ * @param {User} liveUser User.
+ */
+Point.prototype.isInUserAssignmentMemory = function(liveUser) {
+    // Make sure the user is valid
+    if(liveUser === null || liveUser === undefined)
+        return false;
+
+    // Check whether the user is in the user assignment memory
+    return this._userAssignmentMem.hasOwnProperty(liveUser.getIdHex());
+};
+
+/**
+ * Get all assignments on this point for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {Point~getUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ */
+Point.prototype.getUserAssignmentAssignments = function(user, callback) {
+    // Parse the user ID
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+    else if(_.isString(user))
+        user = new ObjectId(user);
+
+    // Call back errors
+    if(user === null || user === undefined) {
+        callback(new Error('Invalid user instance given.'));
+        return;
+    }
+
+    // Get the section for the user, and return an empty array if undefined
+    var section = this._userAssignmentMem[user.toString()];
+    if(section === undefined) {
+        callback(null, []);
+        return;
+    }
+
+    // Create an array of assignments
+    var assignments = [];
+
+    // Create a callback latch
+    var latch = new CallbackLatch(section.length);
+    var calledBack = false;
+
+    // Loop through the section to parse each assignment
+    section.forEach(function(assignmentId) {
+        // Stop if we called back
+        if(calledBack)
+            return;
+
+        // Get the assignment by it's ID
+        Core.model.assignment.getAssignmentById(assignmentId, function(err, assignment) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Add the assignment to the list if it's not null
+            if(assignment !== null && assignment !== undefined)
+                assignments.push(assignment);
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    });
+
+    // Return the list of assignments when we're done
+    latch.then(function() {
+        return assignments;
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~getUserAssignmentAssignmentsCallback
+ * @type {Error|null} Error instance if an error occurred, null if not.
+ * @type {AssignmentModel[]} Array holding all assignments.
+ */
+
+/**
+ * Check whether the given assignment is at this point for a given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {AssignmentModel|ObjectId|string} assignment Assignment model or the assignment ID.
+ * @param {Point~hasUserAssignmentCallback} callback Called with the result, or when an error occurred.
+ */
+Point.prototype.hasUserAssignment = function(user, assignment, callback) {
+    // Parse the user ID
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+    else if(_.isString(user))
+        user = new ObjectId(user);
+
+    // Parse the assignment ID
+    if(assignment instanceof AssignmentModel)
+        assignment = assignment.getId();
+    else if(_.isString(assignment))
+        assignment = new ObjectId(assignment);
+
+    // Define a variable to keep track whether we called back
+    var calledBack = false;
+
+    // Loop through the list of assignments
+    this._userAssignmentMem[user.toString()].forEach(function(assignmentId) {
+        // Skip if we called back
+        if(calledBack)
+            return;
+
+        // Compare the IDs
+        if(assignment.equals(assignmentId)) {
+            callback(null, true);
+            calledBack = true;
+            return;
+        }
+    });
+
+    // Call back with false
+    if(!calledBack)
+        callback(null, false);
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~hasUserAssignmentCallback
+ * @type {Error|null} Error instance if an error occurred, null if not.
+ * @type {boolean} True if this point has the given assignment for the given user, false if not.
+ */
+
+/**
+ * Set all assignments on this point for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments
+ * @param {Point~errorCallback} err Called with an error, if an error occurred.
+ *
+ * @return
+ */
+Point.prototype.setUserAssignmentAssignments = function(user, assignments, err) {
+    // Parse the user ID
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+    else if(_.isString(user))
+        user = new ObjectId(user);
+
+    // Call back errors
+    if(user === null || user === undefined) {
+        err(new Error('Invalid user instance given.'));
+        return;
+    }
+
+    // Place a single item in an array
+    if(!_.isArray(assignments))
+        assignments = [assignments];
+
+    // Reset the list of assignments
+    this._userAssignmentMem[user.getIdHex()] = [];
+
+    // Create a callback latch
+    var latch = new CallbackLatch(assignments.length);
+    var calledBack = false;
+
+    // Keep a reference to this
+    var self = this;
+
+    // Loop through the assignments to process them
+    assignments.forEach(function(assignmentId) {
+        // Stop if we called back
+        if(calledBack)
+            return;
+
+        // Parse the assignment IDs
+        if(_.isString(assignmentId)) {
+            // Call back an error if the ID is invalid
+            if (!ObjectId.isValid(assignmentId)) {
+                if (!calledBack)
+                    err(new Error('Invalid assignment ID.'));
+                calledBack = true;
+                return;
+            }
+
+            // Convert the string into an object ID
+            assignmentId = new ObjectId(assignmentId);
+
+        } else if(assignmentId instanceof AssignmentModel)
+            assignmentId = assignmentId.getIdHex();
+
+        // Call back an error if the assignment ID isn't an object ID instance
+        if(!(assignmentId instanceof ObjectId)) {
+            // Call back an error if the ID is invalid
+            if (!ObjectId.isValid(assignmentId)) {
+                if (!calledBack)
+                    err(new Error('Invalid assignment ID.'));
+                calledBack = true;
+                return;
+            }
+        }
+
+        // Push the ID in the list
+        self._userAssignmentMem[user.getIdHex()].push(assignmentId);
+    });
+};
+
+/**
+ * Error callback.
+ *
+ * @callback Point~errorCallback
+ * @param {Error} Error instance defining the error that occurred.
+ */
 
 /**
  * Destroy the point.
