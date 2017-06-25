@@ -594,8 +594,14 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
 
             // Continue when we're done
             latch.then(function() {
-                // TODO: Update the visible points to the user (send an update packet)
-                console.warn('TODO: Update visible points to the user here.');
+                // Broadcast updated location data to players
+                Core.gameManager.broadcastLocationData(0, self.game, user, null, function(err) {
+                    // Handle errors
+                    if(err !== null) {
+                        console.warn('An error occurred while broadcasting location data to a user.');
+                        console.error(err);
+                    }
+                });
 
                 // Call back
                 callback(null);

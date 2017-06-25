@@ -430,13 +430,13 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
     // Loop through the games
     this.games.forEach(function(liveGame) {
         // Check whether a game constraint is set
-        if(gameConstraint != undefined && !liveGame.getId().equals(gameConstraint))
+        if(gameConstraint !== undefined && !liveGame.getId().equals(gameConstraint))
             return;
 
         // Loop through the game users
         liveGame.userManager.users.forEach(function(liveUser) {
             // Check whether a game constraint is set
-            if (userConstraint != undefined && !liveUser.getId().equals(userConstraint))
+            if (userConstraint !== undefined && !liveUser.getId().equals(userConstraint))
                 return;
 
             // Add the live game and user as entry
@@ -467,9 +467,8 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
             // Create a callback latch
             var gameLatch = new CallbackLatch();
 
-            // Determine whether to show team and/or all players
-            var showTeamPlayers = false;
-            var showAllPlayers = false;
+            // Determine whether to show other players.
+            var showOtherPlayers = false;
 
             // Get the user state
             gameLatch.add();
@@ -483,10 +482,8 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                     return;
                 }
 
-                // Update the show flags
-                showTeamPlayers = userState.participant;
-                // TODO: Always show all players for spectators?
-                showAllPlayers = userState.spectator || !userState.participant;
+                // Set the show flag
+                showOtherPlayers = userState.spectator;
 
                 // Resolve the latch
                 gameLatch.resolve();
@@ -497,121 +494,9 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 // Reset the latch to it's identity
                 gameLatch.identity();
 
-                // Create a users list
+                // Create a points and users list
+                var points = [];
                 var users = [];
-                var factories = [];
-
-                // Loop through the list user
-                liveGame.userManager.users.forEach(function(otherLiveUser) {
-                    // Skip each user if we already called back
-                    if(calledBack)
-                        return;
-
-                    // Check whether the other user is visible for the current user
-                    gameLatch.add();
-                    otherLiveUser.isVisibleFor(liveUser, function(err, visible) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                if(_.isFunction(callback))
-                                    callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Make sure the user is visible
-                        if(!visible) {
-                            gameLatch.resolve();
-                            return;
-                        }
-
-                        // Get the name of the user
-                        otherLiveUser.getName(function(err, name) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    if(_.isFunction(callback))
-                                        callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // TODO: Fix this. The shop manager isn't used anymore in this game.
-
-                            // Get the shop instance for this user if there is any, and determine whether the user is a shop
-                            const liveShop = visible && liveGame.shopManager.getShopByUser(otherLiveUser);
-                            const isShop = liveShop != null;
-
-                            // Create a data object for the user
-                            var userObject = {
-                                user: otherLiveUser.getIdHex(),
-                                userName: name,
-                                location: otherLiveUser.getLocation(),
-                                ally: true,
-                                shop: {
-                                    isShop
-                                }
-                            };
-
-                            // Create a callback latch for the shop
-                            var shopLatch = new CallbackLatch();
-
-                            // Fetch shop data if this user is a shop
-                            if(isShop) {
-                                // Add the shop token
-                                userObject.shop.token = liveShop.getToken();
-
-                                // Get the shop visibility data
-                                shopLatch.add();
-                                liveShop.getVisibilityState(liveUser, function(err, visibilityState) {
-                                    // Call back errors
-                                    if(err !== null) {
-                                        if(!calledBack)
-                                            if(_.isFunction(callback))
-                                                callback(err);
-                                        calledBack = true;
-                                        return;
-                                    }
-
-                                    // Append the visibility state of the shop to the user
-                                    userObject.ally = visibilityState.ally;
-                                    userObject.shop.inRange = visibilityState.inRange;
-
-                                    // Resolve the shop latch
-                                    shopLatch.resolve();
-                                });
-
-                                // Get the shop range
-                                shopLatch.add();
-                                liveShop.getRange(liveUser, function(err, range) {
-                                    // Call back errors
-                                    if(err !== null) {
-                                        if(!calledBack)
-                                            if(_.isFunction(callback))
-                                                callback(err);
-                                        calledBack = true;
-                                        return;
-                                    }
-
-                                    // Set the range
-                                    userObject.shop.range = range;
-
-                                    // Resolve the shop latch
-                                    shopLatch.resolve();
-                                });
-                            }
-
-                            // Add the user object
-                            shopLatch.then(function() {
-                                // Create a user object and add it to the list
-                                users.push(userObject);
-
-                                // Resolve the game latch
-                                gameLatch.resolve();
-                            });
-                        });
-                    });
-                });
 
                 // TODO: Loop through the list of points and update them if needed?
                 // // Loop through the list of factories
@@ -716,13 +601,62 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 //     });
                 // });
 
+                // Loop through the list user
+                if(showOtherPlayers)
+                    liveGame.userManager.users.forEach(function(otherLiveUser) {
+                        // Skip each user if we already called back
+                        if(calledBack)
+                            return;
+
+                        // Check whether the other user is visible for the current user
+                        gameLatch.add();
+                        otherLiveUser.isVisibleFor(liveUser, function(err, visible) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    if(_.isFunction(callback))
+                                        callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Make sure the user is visible
+                            if(!visible) {
+                                gameLatch.resolve();
+                                return;
+                            }
+
+                            // Get the name of the user
+                            otherLiveUser.getName(function(err, name) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        if(_.isFunction(callback))
+                                            callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Create a user object and add it to the list
+                                users.push({
+                                    user: otherLiveUser.getIdHex(),
+                                    userName: name,
+                                    location: otherLiveUser.getLocation()
+                                });
+
+                                // Resolve the game latch
+                                gameLatch.resolve();
+                            });
+                        });
+                    });
+
                 // Send the data to the proper sockets when done
                 gameLatch.then(function() {
                     // Create a packet object
                     const packetObject = {
                         game: liveGame.getIdHex(),
                         users,
-                        factories
+                        points
                     };
 
                     // Create a packet and send it to the correct user/sockets
