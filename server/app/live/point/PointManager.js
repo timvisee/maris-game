@@ -352,11 +352,8 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
         if(calledBack || point === null || point === undefined)
             return;
 
-        // Get the assignments for the user
-        point.hasUserAssignmentAssignments(user, {
-            open: true,
-            pending: true
-        }, function(err, hasAssignments) {
+        // Check whether the point is visible
+        point.isVisibleFor(user, function(err, visible) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -365,8 +362,8 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
                 return;
             }
 
-            // Add the point if there are any assignments
-            if(hasAssignments)
+            // Add the point if it's visible
+            if(visible)
                 result.push(point);
 
             // Resolve the latch

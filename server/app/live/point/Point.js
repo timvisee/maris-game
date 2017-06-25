@@ -296,8 +296,8 @@ Point.prototype.sendData = function(user, sockets, callback) {
                     return;
                 }
 
-                // Get the visibility state for the user
-                self.getVisibilityState(liveUser, function(err, visibilityState) {
+                // Check whether the point is in-range
+                self.isUserInRange(liveUser, function(err, inRange) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
@@ -306,9 +306,8 @@ Point.prototype.sendData = function(user, sockets, callback) {
                         return;
                     }
 
-                    // Set the visibility, range and ally states
-                    pointData.inRange = visibilityState.inRange;
-                    pointData.ally = visibilityState.ally;
+                    // Set the visibility and range
+                    pointData.inRange = inRange;
 
                     // Resolve the latch
                     latch.resolve();
@@ -413,6 +412,165 @@ Point.prototype.isUserInRange = function(liveUser, callback) {
         callback(null, pointLocation.isInRange(liveUser.getLocation(), config.game.pointRange));
     });
 };
+
+/**
+ * Check whether this point is visible for the given user.
+ *
+ * @param {User} liveUser Given user.
+ * @param {function} callback callback(err, isVisible)
+ */
+Point.prototype.isVisibleFor = function(liveUser, callback) {
+    // Store this instance
+    const self = this;
+
+    // Get the game stage
+    this.getGame().getGameModel().getStage(function(err, gameStage) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Call back true if the game is finished
+        if(gameStage >= 2) {
+            callback(null, true);
+            return;
+        }
+
+        // Create a latch
+        var latch = new CallbackLatch();
+        var calledBack = false;
+
+        // Check whether the user is spectator
+        latch.add();
+        liveUser.getGameUser(function(err, gameUser) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // The game user may not be null
+            if(gameUser === null) {
+                latch.resolve();
+                return;
+            }
+
+            // Check whether the user is spectator
+            gameUser.isSpectator(function(err, isSpectator) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Always visible if the user is spectator
+                if(isSpectator) {
+                    if(!calledBack)
+                        callback(null, true);
+                    return;
+                }
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Get the assignments for the user
+        latch.add();
+        self.hasUserAssignmentAssignments(liveUser, {
+            open: true,
+            pending: true
+        }, function(err, hasAssignments) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Add the point if there are any assignments
+            if(hasAssignments) {
+                if(!calledBack)
+                    callback(null, true);
+                return;
+            }
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // We're done, not visible
+        latch.then(function () {
+            if(!calledBack)
+                callback(null, false);
+        });
+    });
+};
+
+/**
+ * Update the visibility state for the given user.
+ *
+ * @param {User} liveUser User to update the visibility state for.
+ * @param {Point~updateVisibilityStateCallback} callback Called with the result or when an error occurred.
+ */
+Point.prototype.updateRangeState = function(liveUser, callback) {
+    // Store this instance
+    const self = this;
+
+    // Call back if the user is null
+    if(liveUser === null) {
+        callback(null);
+        return;
+    }
+
+    // Check whether the game is visible
+    this.isUserInRange(liveUser, function(err, visible) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Check whether the visibility state changed
+        var stateChanged = false;
+
+        // Update the range memory
+        if(self.setInRangeMemory(liveUser, visible))
+            stateChanged = true;
+
+        // Send the point data if the state changed
+        if(stateChanged)
+        // Broadcast the point data to all relevant user
+            self.broadcastData(function(err) {
+                // Call back errors
+                if(err !== null) {
+                    callback(err);
+                    return;
+                }
+
+                // Call back
+                callback(null, true);
+            });
+
+        else
+        // Call back
+            callback(null, false);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~updateVisibilityStateCallback
+ * @param {Error|null} Error instance if an error occurred.
+ * @param {boolean=} True if the state changed, false if not.
+ */
 
 /**
  * Check whether the given user is in the range memory.

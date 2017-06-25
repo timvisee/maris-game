@@ -292,31 +292,31 @@ User.prototype.updateLocation = function(location, socket, callback) {
     var latch = new CallbackLatch();
 
     // TODO: Loop through all points, to check whether the user is close
-    // // Loop through all the factories
-    // liveGame.factoryManager.factories.forEach(function(liveFactory) {
-    //     // Skip if we called back
-    //     if(calledBack)
-    //         return;
-    //
-    //     // Update the visibility state for the user
-    //     latch.add();
-    //     liveFactory.updateVisibilityState(self, function(err, changed) {
-    //         // Call back errors
-    //         if(err !== null) {
-    //             if(!calledBack)
-    //                 callback(err);
-    //             calledBack = true;
-    //             return;
-    //         }
-    //
-    //         // Check whether we should update the game data
-    //         if(changed)
-    //             updateUser = true;
-    //
-    //         // Resolve the latch
-    //         latch.resolve();
-    //     });
-    // });
+    // Loop through all the points
+    liveGame.pointManager.points.forEach(function(livePoint) {
+        // Skip if we called back
+        if(calledBack)
+            return;
+
+        // Update the visibility state for the user
+        latch.add();
+        livePoint.updateRangeState(self, function(err, changed) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Check whether we should update the game data
+            if(changed)
+                updateUser = true;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    });
 
     // // Loop through all the shops
     // liveGame.shopManager.shops.forEach(function(liveShop) {
@@ -326,7 +326,7 @@ User.prototype.updateLocation = function(location, socket, callback) {
     //
     //     // Update the visibility state for the user
     //     latch.add();
-    //     liveShop.updateVisibilityState(self, function(err, changed) {
+    //     liveShop.updateRangeState(self, function(err, changed) {
     //         // Call back errors
     //         if(err !== null) {
     //             if(!calledBack)
