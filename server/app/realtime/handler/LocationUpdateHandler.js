@@ -197,25 +197,32 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
                     }
                 });
 
-                // Update the location of all other users to determine whether they're in range for the shop
-                liveGame.userManager.users.forEach(function(otherLiveUser) {
-                    // Make sure this live user isn't the current user
-                    if(otherLiveUser.getId().equals(liveUser.getId()))
-                        return;
-
-                    // Make sure the user has recent location
-                    if(!otherLiveUser.hasRecentLocation())
-                        return;
-
-                    // Update the live location for this user
-                    otherLiveUser.updateLocation(undefined, undefined, function(err) {
-                        // Handle errors
-                        if(err !== null) {
-                            console.error(err);
-                            console.error('Failed to update player location, ignoring');
-                        }
-                    });
+                // Update the points
+                liveGame.pointManager.updateUserPoints(user, function(err) {
+                    // Call back errors
+                    if(err !== null)
+                        callbackError();
                 });
+
+                // // Update the location of all other users to determine whether they're in range for the shop
+                // liveGame.userManager.users.forEach(function(otherLiveUser) {
+                //     // Make sure this live user isn't the current user
+                //     if(otherLiveUser.getId().equals(liveUser.getId()))
+                //         return;
+                //
+                //     // Make sure the user has recent location
+                //     if(!otherLiveUser.hasRecentLocation())
+                //         return;
+                //
+                //     // Update the live location for this user
+                //     otherLiveUser.updateLocation(undefined, undefined, function(err) {
+                //         // Handle errors
+                //         if(err !== null) {
+                //             console.error(err);
+                //             console.error('Failed to update player location, ignoring');
+                //         }
+                //     });
+                // });
             });
         });
     });
