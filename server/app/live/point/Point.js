@@ -552,7 +552,7 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
                 if(filter.open && submissions.length === 0)
                     keep = true;
 
-                else {
+                else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
                     // Loop through the list of submissions
                     submissions.forEach(function(submission) {
                         // Return early if called back or if already determined to keep the submission
