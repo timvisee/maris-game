@@ -1315,18 +1315,18 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_LOCATIONS_UPDATE,
 
     // Check whether this packet contains specific data
     const hasUsers = packet.hasOwnProperty('users');
-    const hasFactories = packet.hasOwnProperty('factories');
+    const hasPoints = packet.hasOwnProperty('points');
 
     // Show a notification
-    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', factories: ' + (hasFactories ? packet.factories.length : 0) + ')');
+    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', factories: ' + (hasPoints ? packet.points.length : 0) + ')');
 
     // Update the users locations
     if(hasUsers)
         updatePlayerMarkers(packet.users);
 
-    // Update the factory locations
-    if(hasFactories)
-        updateFactoryMarkers(packet.factories);
+    // Update the points locations
+    if(hasPoints)
+        updatePointsMarkers(packet.points);
 
     // Focus on everything if enabled, also focus on everything if we should focus on the player, but no player is available
     if(getFollowEverything() || (getFollowPlayer() && playerMarker == null))
@@ -2757,7 +2757,7 @@ function setGpsState(state) {
 var map = null;
 var playerMarker = null;
 var playersMarkers = [];
-var factoryMarkers = [];
+var pointMarkers = [];
 
 var mapFollowPlayerButton = null;
 var mapFollowEverythingButton = null;
@@ -3466,11 +3466,11 @@ function updatePlayerMarkers(users) {
 }
 
 /**
- * Update the markers for visible factories.
+ * Update the markers for visible points.
  *
- * @param factories Factories data.
+ * @param points Points data.
  */
-function updateFactoryMarkers(factories) {
+function updatePointMarkers(points) {
     // Make sure the map is loaded
     if(map == null)
         return;
@@ -3479,20 +3479,20 @@ function updateFactoryMarkers(factories) {
     if(Maris.state.activeGameRoles == null || !(Maris.state.activeGameRoles.participant || Maris.state.activeGameRoles.spectator))
         return;
 
-    // Loop through the factories
-    factories.forEach(function(factory) {
-        // Get the factory position
-        const pos = [factory.location.latitude, factory.location.longitude];
+    // Loop through the points
+    points.forEach(function(point) {
+        // Get the points position
+        const pos = [point.location.latitude, point.location.longitude];
 
         // Find the correct marker for the user
         var marker = null;
-        factoryMarkers.forEach(function(entry) {
+        pointMarkers.forEach(function(entry) {
             // Skip the loop if we found the marker
             if(marker != null)
                 return;
 
             // Check if this is the correct marker
-            if(entry.factory.factory == factory.factory)
+            if(entry.point.point == point.point)
                 marker = entry;
         });
 
@@ -3500,55 +3500,40 @@ function updateFactoryMarkers(factories) {
         if(marker == null) {
             // Create the marker
             marker = L.marker(pos, {
-                icon: L.spriteIcon(factory.ally ? 'orange' : 'red')
+                icon: L.spriteIcon(point.inRange ? 'green' : 'orange')
             });
 
             // Create a range circle
-            marker.rangeCircle = L.circle(pos, factory.range);
+            marker.rangeCircle = L.circle(pos, point.range);
             marker.rangeCircle.setStyle({
-                opacity: factory.inRange ? 1 : 0.4,
-                dashArray: factory.inRange ? '' : '5,5',
-                color: factory.ally ? 'darkorange' : 'red'
+                opacity: point.inRange ? 1 : 0.4,
+                dashArray: point.inRange ? '' : '5,5',
+                color: point.inRange ? 'darkgreen' : 'darkorange'
             });
 
             // Add the marker and range circle to the map
             marker.addTo(map);
             marker.rangeCircle.addTo(map);
 
-            // Put the factory data in the marker
-            marker.factory = {
-                factory: factory.factory,
-                ally: factory.ally
+            // Put the point data in the marker
+            marker.point = {
+                point: point.point
             };
 
             // Add the marker to the markers list
-            factoryMarkers.push(marker);
+            pointMarkers.push(marker);
 
         } else {
             // Update the position and range
             marker.setLatLng(pos);
             marker.rangeCircle.setLatLng(pos);
-            marker.rangeCircle.setRadius(factory.range);
+            marker.rangeCircle.setRadius(point.range);
 
-            // Set the factory style
+            // Set the point style
             marker.rangeCircle.setStyle({
-                opacity: factory.inRange ? 1 : 0.4,
-                dashArray: factory.inRange ? '' : '5,5'
+                opacity: point.inRange ? 1 : 0.4,
+                dashArray: point.inRange ? '' : '5,5'
             });
-
-            // Update the factory sprite and color if the ally state changed
-            if(marker.factory.ally != factory.ally) {
-                // Update the marker sprite
-                marker.setIcon(L.spriteIcon(factory.ally ? 'orange' : 'red'));
-
-                // Update the range circle color
-                marker.rangeCircle.setStyle({
-                    color: factory.ally ? 'darkorange' : 'red'
-                });
-
-                // Update the factory ally state
-                marker.factory.ally = factory.ally;
-            }
         }
 
         // Rebind the popup to show when the user clicks on the marker
@@ -3558,27 +3543,27 @@ function updateFactoryMarkers(factories) {
             const dialogBody = '<div align="center" class="table-list">' +
                 '<table>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-tag-more zmdi-hc-fw"></i> Naam</td><td>' + factory.name + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-tag-more zmdi-hc-fw"></i> Naam</td><td>' + point.name + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Vriendelijk</td><td>' + (factory.ally ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Vriendelijk</td><td>' + (point.ally ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (factory.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
+                '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (point.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '</table>' +
                 '</div>';
 
             // Show a dialog
             showDialog({
-                title: capitalizeFirst(NameConfig.factory.name),
+                title: capitalizeFirst(NameConfig.point.name),
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'Bekijk ' + NameConfig.factory.name,
+                        text: 'Bekijk ' + NameConfig.point.name,
                         state: 'primary',
                         action: function() {
-                            Maris.utils.navigateToPage('/game/' + Maris.utils.getGameId() + '/factory/' + factory.factory, true, true, 'flip');
+                            Maris.utils.navigateToPage('/game/' + Maris.utils.getGameId() + '/point/' + point.point, true, true, 'flip');
                         }
                     }, {
                         text: 'Sluiten'
@@ -3592,18 +3577,18 @@ function updateFactoryMarkers(factories) {
     var toRemove = [];
 
     // Loop through all markers and make sure it's user is in the user list
-    factoryMarkers.forEach(function(entry, i) {
+    pointMarkers.forEach(function(entry, i) {
         // Determine whether the user exists
         var exists = false;
 
-        // Loop through the list of factory and check whether the factory exists
-        factories.forEach(function(factory) {
+        // Loop through the list of point and check whether the point exists
+        factories.forEach(function(point) {
             // Skip if it exists
             if(exists)
                 return;
 
-            // Check whether this is the factory
-            if(factory.factory == entry.factory.factory)
+            // Check whether this is the point
+            if(point.point == entry.point.point)
                 exists = true;
         });
 
@@ -3615,14 +3600,14 @@ function updateFactoryMarkers(factories) {
     // Remove the markers at the given indices
     for(var i = toRemove.length - 1; i >= 0; i--) {
         // Get the marker to remove
-        const removeMarker = factoryMarkers[toRemove[i]];
+        const removeMarker = pointMarkers[toRemove[i]];
 
         // Remove the range circle and then the marker itself
         map.removeLayer(removeMarker.rangeCircle);
         map.removeLayer(removeMarker);
 
         // Remove the entry from the array
-        factoryMarkers.splice(toRemove[i], 1);
+        pointMarkers.splice(toRemove[i], 1);
     }
 }
 
@@ -3650,10 +3635,10 @@ function focusEverything() {
                 fitters.push(marker);
         });
 
-    // Add the factory markers
-    if(factoryMarkers != null)
-        factoryMarkers.forEach(function(factoryMarker) {
-            fitters.push(factoryMarker.rangeCircle);
+    // Add the point markers
+    if(pointMarkers != null)
+        pointMarkers.forEach(function(pointMarker) {
+            fitters.push(pointMarker.rangeCircle);
         });
 
     // Make sure we have any fitters

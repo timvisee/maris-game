@@ -153,7 +153,7 @@ CallbackLatch.prototype._invokeCallback = function() {
 
     // Make sure there's anything to call back to
     if(this._finalCallback === null || this._finalCallback === undefined) {
-        console.warn('Unable to callback, this callback latch doesn\'t have a callback defined.');
+        // console.warn('Unable to callback, this callback latch doesn\'t have a callback defined.');
         return;
     }
 
