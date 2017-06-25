@@ -460,12 +460,12 @@ Point.prototype.isInUserAssignmentMemory = function(liveUser) {
 };
 
 /**
- * Get all assignments on this point for the given user.
+ * Get all assignment IDs on this point for the given user.
  *
  * @param {UserModel|User|ObjectId|string} user User model or a user ID.
- * @param {Point~getUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ * @param {Point~getUserAssignmentAssignmentIds} callback Called with the result, or when an error occurred.
  */
-Point.prototype.getUserAssignmentAssignments = function(user, callback) {
+Point.prototype.getUserAssignmentAssignmentIds = function(user, callback) {
     // Parse the user ID
     if(user instanceof UserModel || user instanceof User)
         user = user.getId();
@@ -479,47 +479,75 @@ Point.prototype.getUserAssignmentAssignments = function(user, callback) {
     }
 
     // Get the section for the user, and return an empty array if undefined
-    var section = this._userAssignmentMem[user.toString()];
-    if(section === undefined) {
+    var ids = this._userAssignmentMem[user.toString()];
+    if(ids === undefined) {
         callback(null, []);
         return;
     }
 
-    // Create an array of assignments
-    var assignments = [];
+    // Return the list of IDs
+    return ids;
+};
 
-    // Create a callback latch
-    var latch = new CallbackLatch(section.length);
-    var calledBack = false;
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~getUserAssignmentAssignmentIdsCallback
+ * @type {Error|null} Error instance if an error occurred, null if not.
+ * @type {ObjectId[]} Array holding all assignment IDs.
+ */
 
-    // Loop through the section to parse each assignment
-    section.forEach(function(assignmentId) {
-        // Stop if we called back
-        if(calledBack)
+/**
+ * Get all assignments on this point for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {Point~getUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ */
+Point.prototype.getUserAssignmentAssignments = function(user, callback) {
+    // Get the list of assignment IDs
+    this.getUserAssignmentAssignmentIds(user, function(err, ids) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
             return;
+        }
 
-        // Get the assignment by it's ID
-        Core.model.assignment.getAssignmentById(assignmentId, function(err, assignment) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
+        // Create an array of assignments
+        var assignments = [];
+
+        // Create a callback latch
+        var latch = new CallbackLatch(ids.length);
+        var calledBack = false;
+
+        // Loop through the section to parse each assignment
+        ids.forEach(function(assignmentId) {
+            // Stop if we called back
+            if(calledBack)
                 return;
-            }
 
-            // Add the assignment to the list if it's not null
-            if(assignment !== null && assignment !== undefined)
-                assignments.push(assignment);
+            // Get the assignment by it's ID
+            Core.model.assignment.getAssignmentById(assignmentId, function(err, assignment) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
 
-            // Resolve the latch
-            latch.resolve();
+                // Add the assignment to the list if it's not null
+                if(assignment !== null && assignment !== undefined)
+                    assignments.push(assignment);
+
+                // Resolve the latch
+                latch.resolve();
+            });
         });
-    });
 
-    // Return the list of assignments when we're done
-    latch.then(function() {
-        return assignments;
+        // Return the list of assignments when we're done
+        latch.then(function() {
+            return assignments;
+        });
     });
 };
 
@@ -529,6 +557,34 @@ Point.prototype.getUserAssignmentAssignments = function(user, callback) {
  * @callback Point~getUserAssignmentAssignmentsCallback
  * @type {Error|null} Error instance if an error occurred, null if not.
  * @type {AssignmentModel[]} Array holding all assignments.
+ */
+
+/**
+ * Check whether there are any assignments for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {Point~hasUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ */
+Point.prototype.hasUserAssignmentAssignments = function(user, callback) {
+    // Get the list of assignment IDs
+    this.getUserAssignmentAssignmentIds(user, function(err, ids) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Call back the result
+        callback(null, ids.length > 0);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~hasUserAssignmentAssignmentsCallback
+ * @type {Error|null} Error instance if an error occurred, null if not.
+ * @type {boolean} True if the given user has any assignments on this point, false if not.
  */
 
 /**

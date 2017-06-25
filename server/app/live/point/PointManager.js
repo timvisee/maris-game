@@ -349,8 +349,7 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
             return;
 
         // Get the assignments for the user
-        // TODO: IMPORTANT: Use a count check, so we don't have to initialize every assignment in the background
-        point.getUserAssignmentAssignments(user, function(err, assignments) {
+        point.hasUserAssignmentAssignments(user, function(err, hasAssignments) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -360,7 +359,7 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
             }
 
             // Add the point if there are any assignments
-            if(assignments.length > 0)
+            if(hasAssignments)
                 result.push(point);
 
             // Resolve the latch
