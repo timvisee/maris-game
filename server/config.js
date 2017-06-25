@@ -380,7 +380,7 @@ config.game.pointRange = 15;
  * The number of assignments on each point for a user.
  * @type {number}
  */
-config.game.pointAssignmentCount = 5;
+config.game.pointAssignmentCount = 3;
 
 /**
  * The minimum number of 'clean' points a user must have.
@@ -388,7 +388,7 @@ config.game.pointAssignmentCount = 5;
  *
  * @type {number}
  */
-config.game.pointMinClean = 2;
+config.game.pointMinClean = 3;
 
 /**
  * Location decay time in milliseconds.

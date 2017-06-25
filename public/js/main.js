@@ -1326,7 +1326,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_LOCATIONS_UPDATE,
 
     // Update the points locations
     if(hasPoints)
-        updatePointsMarkers(packet.points);
+        updatePointMarkers(packet.points);
 
     // Focus on everything if enabled, also focus on everything if we should focus on the player, but no player is available
     if(getFollowEverything() || (getFollowPlayer() && playerMarker == null))
@@ -3546,9 +3546,6 @@ function updatePointMarkers(points) {
                 '        <td class="left"><i class="zmdi zmdi-tag-more zmdi-hc-fw"></i> Naam</td><td>' + point.name + '</td>' +
                 '    </tr>' +
                 '    <tr>' +
-                '        <td class="left"><i class="zmdi zmdi-star zmdi-hc-fw"></i> Vriendelijk</td><td>' + (point.ally ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
-                '    </tr>' +
-                '    <tr>' +
                 '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (point.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '</table>' +
@@ -3556,11 +3553,11 @@ function updatePointMarkers(points) {
 
             // Show a dialog
             showDialog({
-                title: capitalizeFirst(NameConfig.point.name),
+                title: 'Punt',
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'Bekijk ' + NameConfig.point.name,
+                        text: 'Bekijk punt',
                         state: 'primary',
                         action: function() {
                             Maris.utils.navigateToPage('/game/' + Maris.utils.getGameId() + '/point/' + point.point, true, true, 'flip');
@@ -3582,7 +3579,7 @@ function updatePointMarkers(points) {
         var exists = false;
 
         // Loop through the list of point and check whether the point exists
-        factories.forEach(function(point) {
+        points.forEach(function(point) {
             // Skip if it exists
             if(exists)
                 return;

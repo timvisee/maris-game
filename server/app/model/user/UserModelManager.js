@@ -157,6 +157,37 @@ UserModelManager.prototype.isValidUserId = function(id, callback) {
  */
 
 /**
+ * Get a user by it's user ID.
+ *
+ * @param {ObjectId|string} id The user ID.
+ * @param {UserModelManager~getUserByIdCallback} callback Called with the user or when an error occurred.
+ */
+UserModelManager.prototype.getUserById = function(id, callback) {
+    // Store the current instance
+    const self = this;
+
+    // Check whether the user ID is valid
+    this.isValidUserId(id, function(err, result) {
+        // Call back errors
+        if(err !== null) {
+            callback(err, null);
+            return;
+        }
+
+        // Call back the result
+        callback(null, result ? self._instanceManager.create(id) : null);
+    })
+};
+
+/**
+ * Called with the user or when an error occurred.
+ *
+ * @callback UserModelManager~getUserByIdCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {UserModel|null} User instance, or null if no user was found for the given ID.
+ */
+
+/**
  * Get a user by it's username.
  *
  * @param {string} username Username of the user.

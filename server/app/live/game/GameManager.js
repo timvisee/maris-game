@@ -413,7 +413,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
         scheduleTime = 0;
 
     // Parse the sockets
-    if(sockets === undefined)
+    if(sockets === undefined || sockets === null)
         sockets = [];
     else if(!_.isArray(sockets))
         sockets = [sockets];
@@ -491,16 +491,16 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
 
             // Create a list of users when the user state is fetched
             gameLatch.then(function() {
-                // Reset the latch to it's identity
-                gameLatch.identity();
+                // Create a point latch
+                var dataLatch = new CallbackLatch();
 
                 // Create a points and users list
                 var points = [];
                 var users = [];
 
                 // Loop through the list of points
-                gameLatch.add();
-                liveGame.pointManager.getVisiblePoints(user, function(points) {
+                dataLatch.add();
+                liveGame.pointManager.getVisiblePoints(liveUser, function(err, visiblePoints) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
@@ -510,21 +510,27 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                     }
 
                     // Loop through the list of points
-                    points.forEach(function(point) {
+                    visiblePoints.forEach(function(livePoint) {
                         // Return early if called back
                         if(calledBack)
                             return;
 
-                        // Create a point object
+                        // Create the point object
                         var pointObject = {
                             point: livePoint.getIdHex(),
-                            inRange: false,
+                            name: null,
+                            location: null,
+                            inRange: livePoint.isInRangeMemory(liveUser),
                             range: config.game.pointRange
                         };
 
-                        // Determine whether the point is in-range
-                        gameLatch.add();
-                        point.isInRangeMemory(liveUser, function(err, inRange) {
+                        // Create a point latch
+                        var pointLatch = new CallbackLatch();
+                        dataLatch.add();
+
+                        // Get the location
+                        pointLatch.add();
+                        livePoint.getPointModel().getLocation(function(err, location) {
                             // Call back errors
                             if(err !== null) {
                                 if(!calledBack)
@@ -533,19 +539,43 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                                 return;
                             }
 
-                            // Set wehther the point is in-range
-                            pointObject.inRange = inRange;
+                            // Set the location
+                            pointObject.location = location;
 
-                            // Add the point
+                            // Resolve the latch
+                            pointLatch.resolve();
+                        });
+
+                        // Get the name
+                        pointLatch.add();
+                        livePoint.getName(function(err, pointName) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the name
+                            pointObject.name = pointName;
+
+                            // Resolve the latch
+                            pointLatch.resolve();
+                        });
+
+                        // Put the point in the list
+                        pointLatch.then(function() {
+                            // Create and add the point
                             points.push(pointObject);
 
-                            // Resolve the game latch
-                            gameLatch.resolve();
+                            // Resolve the latch
+                            dataLatch.resolve();
                         });
                     });
 
                     // Resolve the game latch
-                    gameLatch.resolve();
+                    dataLatch.resolve();
                 });
 
                 // liveGame.pointManager.points.forEach(function(livePoint) {
@@ -632,14 +662,14 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 // });
 
                 // Loop through the list user
-                if(showOtherPlayers)
+                if(showOtherPlayers) {
                     liveGame.userManager.users.forEach(function(otherLiveUser) {
                         // Skip each user if we already called back
                         if(calledBack)
                             return;
 
                         // Check whether the other user is visible for the current user
-                        gameLatch.add();
+                        dataLatch.add();
                         otherLiveUser.isVisibleFor(liveUser, function(err, visible) {
                             // Call back errors
                             if(err !== null) {
@@ -652,7 +682,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
 
                             // Make sure the user is visible
                             if(!visible) {
-                                gameLatch.resolve();
+                                dataLatch.resolve();
                                 return;
                             }
 
@@ -675,13 +705,14 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                                 });
 
                                 // Resolve the game latch
-                                gameLatch.resolve();
+                                dataLatch.resolve();
                             });
                         });
                     });
+                }
 
                 // Send the data to the proper sockets when done
-                gameLatch.then(function() {
+                dataLatch.then(function() {
                     // Create a packet object
                     const packetObject = {
                         game: liveGame.getIdHex(),

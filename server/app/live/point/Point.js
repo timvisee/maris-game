@@ -31,7 +31,9 @@ var PacketType = require('../../realtime/PacketType');
 var PointModel = require('../../model/point/PointModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 var ApprovalState = require("../../model/submission/ApprovalState.js");
+var UserModel = require('../../model/user/UserModel');
 var User = require('../user/User');
+var AssignmentModel = require('../../model/assignment/AssignmentModel');
 
 /**
  * Point class.
@@ -464,23 +466,23 @@ Point.prototype.isInUserAssignmentMemory = function(liveUser) {
 /**
  * Get all assignment IDs on this point for the given user.
  *
- * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {UserModel|User|ObjectId|string} userId User model or a user ID.
  * @param {Point~AssignmentFilterObject|null} filter Filter object or null.
  * @param {Point~getUserAssignmentAssignmentIdsCallback} callback Called with the result, or when an error occurred.
  */
-Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback) {
+Point.prototype.getUserAssignmentAssignmentIds = function(userId, filter, callback) {
     // Parse the user ID
-    if(user instanceof UserModel || user instanceof User)
-        user = user.getId();
-    else if(_.isString(user))
-        user = new ObjectId(user);
+    if(userId instanceof UserModel || userId instanceof User)
+        userId = userId.getId();
+    else if(_.isString(userId))
+        userId = new ObjectId(userId);
 
     // Parse the filter
     if(filter === undefined)
         filter = null;
 
     // Call back errors
-    if(user === null || user === undefined) {
+    if(userId === null || userId === undefined) {
         callback(new Error('Invalid user instance given.'));
         return;
     }
@@ -490,14 +492,14 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
     }
 
     // Normalize the filter
-    if(_.isEmpty(filter))
+    if(filter === {})
         filter = null;
     if(_.isObject(filter) && filter.open && filter.pending && filter.approved && filter.accepted && filter.rejected)
         // Using a filter doesn't make sense if nothing will be filtered
         filter = null;
 
     // Get the section for the user, and return an empty array if undefined
-    var ids = this._userAssignmentMem[user.toString()];
+    var ids = this._userAssignmentMem[userId.toString()];
     if(ids === undefined) {
         callback(null, []);
         return;
@@ -524,7 +526,7 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
 
         // Get the assignment by it's ID
         latch.add();
-        Core.model.assignment.getAssignmentById(id, function(err, assignment) {
+        Core.model.assignmentModelManager.getAssignmentById(id, function(err, assignment) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
@@ -533,8 +535,8 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
                 return;
             }
 
-            // Get the submissions for the given user and the current assignment
-            Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
+            // Get the user by it's ID
+            Core.model.userModelManager.getUserById(userId, function(err, user) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -543,69 +545,77 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
                     return;
                 }
 
-                // Set whether to keep the submission
-                var keep = false;
+                // Get the submissions for the given user and the current assignment
+                Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
 
-                // Create a callback latch for the filtering
-                var filterLatch = new CallbackLatch();
+                    // Set whether to keep the submission
+                    var keep = false;
 
-                // Filter open assignments
-                if(filter.open && submissions.length === 0)
-                    keep = true;
+                    // Create a callback latch for the filtering
+                    var filterLatch = new CallbackLatch();
 
-                else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
-                    // Loop through the list of submissions
-                    submissions.forEach(function(submission) {
-                        // Return early if called back or if already determined to keep the submission
-                        if(calledBack || keep)
-                            return;
+                    // Apply filtering
+                    if(filter !== null) {
+                        // Filter open assignments
+                        if(filter.open && submissions.length === 0)
+                            keep = true;
 
-                        // Get the approval state
-                        filterLatch.add();
-                        submission.getApprovalState(function(err, approvalState) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
+                        else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
+                            // Loop through the list of submissions
+                            submissions.forEach(function(submission) {
+                                // Return early if called back or if already determined to keep the submission
+                                if(calledBack || keep)
+                                    return;
 
-                            // Return early if determined to keep the submission
-                            if(keep) {
-                                latch.resolve();
-                                return;
-                            }
+                                // Get the approval state
+                                filterLatch.add();
+                                submission.getApprovalState(function(err, approvalState) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        if(!calledBack)
+                                            callback(err);
+                                        calledBack = true;
+                                        return;
+                                    }
 
-                            // Filter
-                            if(filter.pending && approvalState === ApprovalState.PENDING)
-                                keep = true;
-                            else if(filter.accepted && approvalState === ApprovalState.APPROVED)
-                                keep = true;
-                            else if(filter.rejected && approvalState === ApprovalState.REJECTED)
-                                keep = true;
-                            else if(filter.approved && approvalState !== null)
-                                keep = true;
+                                    // Return early if determined to keep the submission
+                                    if(keep) {
+                                        filterLatch.resolve();
+                                        return;
+                                    }
 
-                            // Resolve the latch
-                            filterLatch.resolve();
-                        });
+                                    // Filter
+                                    if(filter.pending && approvalState === ApprovalState.PENDING)
+                                        keep = true;
+                                    else if(filter.accepted && approvalState === ApprovalState.APPROVED)
+                                        keep = true;
+                                    else if(filter.rejected && approvalState === ApprovalState.REJECTED)
+                                        keep = true;
+                                    else if(filter.approved && approvalState !== null)
+                                        keep = true;
+
+                                    // Resolve the latch
+                                    filterLatch.resolve();
+                                });
+                            });
+                        }
+                    }
+
+                    // Continue with the latch
+                    filterLatch.then(function() {
+                        if(keep)
+                            result.push(assignment.getId());
+                        latch.resolve();
                     });
-                }
-
-                // Continue with the latch
-                filterLatch.then(function() {
-                    if(keep)
-                        result.push(assignment.getId());
                 });
             });
-
-            // Add the assignment to the list if it's not null
-            if(assignment !== null && assignment !== undefined)
-                result.push(assignment);
-
-            // Resolve the latch
-            latch.resolve();
         });
     });
 
@@ -808,19 +818,19 @@ Point.prototype.hasUserAssignment = function(user, assignment, callback) {
 /**
  * Set all assignments on this point for the given user.
  *
- * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {UserModel|User|ObjectId|string} userId User model or a user ID.
  * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments
  * @param {Point~errorCallback} err Called with an error, if an error occurred.
  */
-Point.prototype.setUserAssignmentAssignments = function(user, assignments, err) {
+Point.prototype.setUserAssignmentAssignments = function(userId, assignments, err) {
     // Parse the user ID
-    if(user instanceof UserModel || user instanceof User)
-        user = user.getId();
-    else if(_.isString(user))
-        user = new ObjectId(user);
+    if(userId instanceof UserModel || userId instanceof User)
+        userId = userId.getId();
+    else if(_.isString(userId))
+        userId = new ObjectId(userId);
 
     // Call back errors
-    if(user === null || user === undefined) {
+    if(userId === null || userId === undefined) {
         err(new Error('Invalid user instance given.'));
         return;
     }
@@ -830,10 +840,8 @@ Point.prototype.setUserAssignmentAssignments = function(user, assignments, err) 
         assignments = [assignments];
 
     // Reset the list of assignments
-    this._userAssignmentMem[user.getIdHex()] = [];
+    this._userAssignmentMem[userId.toString()] = assignments.length > 0 ? [] : undefined;
 
-    // Create a callback latch
-    var latch = new CallbackLatch(assignments.length);
     var calledBack = false;
 
     // Keep a reference to this
@@ -873,7 +881,7 @@ Point.prototype.setUserAssignmentAssignments = function(user, assignments, err) 
         }
 
         // Push the ID in the list
-        self._userAssignmentMem[user.getIdHex()].push(assignmentId);
+        self._userAssignmentMem[userId.toString()].push(assignmentId);
     });
 };
 

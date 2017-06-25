@@ -335,13 +335,14 @@ AssignmentModelManager.prototype.getAssignments = function(game, user, callback)
  */
 AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(game, user, callback) {
     // Create a parsing latch
-    var parseLatch = new CallbackLatch(2);
+    var parseLatch = new CallbackLatch();
     var calledBack = false;
 
     // Parse the game and user values
     if(game instanceof Game)
         game = game.getGameModel();
-    else if(game instanceof ObjectId || (_.isString(game) && ObjectId.isValid(game)))
+    else if(game instanceof ObjectId || (_.isString(game) && ObjectId.isValid(game))) {
+        parseLatch.add();
         Core.model.gameModelManager.getGameById(game, function(err, result) {
             // Call back errors
             if(err !== null) {
@@ -357,9 +358,11 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
             // Resolve the parsing latch
             parseLatch.resolve();
         });
+    }
     if(user instanceof User)
         user = user.getUserModel();
-    else if(user instanceof ObjectId || (_.isString(user) && ObjectId.isValid(user)))
+    else if(user instanceof ObjectId || (_.isString(user) && ObjectId.isValid(user))) {
+        parseLatch.add();
         Core.model.userModelManager.getUserById(user, function(err, result) {
             // Call back errors
             if(err !== null) {
@@ -375,6 +378,10 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
             // Resolve the parsing latch
             parseLatch.resolve();
         });
+    }
+
+    // Keep a reference to this
+    const self = this;
 
     // Continue when we're done parsing
     parseLatch.then(function() {
@@ -389,7 +396,7 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
         }
 
         // Get the list of assignments
-        this.getAssignments(game, user, function(err, assignments) {
+        self.getAssignments(game, user, function(err, assignments) {
             // Call back errors
             if(err !== null) {
                 callback(err);

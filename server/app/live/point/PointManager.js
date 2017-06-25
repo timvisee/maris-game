@@ -28,6 +28,8 @@ var Core = require('../../../Core');
 var Point = require('./Point');
 var PointModel = require('../../model/point/PointModel');
 var CallbackLatch = require('../../util/CallbackLatch');
+var UserModel = require('../../model/user/UserModel');
+var User = require('../user/User');
 
 var config = require('../../../config');
 
@@ -416,7 +418,6 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
         var cleanCount = 0;
 
         // Create a counting latch
-        latch.add();
         var countLatch = new CallbackLatch(2);
 
         // Get all assignments for the user
@@ -426,6 +427,12 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
                 if(!calledBack)
                     callback(err);
                 calledBack = true;
+                return;
+            }
+
+            // Return and resolve the main latch when there are no assignments
+            if(count <= 0) {
+                latch.resolve();
                 return;
             }
 
@@ -478,7 +485,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
         var missingPoints = Math.max(config.game.pointMinClean - cleanPoints, 0);
 
         // We're done if there are enough clean points available
-        if(missingPoints > 0) {
+        if(missingPoints <= 0) {
             if(!calledBack)
                 callback(null);
             calledBack = true;
@@ -489,11 +496,11 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
         var unusedPoints;
         var unusedAssignments;
 
-        // Reset the latch to it's identity
-        latch.identity();
+        // Create a point selection callback latch
+        var pointLatch = new CallbackLatch();
 
         // Get a list of unused points for this user
-        latch.add();
+        pointLatch.add();
         self.getUnusedPoints(user, function(err, points) {
             // Call back errors
             if(err !== null) {
@@ -513,11 +520,11 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
             unusedPoints = points;
 
             // Resolve the latch
-            latch.resolve();
+            pointLatch.resolve();
         });
 
         // Get a list of unused assignments
-        latch.add();
+        pointLatch.add();
         self.getUnusedAssignments(user, function(err, assignments) {
             // Call back errors
             if(err !== null) {
@@ -526,7 +533,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
                 calledBack = true;
                 return;
             }
-
+            
             // Return if there are no unused assignments
             if(assignments.length === 0) {
                 callback(null);
@@ -537,11 +544,11 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
             unusedAssignments = assignments;
 
             // Resolve the latch
-            latch.resolve();
+            pointLatch.resolve();
         });
 
         // Continue with the latch
-        latch.then(function() {
+        pointLatch.then(function() {
             // Create a list of chosen points
             var chosenPoints = [];
 
@@ -556,7 +563,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
             }
 
             // Reset the latch to it's identity
-            latch.identity();
+            pointLatch.identity();
 
             // Loop through each point, and attach assignments to it
             chosenPoints.forEach(function(point) {
@@ -577,23 +584,18 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
                 }
 
                 // Attach the assignments to the point
-                latch.add();
                 point.setUserAssignmentAssignments(user, pointAssignments, function(err) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
                             callback(err);
                         calledBack = true;
-                        return;
                     }
-
-                    // Resolve the latch
-                    latch.resolve();
                 });
             });
 
             // Continue when we're done
-            latch.then(function() {
+            pointLatch.then(function() {
                 // Broadcast updated location data to players
                 Core.gameManager.broadcastLocationData(0, self.game, user, null, function(err) {
                     // Handle errors
@@ -696,7 +698,7 @@ PointManager.prototype.getUnusedAssignments = function(user, callback) {
     const self = this;
 
     // Get a list of unused assignments
-    Core.model.submissionModelManager.getAssignmentsWithoutSubmissions(this.game.getGameModel(), user, function(err, assignments) {
+    Core.model.assignmentModelManager.getAssignmentsWithoutSubmissions(this.game.getGameModel(), user, function(err, assignments) {
         // Call back errors
         if(err !== null) {
             callback(err);
@@ -704,13 +706,14 @@ PointManager.prototype.getUnusedAssignments = function(user, callback) {
         }
 
         // Create a callback latch
-        var latch = new CallbackLatch(self.points.length);
+        var latch = new CallbackLatch();
         var calledBack = false;
 
         // Create a list of used assignment IDs based on the current assignments attached to a point
         var usedAssignmentIds = [];
-        self.points.forEach(function(err, point) {
+        self.points.forEach(function(point) {
             // Loop through the assignments on the point
+            latch.add();
             point.getUserAssignmentAssignmentIds(user, null, function(err, ids) {
                 // Call back errors
                 if(err !== null) {
@@ -734,7 +737,7 @@ PointManager.prototype.getUnusedAssignments = function(user, callback) {
         // Continue after the latch
         latch.then(function() {
             // Filter every assignment that is already attached to any point
-            assignments = assignments.filter((assignment) => !usedAssignmentIds.includes(assignment.getIdHex()));
+            assignments = assignments.filter((assignment) => !_.includes(usedAssignmentIds, assignment.getIdHex()));
 
             // Call back the list of assignments
             callback(null, assignments);
