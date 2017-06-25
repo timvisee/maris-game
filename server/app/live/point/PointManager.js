@@ -349,7 +349,10 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
             return;
 
         // Get the assignments for the user
-        point.hasUserAssignmentAssignments(user, null, function(err, hasAssignments) {
+        point.hasUserAssignmentAssignments(user, {
+            open: true,
+            pending: true
+        }, function(err, hasAssignments) {
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
