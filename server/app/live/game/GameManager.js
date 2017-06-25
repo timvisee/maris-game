@@ -498,16 +498,64 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 var points = [];
                 var users = [];
 
-                // TODO: Loop through the list of points and update them if needed?
-                // // Loop through the list of factories
-                // liveGame.factoryManager.factories.forEach(function(liveFactory) {
+                // Loop through the list of points
+                gameLatch.add();
+                liveGame.pointManager.getVisiblePoints(user, function(points) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Loop through the list of points
+                    points.forEach(function(point) {
+                        // Return early if called back
+                        if(calledBack)
+                            return;
+
+                        // Create a point object
+                        var pointObject = {
+                            point: livePoint.getIdHex(),
+                            inRange: false,
+                            range: config.game.pointRange
+                        };
+
+                        // Determine whether the point is in-range
+                        gameLatch.add();
+                        point.isInRangeMemory(liveUser, function(err, inRange) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set wehther the point is in-range
+                            pointObject.inRange = inRange;
+
+                            // Add the point
+                            points.push(pointObject);
+
+                            // Resolve the game latch
+                            gameLatch.resolve();
+                        });
+                    });
+
+                    // Resolve the game latch
+                    gameLatch.resolve();
+                });
+
+                // liveGame.pointManager.points.forEach(function(livePoint) {
                 //     // Skip each user if we already called back
                 //     if(calledBack)
                 //         return;
                 //
                 //     // Check whether the other user is visible for the current user
                 //     gameLatch.add();
-                //     liveFactory.getVisibilityState(liveUser, function(err, visibilityData) {
+                //     livePoint.getVisibilityState(liveUser, function(err, visibilityData) {
                 //         // Call back errors
                 //         if(err !== null) {
                 //             if(!calledBack)
@@ -524,18 +572,19 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 //         }
                 //
                 //         // Create a point latch
-                //         var factoryLatch = new CallbackLatch();
+                //         var pointLatch = new CallbackLatch();
                 //
                 //         // Create a point object
-                //         var factoryObject = {
-                //             factory: liveFactory.getIdHex(),
+                //         var pointObject = {
+                //             point: livePoint.getIdHex(),
                 //             ally: visibilityData.ally,
-                //             inRange: visibilityData.inRange
+                //             inRange: visibilityData.inRange,
+                //             range: config.game.pointRange
                 //         };
                 //
                 //         // Get the name of the point
-                //         factoryLatch.add();
-                //         liveFactory.getName(function(err, name) {
+                //         pointLatch.add();
+                //         livePoint.getName(function(err, name) {
                 //             // Call back errors
                 //             if(err !== null) {
                 //                 if(!calledBack)
@@ -546,15 +595,15 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 //             }
                 //
                 //             // Set the point name
-                //             factoryObject.name = name;
+                //             pointObject.name = name;
                 //
                 //             // Resolve the point latch
-                //             factoryLatch.resolve();
+                //             pointLatch.resolve();
                 //         });
                 //
                 //         // Get the point location
-                //         factoryLatch.add();
-                //         liveFactory.getFactoryModel().getLocation(function(err, location) {
+                //         pointLatch.add();
+                //         livePoint.getPointModel().getLocation(function(err, location) {
                 //             // Call back errors
                 //             if(err !== null) {
                 //                 if(!calledBack)
@@ -565,35 +614,16 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 //             }
                 //
                 //             // Set the location
-                //             factoryObject.location = location;
+                //             pointObject.location = location;
                 //
                 //             // Resolve the point latch
-                //             factoryLatch.resolve();
-                //         });
-                //
-                //         // Get the point range
-                //         factoryLatch.add();
-                //         liveFactory.getRange(liveUser, function(err, range) {
-                //             // Call back errors
-                //             if(err !== null) {
-                //                 if(!calledBack)
-                //                     if(_.isFunction(callback))
-                //                         callback(err);
-                //                 calledBack = true;
-                //                 return;
-                //             }
-                //
-                //             // Set the range
-                //             factoryObject.range = range;
-                //
-                //             // Resolve the point latch
-                //             factoryLatch.resolve();
+                //             pointLatch.resolve();
                 //         });
                 //
                 //         // Add the point object when we're done
-                //         factoryLatch.then(function() {
+                //         pointLatch.then(function() {
                 //             // Create a user object and add it to the list
-                //             factories.push(factoryObject);
+                //             points.push(pointObject);
                 //
                 //             // Resolve the game latch
                 //             gameLatch.resolve();
