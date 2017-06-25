@@ -20,6 +20,7 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var mongo = require('mongodb');
 var ObjectId = mongo.ObjectId;
 
@@ -33,6 +34,10 @@ var AssignmentDatabase = require('./AssignmentDatabase');
 var HashUtils = require('../../hash/HashUtils');
 var ModelInstanceManager = require('../ModelInstanceManager');
 var AssignmentModel = require('./AssignmentModel');
+var GameModel = require('../game/GameModel');
+var UserModel = require('../user/UserModel');
+var User = require('../../live/user/User');
+var Game = require('../../live/game/Game');
 
 /**
  * Redis key root for cache.
@@ -329,45 +334,99 @@ AssignmentModelManager.prototype.getAssignments = function(game, user, callback)
  * @param {AssignmentModelManager~getAssignmentsWithoutSubmissions} callback Called back with the result or when an error occurred.
  */
 AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(game, user, callback) {
-    // Get the list of assignments
-    this.getAssignments(game, user, function(err, assignments) {
+    // Create a parsing latch
+    var parseLatch = new CallbackLatch(2);
+    var calledBack = false;
+
+    // Parse the game and user values
+    if(game instanceof Game)
+        game = game.getGameModel();
+    else if(game instanceof ObjectId || (_.isString(game) && ObjectId.isValid(game)))
+        Core.model.gameModelManager.getGameById(game, function(err, result) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the game instance
+            game = result;
+
+            // Resolve the parsing latch
+            parseLatch.resolve();
+        });
+    if(user instanceof User)
+        user = user.getUserModel();
+    else if(user instanceof ObjectId || (_.isString(user) && ObjectId.isValid(user)))
+        Core.model.userModelManager.getUserById(user, function(err, result) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the user instance
+            user = result;
+
+            // Resolve the parsing latch
+            parseLatch.resolve();
+        });
+
+    // Continue when we're done parsing
+    parseLatch.then(function() {
         // Call back errors
-        if(err !== null) {
-            callback(err);
+        if(!(game instanceof GameModel)) {
+            callback(new Error('Invalid game instance given.'));
+            return;
+        }
+        if(!(user instanceof UserModel)) {
+            callback(new Error('Invalid user instance given.'));
             return;
         }
 
-        // Create the result array
-        var result = [];
+        // Get the list of assignments
+        this.getAssignments(game, user, function(err, assignments) {
+            // Call back errors
+            if(err !== null) {
+                callback(err);
+                return;
+            }
 
-        // Create a callback latch
-        var latch = new CallbackLatch(assignments.length);
-        var calledBack = false;
+            // Create the result array
+            var result = [];
 
-        // Loop through the assignments and determine whether they don't have any submissions
-        assignments.forEach(function(assignment) {
-            // Get the submissions for this assignment
-            Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
+            // Create a callback latch
+            var latch = new CallbackLatch(assignments.length);
 
-                // Add the assignment if it doesn't have submissions
-                if(submissions.length === 0)
-                    result.push(assignment);
+            // Loop through the assignments and determine whether they don't have any submissions
+            assignments.forEach(function(assignment) {
+                // Get the submissions for this assignment
+                Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
 
-                // Resolve the latch
-                latch.resolve();
+                    // Add the assignment if it doesn't have submissions
+                    if(submissions.length === 0)
+                        result.push(assignment);
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
             });
-        });
 
-        // Call back the result list when we're done
-        latch.then(function() {
-            callback(null, result);
+            // Call back the result list when we're done
+            latch.then(function() {
+                callback(null, result);
+            });
         });
     });
 };
