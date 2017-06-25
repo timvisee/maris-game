@@ -322,6 +322,65 @@ AssignmentModelManager.prototype.getAssignments = function(game, user, callback)
  */
 
 /**
+ * Get all assignments for the given user on the given game that don't have any submissions yet.
+ *
+ * @param {GameModel|Game|ObjectId|string} game Game to get the assignments for.
+ * @param {UserModel|User|ObjectId|string} user User to get the assignments for.
+ * @param {AssignmentModelManager~getAssignmentsWithoutSubmissions} callback Called back with the result or when an error occurred.
+ */
+AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(game, user, callback) {
+    // Get the list of assignments
+    this.getAssignments(game, user, function(err, assignments) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Create the result array
+        var result = [];
+
+        // Create a callback latch
+        var latch = new CallbackLatch(assignments.length);
+        var calledBack = false;
+
+        // Loop through the assignments and determine whether they don't have any submissions
+        assignments.forEach(function(assignment) {
+            // Get the submissions for this assignment
+            Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Add the assignment if it doesn't have submissions
+                if(submissions.length === 0)
+                    result.push(assignment);
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Call back the result list when we're done
+        latch.then(function() {
+            callback(null, result);
+        });
+    });
+};
+
+/**
+ * Called back with the result or when an error occurred.
+ *
+ * @callback AssignmentModelManager~getAssignmentsWithoutSubmissions}
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {Assignment[]=} List of assignments that aren't used.
+ */
+
+/**
  * Flush the cache for this model manager.
  *
  * @param {AssignmentModelManager~flushCacheCallback} [callback] Called on success or when an error occurred.
