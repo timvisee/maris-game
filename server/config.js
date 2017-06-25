@@ -377,6 +377,20 @@ config.validation.gameNameMaxLength = 128;
 config.game.pointRange = 15;
 
 /**
+ * The number of assignments on each point for a user.
+ * @type {number}
+ */
+config.game.pointAssignmentCount = 5;
+
+/**
+ * The minimum number of 'clean' points a user must have.
+ * Clean points are points that have incomplete answers.
+ *
+ * @type {number}
+ */
+config.game.pointMinClean = 2;
+
+/**
  * Location decay time in milliseconds.
  * @type {number}
  */

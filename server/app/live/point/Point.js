@@ -31,6 +31,7 @@ var PacketType = require('../../realtime/PacketType');
 var PointModel = require('../../model/point/PointModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 var ApprovalState = require("../../model/submission/ApprovalState.js");
+var User = require('../user/User');
 
 /**
  * Point class.
@@ -465,7 +466,7 @@ Point.prototype.isInUserAssignmentMemory = function(liveUser) {
  *
  * @param {UserModel|User|ObjectId|string} user User model or a user ID.
  * @param {Point~AssignmentFilterObject|null} filter Filter object or null.
- * @param {Point~getUserAssignmentAssignmentIds} callback Called with the result, or when an error occurred.
+ * @param {Point~getUserAssignmentAssignmentIdsCallback} callback Called with the result, or when an error occurred.
  */
 Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback) {
     // Parse the user ID
@@ -638,7 +639,7 @@ Point.prototype.getUserAssignmentAssignmentIds = function(user, filter, callback
  *
  * @param {UserModel|User|ObjectId|string} user User model or a user ID.
  * @param {Point~AssignmentFilterObject|null} filter Filter object or null.
- * @param {Point~getUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ * @param {Point~getUserAssignmentAssignmentsCallback} callback Called with the result, or when an error occurred.
  */
 Point.prototype.getUserAssignmentAssignments = function(user, filter, callback) {
     // Get the list of assignment IDs
@@ -697,13 +698,13 @@ Point.prototype.getUserAssignmentAssignments = function(user, filter, callback) 
  */
 
 /**
- * Check whether there are any assignments for the given user.
+ * Get the count of assignments on the point for the given user.
  *
  * @param {UserModel|User|ObjectId|string} user User model or a user ID.
  * @param {Point~AssignmentFilterObject|null} filter Filter object or null.
- * @param {Point~hasUserAssignmentAssignments} callback Called with the result, or when an error occurred.
+ * @param {Point~getUserAssignmentAssignmentCountCallback} callback Called with the result, or when an error occurred.
  */
-Point.prototype.hasUserAssignmentAssignments = function(user, filter, callback) {
+Point.prototype.getUserAssignmentAssignmentCount = function(user, filter, callback) {
     // Get the list of assignment IDs
     this.getUserAssignmentAssignmentIds(user, filter, function(err, ids) {
         // Call back errors
@@ -713,7 +714,36 @@ Point.prototype.hasUserAssignmentAssignments = function(user, filter, callback) 
         }
 
         // Call back the result
-        callback(null, ids.length > 0);
+        callback(null, ids.length);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback Point~getUserAssignmentAssignmentCountCallback
+ * @type {Error|null} Error instance if an error occurred, null if not.
+ * @type {int} The assignment count.
+ */
+
+/**
+ * Check whether there are any assignments for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model or a user ID.
+ * @param {Point~AssignmentFilterObject|null} filter Filter object or null.
+ * @param {Point~hasUserAssignmentAssignmentsCallback} callback Called with the result, or when an error occurred.
+ */
+Point.prototype.hasUserAssignmentAssignments = function(user, filter, callback) {
+    // Get the list of assignment IDs
+    this.getUserAssignmentAssignmentCount(user, filter, function(err, count) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Call back the result
+        callback(null, count > 0);
     });
 };
 
@@ -781,8 +811,6 @@ Point.prototype.hasUserAssignment = function(user, assignment, callback) {
  * @param {UserModel|User|ObjectId|string} user User model or a user ID.
  * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments
  * @param {Point~errorCallback} err Called with an error, if an error occurred.
- *
- * @return
  */
 Point.prototype.setUserAssignmentAssignments = function(user, assignments, err) {
     // Parse the user ID

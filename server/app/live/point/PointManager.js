@@ -29,6 +29,8 @@ var Point = require('./Point');
 var PointModel = require('../../model/point/PointModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 
+var config = require('../../../config');
+
 /**
  * PointManager class.
  *
@@ -375,6 +377,372 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
         callback(null, result);
     });
 };
+
+/**
+ * Update the points that are available to the user, to match the configured minimums.
+ *
+ * @param {UserModel|User|ObjectId|string} user User to update the points for.
+ * @param {PointManager~errorCallback} callback
+ */
+// TODO: Should we also check whether there are points that have all assignments completed, continue in that case
+PointManager.prototype.updateUserPoints = function(user, callback) {
+    // Parse the user
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+    else if(_.isString(user) && ObjectId.isValid(user))
+        user = new ObjectId(user);
+
+    // Call back errors
+    if(!(user instanceof ObjectId)) {
+        callback(new Error('Invalid user instance given'));
+        return;
+    }
+
+    // Count the number of clean points
+    var cleanPoints = 0;
+
+    // Create a callback latch
+    var latch = new CallbackLatch(this.points.length);
+    var calledBack = false;
+
+    // Loop through the list of points, and check whether the given user has assignments on it
+    this.points.forEach(function(point) {
+        // Return early if we already called back, and make sure the point is valid
+        if(calledBack || point === null || point === undefined)
+            return;
+
+        // Define some variables for the count
+        var allCount = 0;
+        var cleanCount = 0;
+
+        // Create a counting latch
+        latch.add();
+        var countLatch = new CallbackLatch(2);
+
+        // Get all assignments for the user
+        point.getUserAssignmentAssignmentCount(user, null, function(err, count) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Store the count
+            allCount = count;
+
+            // Resolve the latch
+            countLatch.resolve();
+        });
+
+        // Get the assignments for the user
+        point.getUserAssignmentAssignmentCount(user, {
+            open: true
+        }, function(err, count) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Store the count
+            cleanCount = count;
+
+            // Resolve the latch
+            countLatch.resolve();
+        });
+
+        // Compare the count and determine the result
+        countLatch.then(function() {
+            // Determine whether the point is clean
+            var isClean = allCount === cleanCount;
+
+            // Add the point to the list if it's clean
+            if(isClean)
+                cleanPoints++;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    });
+
+    // Keep a reference to this
+    const self = this;
+
+    // Continue after the latch
+    latch.then(function() {
+        // Determine how many points are missing
+        var missingPoints = Math.max(config.game.pointMinClean - cleanPoints, 0);
+
+        // We're done if there are enough clean points available
+        if(missingPoints > 0) {
+            if(!calledBack)
+                callback(null);
+            calledBack = true;
+            return;
+        }
+
+        // Create a list of unused points and assignments
+        var unusedPoints;
+        var unusedAssignments;
+
+        // Reset the latch to it's identity
+        latch.identity();
+
+        // Get a list of unused points for this user
+        latch.add();
+        self.getUnusedPoints(user, function(err, points) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Return if there are no unused points
+            if(points.length === 0) {
+                callback(null);
+                return;
+            }
+
+            // Set the points
+            unusedPoints = points;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Get a list of unused assignments
+        latch.add();
+        self.getUnusedAssignments(user, function(err, assignments) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Return if there are no unused assignments
+            if(assignments.length === 0) {
+                callback(null);
+                return;
+            }
+
+            // Set the assignments
+            unusedAssignments = assignments;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Continue with the latch
+        latch.then(function() {
+            // Create a list of chosen points
+            var chosenPoints = [];
+
+            // Keep choosing random points until the required point amount is satisfied
+            while(missingPoints > chosenPoints.length && unusedPoints.length > 0) {
+                // Pick a random number
+                var randomIndex = _.random(unusedPoints.length - 1);
+
+                // Add the point to the list, and remove it from the unused list
+                chosenPoints.push(unusedPoints[randomIndex]);
+                unusedPoints.splice(randomIndex, 1);
+            }
+
+            // Reset the latch to it's identity
+            latch.identity();
+
+            // Loop through each point, and attach assignments to it
+            chosenPoints.forEach(function(point) {
+                // Determine how many assignments to pick
+                var count = Math.min(Math.ceil(unusedAssignments.length / chosenPoints.length), config.game.pointMinClean);
+
+                // Create a list of point assignments to attach
+                var pointAssignments = [];
+
+                // Pick some assignments
+                while(pointAssignments.length < count && unusedAssignments.length > 0) {
+                    // Pick a random number
+                    var randomIndex = _.random(unusedAssignments.length - 1);
+
+                    // Add the assignment
+                    pointAssignments.push(unusedAssignments[randomIndex]);
+                    unusedAssignments.splice(randomIndex, 1);
+                }
+
+                // Attach the assignments to the point
+                latch.add();
+                point.setUserAssignmentAssignments(user, pointAssignments, function(err) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+            });
+
+            // Continue when we're done
+            latch.then(function() {
+                // TODO: Update the visible points to the user (send an update packet)
+                console.warn('TODO: Update visible points to the user here.');
+
+                // Call back
+                callback(null);
+            });
+        });
+    });
+};
+
+/**
+ * Error callback.
+ *
+ * @callback PointManager~errorCallback
+ * @param {Error} Error instance defining the error that occurred.
+ */
+
+/**
+ * Get a list of unused points for the given user.
+ * These points may be used to put new assignments on.
+ *
+ * @param {UserModel|User|ObjectId|string} user User to get the points for.
+ * @param {PointManager~getUnusedPointsCallback} callback Called with the result, or when an error occurred.
+ */
+PointManager.prototype.getUnusedPoints = function(user, callback) {
+    // Parse the user
+    if(user instanceof UserModel || user instanceof User)
+        user = user.getId();
+    else if(_.isString(user) && ObjectId.isValid(user))
+        user = new ObjectId(user);
+
+    // Call back errors
+    if(!(user instanceof ObjectId)) {
+        callback(new Error('Invalid user instance given'));
+        return;
+    }
+
+    // Define a list of unused points
+    var unusedPoints = [];
+
+    // Create a callback latch
+    var latch = new CallbackLatch(this.points.length);
+    var calledBack = false;
+
+    // Loop through all points to find unused ones
+    this.points.forEach(function(point) {
+        // Return early if called back
+        if(calledBack)
+            return;
+
+        // Get the assignment count on this point
+        point.getUserAssignmentAssignmentCount(user, null, function(err, count) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Add the point to the unused list if it doesn't have any assignments
+            if(count <= 0)
+                unusedPoints.push(point);
+
+            // Resolve the latch
+            latch.resolve();
+        });
+    });
+
+    // Complete the latch
+    latch.then(function() {
+        // Call back the points
+        callback(null, unusedPoints);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback PointManager~getUnusedPointsCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {Point[]=} An array of unused points.
+ */
+
+/**
+ * Get all unused assignments for the given user on the current game.
+ * This method also checks whether assignments have been attached to points, these assignments are also excluded.
+ *
+ * @param {UserModel|User|ObjectId|string} user User model to get the unused assignments for.
+ * @param {PointManager~getUnusedAssignmentsCallback} callback Called with the result or when an error occurred.
+ */
+PointManager.prototype.getUnusedAssignments = function(user, callback) {
+    // Keep a reference to self
+    const self = this;
+
+    // Get a list of unused assignments
+    Core.model.submissionModelManager.getAssignmentsWithoutSubmissions(this.game.getGameModel(), user, function(err, assignments) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Create a callback latch
+        var latch = new CallbackLatch(self.points.length);
+        var calledBack = false;
+
+        // Create a list of used assignment IDs based on the current assignments attached to a point
+        var usedAssignmentIds = [];
+        self.points.forEach(function(err, point) {
+            // Loop through the assignments on the point
+            point.getUserAssignmentAssignmentIds(user, null, function(err, ids) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Map the IDs to their string representation
+                ids = ids.map((id) => id.toString());
+
+                // Add the assignments
+                usedAssignmentIds = usedAssignmentIds.concat(ids);
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Continue after the latch
+        latch.then(function() {
+            // Filter every assignment that is already attached to any point
+            assignments = assignments.filter((assignment) => !usedAssignmentIds.includes(assignment.getIdHex()));
+
+            // Call back the list of assignments
+            callback(null, assignments);
+        });
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback PointManager~getUnusedAssignmentsCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {Assignment[]=} An array of unused assignments.
+ */
 
 // Export the class
 module.exports = PointManager;
