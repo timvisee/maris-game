@@ -149,6 +149,7 @@ module.exports = {
                                     latch.add();
 
                                     // Get the name of the assignment
+                                    assignmentLatch.add();
                                     assignment.getName(function(err, name) {
                                         // Call back errors
                                         if(err !== null) {
