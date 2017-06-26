@@ -43,6 +43,10 @@ block content
             button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
                 i.zmdi.zmdi-edit
                 | &nbsp;&nbsp;Inzending aanpassen
+            if submission.permissions.approve
+                a.ui-btn(href='/game/' + game.id + '/assignment/' + submission.assignment.id + '/edit', title='Opdracht beheren')
+                    i.zmdi.zmdi-comment-edit
+                    | &nbsp;&nbsp;Opdracht beheren
             if submission.permissions.delete
                 a.ui-btn.clr-warning(href=page.url + '/../delete', title='Inzending verwijderen')
                     i.zmdi.zmdi-delete

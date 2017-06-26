@@ -96,6 +96,9 @@ module.exports = {
                 page: {
                     leftButton: 'back'
                 },
+                game: {
+                    id: game.getIdHex()
+                },
                 submission: {
                     assignment: {
                         id: null,
