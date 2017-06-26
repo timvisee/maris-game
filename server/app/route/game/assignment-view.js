@@ -90,6 +90,7 @@ module.exports = {
                 }
 
                 // Get the live user
+                latch.add();
                 liveGame.getUser(user, function(err, liveUser) {
                     // Call back errors
                     if(err !== null) {
@@ -100,6 +101,7 @@ module.exports = {
                     }
 
                     // Get the visible points for this user
+                    latch.add();
                     liveGame.pointManager.getVisiblePoints(user, function(err, points) {
                         // Call back errors
                         if(err !== null) {
@@ -191,13 +193,21 @@ module.exports = {
                                     });
                                 });
 
+                                // Resolve the latch
                                 latch.resolve();
                             });
                         });
 
+                        // Resolve the latch
                         latch.resolve();
                     });
+
+                    // Resolve the latch
+                    latch.resolve();
                 });
+
+                // Resolve the latch
+                latch.resolve();
             });
 
             // Separate each submission in their own category
@@ -252,6 +262,7 @@ module.exports = {
                         }
 
                         // Get the name of the assignment
+                        submissionLatch.add();
                         assignment.getName(function(err, name) {
                             // Call back errors
                             if(err !== null) {
@@ -285,6 +296,9 @@ module.exports = {
                             // Resolve the latch
                             submissionLatch.resolve();
                         });
+
+                        // Resolve the latch
+                        submissionLatch.resolve();
                     });
 
                     // Get the state for the submission

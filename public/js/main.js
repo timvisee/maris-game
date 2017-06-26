@@ -1314,11 +1314,12 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_LOCATIONS_UPDATE,
     }
 
     // Check whether this packet contains specific data
-    const hasUsers = packet.hasOwnProperty('users');
-    const hasPoints = packet.hasOwnProperty('points');
+    const hasUsers = packet.hasOwnProperty('users') && packet.users !== null && packet.users !== undefined;
+    const hasPoints = packet.hasOwnProperty('points') && packet.points !== null && packet.points !== undefined;
+    const hasAssignmentView = packet.hasOwnProperty('assignmentView') && packet.assignmentView !== null && packet.assignmentView !== undefined;
 
     // Show a notification
-    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', points: ' + (hasPoints ? packet.points.length : 0) + ')');
+    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', points: ' + (hasPoints ? packet.points.length : 0) + ', assignmentView: ' + (hasAssignmentView ? 'yes' : 'no') + ')');
 
     // Update the users locations
     if(hasUsers)
@@ -1327,6 +1328,10 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_LOCATIONS_UPDATE,
     // Update the points locations
     if(hasPoints)
         updatePointMarkers(packet.points);
+
+    // Update the assignment view
+    if(hasAssignmentView)
+        updateAssignmentView(packet.assignmentView);
 
     // Focus on everything if enabled, also focus on everything if we should focus on the player, but no player is available
     if(getFollowEverything() || (getFollowPlayer() && playerMarker == null))
@@ -3606,6 +3611,32 @@ function updatePointMarkers(points) {
         // Remove the entry from the array
         pointMarkers.splice(toRemove[i], 1);
     }
+}
+
+/**
+ * Update the assignment view.
+ * 
+ * @param {string} viewSource HTML source of the assignment view to update to.
+ */
+function updateAssignmentView(viewSource) {
+    // Make sure the data is valid
+    if(viewSource === null || viewSource === undefined)
+        return;
+
+    // TODO: Only update on pages of the proper game
+
+    // Update the list and refresh it (to render)
+    $('.view-assignments').each(function() {
+        // Keep a reference to the view
+        var view = $(this);
+        var subView = view.find('.game-assignments-list');
+
+        // Fade it out
+        subView.fadeOut(150, function() {
+            // Flush it with the new view
+            view.show().html(viewSource).enhanceWithin();
+        });
+    });
 }
 
 /**

@@ -3,13 +3,13 @@ extends ../base/page
 block tabs
     ul(data-role='nd2tabs' data-swipe=true)
         - var fadeDelay = 0;
-        if game.stage != 1
+        if game.stage !== 1
             li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
         if game.stage >= 1
             li.wow.fadeInUp(data-tab='map', data-wow-delay=(fadeDelay += 0.1) + 's') Kaart
-        if game.stage == 1 || user.isHost || user.isAdmin
+        if game.stage === 1 || user.isHost || user.isAdmin
             li.wow.fadeInUp(data-tab='assignments', data-wow-delay=(fadeDelay += 0.1) + 's') Opdrachten
-        if game.stage == 1
+        if game.stage === 1
             li.wow.fadeInUp(data-tab='info', data-wow-delay=(fadeDelay += 0.1) + 's') Info
 
 block content
@@ -17,8 +17,8 @@ block content
         div(data-role='nd2tab', data-tab='map')
             #map-container
 
-    if game.stage == 1 || user.isHost || user.isAdmin
-        div(data-role='nd2tab', data-tab='assignments')
+    if game.stage === 1 || user.isHost || user.isAdmin
+        div(data-role='nd2tab', data-tab='assignments').view-assignments
             // Include the assignment view
             include assignment-view
 
