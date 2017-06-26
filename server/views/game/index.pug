@@ -18,9 +18,10 @@ block content
             #map-container
 
     if game.stage === 1 || user.isHost || user.isAdmin
-        div(data-role='nd2tab', data-tab='assignments').view-assignments
-            // Include the assignment view
-            include assignment-view
+        div(data-role='nd2tab', data-tab='assignments')
+            .view-assignments
+                // Include the assignment view
+                include assignment-view
 
     div(data-role='nd2tab', data-tab='info')
         if user.isHost || user.isAdmin
