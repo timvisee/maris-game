@@ -400,7 +400,8 @@ config.game.locationDecayTime = 30 * 1000;
  * Update interval in milliseconds to send new location updates.
  * @type {number}
  */
-config.game.locationUpdateInterval = 5 * 1000;
+// TODO: Increase this again when viewing users
+config.game.locationUpdateInterval = 60 * 1000;
 
 /**
  * Define whether to spread all tasks that have to be invoked automatically over
