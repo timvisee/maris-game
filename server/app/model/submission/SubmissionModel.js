@@ -523,42 +523,113 @@ SubmissionModel.prototype.delete = function(callback) {
 
 /**
  * Check whether the given user has permission to view this submission.
- * A user will have permission if it's the submitter of the submission, if it's the the host of the game,
- * or if the user is administrator.
- * If the user is null or undefined, false is always called back.
  *
  * @param {UserModel|ObjectId|string|null|undefined} user User to check.
  * @param {SubmissionModel~hasViewPermissionCallback} callback Called with the result or when an error occurred.
  */
 SubmissionModel.prototype.hasViewPermission = function(user, callback) {
-    // Create a reference to this
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Call back if the user is null or undefined
+    if(user === null || user === undefined) {
+        callback(null, false);
+        return;
+    }
+
+    // Store a reference to this
     const self = this;
 
-    // Get the game
+    // Get the game and check whether the user has management permissions
+    latch.add();
     self.getGame(function(err, game) {
         // Call back errors
         if(err !== null) {
-            callback(err);
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
             return;
         }
 
-        // Get the game state
-        game.getStage(function(err, stage) {
+        // Check whether the user has management permissions
+        latch.add();
+        game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
-                callback(err);
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
                 return;
             }
 
-            // Call back true if the stage is 2
-            if(stage === 2) {
-                callback(null, true);
-                return;
+            // Call back if the user has permission
+            if(hasPermission) {
+                if(!calledBack)
+                    callback(null, true);
+                calledBack = true;
             }
 
-            // Check whether the user has management permissions
-            self.hasManagePermission(user, callback);
+            // Resolve the latch
+            latch.resolve();
         });
+
+        // Get the game stage
+        latch.add();
+        game.getStage(function(err, gameStage) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // All users can view the submissions when the game is completed
+            if(gameStage >= 2) {
+                if(!calledBack)
+                    callback(null, true);
+                calledBack = true;
+                return;
+            }
+
+            // The game stage must be running
+            if(gameStage !== 1) {
+                latch.resolve();
+                return;
+            }
+
+            // Get the user that created the submission, he is able to view it too
+            self.getUser(function(err, submissionUser) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Resolve the latch if this user didn't create the submission
+                if(!user.getId().equals(submissionUser.getId())) {
+                    latch.resolve();
+                    return;
+                }
+
+                // This user can view the submission
+                if(!calledBack)
+                    callback(null, true);
+                calledBack = true;
+            });
+        });
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Complete the latch
+    latch.then(function() {
+        if(!calledBack)
+            callback(null, false);
     });
 };
 
@@ -572,9 +643,6 @@ SubmissionModel.prototype.hasViewPermission = function(user, callback) {
 
 /**
  * Check whether the given user has permission to edit this submission.
- * A user will have permission if it's the submitter of the submission, if it's the the host of the game,
- * or if the user is administrator.
- * If the user is null or undefined, false is always called back.
  *
  * @param {UserModel|ObjectId|string|null|undefined} user User to check.
  * @param {SubmissionModel~hasEditPermissionCallback} callback Called with the result or when an error occurred.
@@ -593,19 +661,140 @@ SubmissionModel.prototype.hasEditPermission = function(user, callback) {
     // Store a reference to this
     const self = this;
 
-    // Get the approval state
-    this.getApprovalState(function(err, approvalState) {
+    // Get the game and check whether the user has management permissions
+    latch.add();
+    self.getGame(function(err, game) {
         // Call back errors
         if(err !== null) {
-            callback(err);
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
             return;
         }
 
-        // Determine whether to fall back to the management or approval permissions depending on the approval state
-        if(approvalState === ApprovalState.PENDING)
-            self.hasManagePermission(user, callback);
-        else
-            self.hasApprovalPermission(user, callback);
+        // Check whether the user has management permissions
+        latch.add();
+        game.hasManagePermission(user, function(err, hasPermission) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // Call back if the user has permission
+            if(hasPermission) {
+                if(!calledBack)
+                    callback(null, true);
+                calledBack = true;
+            }
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Get the game stage
+        latch.add();
+        game.getStage(function(err, gameStage) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // The game stage must be running
+            if(gameStage !== 1) {
+                latch.resolve();
+                return;
+            }
+
+            // Get the user that created this submission
+            self.getUser(function(err, submissionUser) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Resolve the latch if this user didn't create the submission
+                if(!user.getId().equals(submissionUser.getId())) {
+                    latch.resolve();
+                    return;
+                }
+
+                // Get the approval state
+                self.getApprovalState(function(err, approvalState) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // The user can't edit if the status is approved
+                    if(approvalState === ApprovalState.APPROVED) {
+                        latch.resolve();
+                        return;
+                    }
+
+                    // The user can edit if the status is still pending
+                    if(approvalState === ApprovalState.PENDING) {
+                        if(!calledBack)
+                            callback(null, true);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Get the assignment
+                    self.getAssignment(function(err, assignment) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                callback(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // The user must be able to retry
+                        assignment.isRetry(function(err, retry) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Call back if the user can retry
+                            if(retry) {
+                                if(!calledBack)
+                                    callback(null, true);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Resolve the latch
+                            latch.resolve();
+                        });
+                    });
+                });
+            });
+        });
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Complete the latch
+    latch.then(function() {
+        if(!calledBack)
+            callback(null, false);
     });
 };
 
@@ -618,15 +807,12 @@ SubmissionModel.prototype.hasEditPermission = function(user, callback) {
  */
 
 /**
- * Check whether the given user has permission to manage this submission.
- * A user will have permission if it's the submitter of the submission, if it's the the host of the game,
- * or if the user is administrator.
- * If the user is null or undefined, false is always called back.
+ * Check whether the given user has permission to delete this submission.
  *
  * @param {UserModel|ObjectId|string|null|undefined} user User to check.
- * @param {SubmissionModel~hasManagePermissionCallback} callback Called with the result or when an error occurred.
+ * @param {SubmissionModel~hasDeletePermissionCallback} callback Called with the result or when an error occurred.
  */
-SubmissionModel.prototype.hasManagePermission = function(user, callback) {
+SubmissionModel.prototype.hasDeletePermission = function(user, callback) {
     // Create a callback latch
     var latch = new CallbackLatch();
     var calledBack = false;
@@ -637,9 +823,12 @@ SubmissionModel.prototype.hasManagePermission = function(user, callback) {
         return;
     }
 
-    // Check whether the user is the poster of this submission
+    // Store a reference to this
+    const self = this;
+
+    // Get the game and check whether the user has management permissions
     latch.add();
-    this.getUser(function(err, result) {
+    self.getGame(function(err, game) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -648,30 +837,8 @@ SubmissionModel.prototype.hasManagePermission = function(user, callback) {
             return;
         }
 
-        // The user mustn't be null, and their IDs must equal
-        if(result !== null && user.getId().equals(result.getId())) {
-            if(!calledBack)
-                callback(null, true);
-            calledBack = true;
-            return;
-        }
-
-        // Resolve the latch
-        latch.resolve();
-    });
-
-    // Get the game of this submission
-    latch.add();
-    this.getGame(function(err, game) {
-        // Call back errors
-        if(err !== null) {
-            if(!calledBack)
-                callback(err);
-            calledBack = true;
-            return;
-        }
-
-        // Check whether the user has management permissions on the game
+        // Check whether the user has management permissions
+        latch.add();
         game.hasManagePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
@@ -681,34 +848,216 @@ SubmissionModel.prototype.hasManagePermission = function(user, callback) {
                 return;
             }
 
-            // Call back if the user has game management permissions
+            // Call back if the user has permission
             if(hasPermission) {
                 if(!calledBack)
                     callback(null, true);
                 calledBack = true;
-                return;
             }
 
             // Resolve the latch
             latch.resolve();
         });
+
+        // Get the game stage
+        latch.add();
+        game.getStage(function(err, gameStage) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            // The game stage must be running
+            if(gameStage !== 1) {
+                latch.resolve();
+                return;
+            }
+
+            // Get the user that created this submission
+            self.getUser(function(err, submissionUser) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Resolve the latch if this user didn't create the submission
+                if(!user.getId().equals(submissionUser.getId())) {
+                    latch.resolve();
+                    return;
+                }
+
+                // Get the approval state
+                self.getApprovalState(function(err, approvalState) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // The user can delete if the answer isn't rejected
+                    if(approvalState !== ApprovalState.REJECTED) {
+                        if(!calledBack)
+                            callback(null, true);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Get the assignment
+                    self.getAssignment(function(err, assignment) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                callback(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // The user must be able to retry
+                        assignment.isRetry(function(err, retry) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Call back if the user can retry
+                            if(retry) {
+                                if(!calledBack)
+                                    callback(null, true);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Resolve the latch
+                            latch.resolve();
+                        });
+                    });
+                });
+            });
+        });
+
+        // Resolve the latch
+        latch.resolve();
     });
 
-    // Call back false if we reach the callback latch
+    // Complete the latch
     latch.then(function() {
         if(!calledBack)
             callback(null, false);
-        calledBack = true;
     });
 };
 
 /**
  * Called with the result or when an error occurred.
  *
- * @callback SubmissionModel~hasManagePermissionCallback
+ * @callback SubmissionModel~hasDeletePermissionCallback
  * @param {Error|null} Error instance if an error occurred.
- * @param {boolean} True if the user has permission to manage the submission, false if not.
+ * @param {boolean} True if the user has permission to delete the submission, false if not.
  */
+
+// TODO: Can we remove this?
+// /**
+//  * Check whether the given user has permission to manage this submission.
+//  * A user will have permission if it's the submitter of the submission, if it's the the host of the game,
+//  * or if the user is administrator.
+//  * If the user is null or undefined, false is always called back.
+//  *
+//  * @param {UserModel|ObjectId|string|null|undefined} user User to check.
+//  * @param {SubmissionModel~hasManagePermissionCallback} callback Called with the result or when an error occurred.
+//  */
+// SubmissionModel.prototype.hasManagePermission = function(user, callback) {
+//     // Create a callback latch
+//     var latch = new CallbackLatch();
+//     var calledBack = false;
+//
+//     // Call back if the user is null or undefined
+//     if(user === null || user === undefined) {
+//         callback(null, false);
+//         return;
+//     }
+//
+//     // Check whether the user is the poster of this submission
+//     latch.add();
+//     this.getUser(function(err, result) {
+//         // Call back errors
+//         if(err !== null) {
+//             if(!calledBack)
+//                 callback(err);
+//             calledBack = true;
+//             return;
+//         }
+//
+//         // The user mustn't be null, and their IDs must equal
+//         if(result !== null && user.getId().equals(result.getId())) {
+//             if(!calledBack)
+//                 callback(null, true);
+//             calledBack = true;
+//             return;
+//         }
+//
+//         // Resolve the latch
+//         latch.resolve();
+//     });
+//
+//     // Get the game of this submission
+//     latch.add();
+//     this.getGame(function(err, game) {
+//         // Call back errors
+//         if(err !== null) {
+//             if(!calledBack)
+//                 callback(err);
+//             calledBack = true;
+//             return;
+//         }
+//
+//         // Check whether the user has management permissions on the game
+//         game.hasManagePermission(user, function(err, hasPermission) {
+//             // Call back errors
+//             if(err !== null) {
+//                 if(!calledBack)
+//                     callback(err);
+//                 calledBack = true;
+//                 return;
+//             }
+//
+//             // Call back if the user has game management permissions
+//             if(hasPermission) {
+//                 if(!calledBack)
+//                     callback(null, true);
+//                 calledBack = true;
+//                 return;
+//             }
+//
+//             // Resolve the latch
+//             latch.resolve();
+//         });
+//     });
+//
+//     // Call back false if we reach the callback latch
+//     latch.then(function() {
+//         if(!calledBack)
+//             callback(null, false);
+//         calledBack = true;
+//     });
+// };
+//
+// /**
+//  * Called with the result or when an error occurred.
+//  *
+//  * @callback SubmissionModel~hasManagePermissionCallback
+//  * @param {Error|null} Error instance if an error occurred.
+//  * @param {boolean} True if the user has permission to manage the submission, false if not.
+//  */
 
 /**
  * Check whether the given user has permission to approve this submission.
@@ -720,7 +1069,6 @@ SubmissionModel.prototype.hasManagePermission = function(user, callback) {
  */
 SubmissionModel.prototype.hasApprovalPermission = function(user, callback) {
     // Create a callback latch
-    var latch = new CallbackLatch();
     var calledBack = false;
 
     // Call back if the user is null or undefined
@@ -762,6 +1110,120 @@ SubmissionModel.prototype.hasApprovalPermission = function(user, callback) {
  * @callback SubmissionModel~hasApprovalPermissionCallback
  * @param {Error|null} Error instance if an error occurred.
  * @param {boolean} True if the user has permission to approve the submission, false if not.
+ */
+
+/**
+ * Get a permission object
+ * @param {UserModel} user User model to get the permissions object for.
+ * @param {SubmissionModel~getPermissionObjectCallback} callback Called with the result or when an error occurred.
+ */
+SubmissionModel.prototype.getPermissionObject = function(user, callback) {
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Create the permissions object
+    var result = {
+        view: false,
+        edit: false,
+        delete: false,
+        approve: false
+    };
+
+    // Check the view permission
+    latch.add();
+    this.hasViewPermission(user, function(err, permission) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the property
+        result.view = permission;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Check the edit permission
+    latch.add();
+    this.hasEditPermission(user, function(err, permission) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the property
+        result.edit = permission;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Check the delete permission
+    latch.add();
+    this.hasDeletePermission(user, function(err, permission) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the property
+        result.delete = permission;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Check the approve permission
+    latch.add();
+    this.hasApprovalPermission(user, function(err, permission) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the property
+        result.approve = permission;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Call back the result
+    latch.then(function() {
+        callback(null, result);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback SubmissionModel~getPermissionObjectCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {SubmissionModel~PermissionObject} Permission object.
+ */
+
+/**
+ * Permission object.
+ *
+ * @define SubmissionModel~PermissionObject
+ * @param {boolean} view True if the user has view permissions, false if not.
+ * @param {boolean} edit True if the user has edit permissions, false if not.
+ * @param {boolean} delete True if the user has delete permissions, false if not.
+ * @param {boolean} approve True if the user has approve permissions, false if not.
  */
 
 // Export the submission class

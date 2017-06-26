@@ -114,7 +114,13 @@ module.exports = {
                         id: null,
                         name: null
                     },
-                    answer_text: null
+                    answer_text: null,
+                    permissions: {
+                        view: false,
+                        edit: false,
+                        delete: false,
+                        approve: false
+                    }
                 },
             };
 
@@ -339,6 +345,24 @@ module.exports = {
 
                 // Set the property
                 options.submission.answer_text = answerText;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Get the permissions
+            latch.add();
+            submission.getPermissionObject(user, function(err, permissions) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the permissions
+                options.submission.permissions = permissions;
 
                 // Resolve the latch
                 latch.resolve();

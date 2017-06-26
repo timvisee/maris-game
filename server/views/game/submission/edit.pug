@@ -43,6 +43,7 @@ block content
             button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
                 i.zmdi.zmdi-edit
                 | &nbsp;&nbsp;Inzending aanpassen
-            a.ui-btn.clr-warning(href=page.url + '/../delete', title='Inzending verwijderen')
-                i.zmdi.zmdi-delete
-                | &nbsp;&nbsp;Inzending verwijderen
+            if submission.permissions.delete
+                a.ui-btn.clr-warning(href=page.url + '/../delete', title='Inzending verwijderen')
+                    i.zmdi.zmdi-delete
+                    | &nbsp;&nbsp;Inzending verwijderen

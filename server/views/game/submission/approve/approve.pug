@@ -15,10 +15,10 @@ block content
                     td= submission.assignment.name
                 tr: td Beschrijving
                     td= submission.assignment.description
-                unless submission.answer_text == null
+                unless submission.answer_text === null
                     tr: td Antwoord
                         td= submission.answer_text
-                unless submission.answer_file == null
+                unless submission.answer_file === null
                     tr: td Bestand
                         td= submission.answer_file
 

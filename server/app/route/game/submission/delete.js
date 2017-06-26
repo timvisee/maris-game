@@ -81,7 +81,7 @@ module.exports = {
         }
 
         // The player must have submission management permission
-        submission.hasManagePermission(user, function(err, hasPermission) {
+        submission.hasDeletePermission(user, function(err, hasPermission) {
             // Handle errors
             if(err !== null) {
                 next(err);
@@ -362,7 +362,7 @@ module.exports = {
         }
 
         // The player must have submission management permission
-        submission.hasManagePermission(user, function(err, hasPermission) {
+        submission.hasDeletePermission(user, function(err, hasPermission) {
             // Call back errors
             if(err !== null) {
                 next(err);
