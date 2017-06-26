@@ -46,7 +46,8 @@ const PacketType = {
     GAME_DATA: 15,
     APP_STATUS_REQUEST: 33,
     APP_STATUS_UPDATE: 34,
-    GAME_POINT_RANGE_UPDATE: 35
+    GAME_POINT_RANGE_UPDATE: 35,
+    GAME_SUBMISSION_APPROVAL_CHANGE: 36
 };
 
 /**
@@ -60,6 +61,15 @@ const GeoStates = {
     NOT_WORKING: 3,
     NO_PERMISSION: 4,
     TIMEOUT: 5
+};
+
+/**
+ * Approavl state.
+ */
+const ApprovalState = {
+    PENDING: 0,
+    APPROVED: 1,
+    REJECTED: 2
 };
 
 /**
@@ -706,7 +716,6 @@ var Maris = {
             return document.location.pathname.trim().toLowerCase().lastIndexOf('/status', 0) === 0;
         },
 
-
         /**
          * Get the game ID of the game pages we're currently on.
          *
@@ -722,6 +731,32 @@ var Maris = {
 
             // Get and return the game ID
             return result[1].toLowerCase();
+        },
+
+        /**
+         * Determine whether we're on a submission page.
+         *
+         * @return {boolean} True if we're on a submission related page, false if not.
+         */
+        isSubmissionPage: function() {
+            return this.getSubmissionId() != null;
+        },
+
+        /**
+         * Get the submission ID of the submission page we're currently on.
+         *
+         * @return {string|null} Submission ID or null if we're not on a submission page.
+         */
+        getSubmissionId: function() {
+            // Create a regular expression to fetch the submission ID from the URL
+            const result = document.location.pathname.trim().match(/^\/game\/([a-f0-9]{24})\/submission\/([a-f0-9]{24})(\/.*)?$/);
+
+            // Make sure any result was found
+            if(result === null || result.length < 3)
+                return null;
+
+            // Get and return the submission ID
+            return result[2].toLowerCase();
         },
 
         /**
@@ -4872,7 +4907,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_POINT_RANGE_UPDAT
     //     console.log('Received location data for inactive game, ignoring...');
     //     return;
     // }
-    
+
     // Show a notification to the user
     showNotification('Punt <b>' + packet.name + '</b> ' + (packet.inRange ? 'binnen' : 'buiten') + ' bereik', {
         toast: true,
@@ -4889,6 +4924,79 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_POINT_RANGE_UPDAT
         $('.point-' + packet.point + '-in-range').html('<span style="color: red;">Buiten bereik</span>');
         $('.point-' + packet.point + '-submission-submit').attr('disabled', 'disabled');
     }
-    
-    // TODO: Flush the background instances of all relevant point pages
+});
+
+// Update submission pages on stage change
+Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, function(packet) {
+    // Make sure a message has been set
+    if(!packet.hasOwnProperty('submission') || !packet.hasOwnProperty('name') || !packet.hasOwnProperty('approve_state') || !packet.hasOwnProperty('own'))
+        return;
+
+    // // Make sure the map data is for the current game
+    // if(Maris.utils.getGameId() != packet.game) {
+    //     console.log('Received location data for inactive game, ignoring...');
+    //     return;
+    // }
+
+    // Show a proper popup if it's the current page
+    if(packet.submission.toLowerCase() === Maris.utils.getSubmissionId()) {
+        // Define the title and message
+        var title;
+        var message;
+        if(packet.approve_state === 0) {
+            title = 'Goedkeuring gereset';
+            message = 'De goedkeurings status voor deze inzending is aangepast.';
+        } else if(packet.approve_state === 1) {
+            title = 'Goedgekeurd';
+            message = 'Deze inzending is zojuist <span style="color: green;">goedgekeurd</span>.';
+        } else if(packet.approve_state === 2) {
+            title = 'Afgekeurd';
+            message = 'Deze inzending is zojuist <span style="color: red;">afgekeurd</span>.';
+        }
+
+        // Show the dialog
+        showDialog({
+            title: title,
+            message: message + '<br /><br />Wilt u deze pagina verversen, of de verandering voor nu negeren?',
+            actions: [{
+                text: 'Verversen',
+                state: 'primary',
+                icon: 'zmdi zmdi-refresh',
+                action: function() {
+                    Maris.utils.reloadPage();
+                }
+            }, {
+                text: 'Negeren',
+                state: 'warning',
+                icon: 'zmdi zmdi-close'
+            }]
+        });
+
+    } else if(packet.own) {
+        // Define the message
+        var message = '<b>' + packet.name + '</b> is ';
+        if(packet.approve_state === 0)
+            message += 'gereset';
+        else if(packet.approve_state === 1)
+            message += 'goedgekeurd';
+        else if(packet.approve_state === 2)
+            message += 'afgekeurd';
+
+        // Show a notification to view the submission
+        showNotification(message, {
+            toast: true,
+            vibrate: true,
+            action: {
+                text: 'Bekijken',
+                action: function() {
+                    $.mobile.navigate('/game/' + Maris.state.activeGame + '/submission/' + packet.submission, {
+                        transition: 'flow'
+                    });
+                }
+            }
+        });
+    }
+
+    // Flush the submission pages
+    Maris.utils.flushPages(new RegExp('^\\/game\\/' + Maris.utils.getGameId() + '\\/submission\\/' + packet.submission), false);
 });

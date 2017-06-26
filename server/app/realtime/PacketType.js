@@ -266,4 +266,15 @@ module.exports = {
      * - inRange: True if in range, false if not.
      */
     GAME_POINT_RANGE_UPDATE: 35,
+
+    /**
+     * The approval status of a submission has been changed.
+     *
+     * Data:
+     * - submission: ID of the submission.
+     * - name: Name of the point
+     * - approve_state: Approval state value.
+     * - own: True if the player owns this submission, false if not.
+     */
+    GAME_SUBMISSION_APPROVAL_CHANGE: 36,
 };

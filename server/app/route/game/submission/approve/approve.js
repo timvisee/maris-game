@@ -31,6 +31,7 @@ var LayoutRenderer = require('../../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../../util/CallbackLatch');
 var ApprovalState = require('../../../../model/submission/ApprovalState');
+const PacketType = require("../../../../realtime/PacketType");
 
 // Export the module
 module.exports = {
@@ -292,6 +293,68 @@ module.exports = {
                         next(err);
                         return;
                     }
+
+                    // Get the submission user and assignment name
+                    var submissionOwner;
+                    var submissionName;
+
+                    // Create a latch
+                    var updateLatch = new CallbackLatch();
+
+                    // Get the owner of the submission
+                    updateLatch.add();
+                    submission.getUser(function(err, owner) {
+                        // Call back errors
+                        if(err !== null) {
+                            console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
+                            console.error(err);
+                            return;
+                        }
+
+                        // Set the owner
+                        submissionOwner = owner;
+
+                        // Resolve the latch
+                        updateLatch.resolve();
+                    });
+
+                    // Get the assignment
+                    updateLatch.add();
+                    submission.getAssignment(function(err, assignment) {
+                        // Call back errors
+                        if(err !== null) {
+                            console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
+                            console.error(err);
+                            return;
+                        }
+
+                        // Get the name of the assignment
+                        assignment.getName(function(err, name) {
+                            // Call back errors
+                            if(err !== null) {
+                                console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
+                                console.error(err);
+                                return;
+                            }
+
+                            // Set the name
+                            submissionName = name;
+
+                            // Resolve the latch
+                            updateLatch.resolve();
+                        });
+                    });
+
+                    // Continue the latch
+                    updateLatch.then(function() {
+                        // Send the change to the user
+                        Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, {
+                            submission: submission.getIdHex(),
+                            name: submissionName,
+                            approve_state: approvalState,
+                            own: true
+                        }, submissionOwner);
+                    });
 
                     // Go back to the submission overview page when done
                     // TODO: Maybe redirect to a different, possibly better page?
