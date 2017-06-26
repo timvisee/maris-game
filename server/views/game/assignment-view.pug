@@ -43,12 +43,12 @@ mixin ratedList
             if submissions.user.id !== submission.user.id
                 span(style="color: gray;")= '  ·  ' + submission.user.name
             if submission.approve_state === 1
-                span.ui-li-count(style='color: green;')
+                span.ui-li-count(style=submissions.user.id === submission.user.id ? 'color: green;' : '')
                     i.zmdi.zmdi-thumb-up.ui-pull-left.
                         &nbsp;&nbsp;
                     = submission.points
             else if submission.approve_state === 2
-                span.ui-li-count(style='color: red;')
+                span.ui-li-count(style=submissions.user.id === submission.user.id ? 'color: red;' : '')
                     if submission.retry
                         i.zmdi.zmdi-edit.ui-pull-left.
                             &nbsp;&nbsp;
