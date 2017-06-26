@@ -146,10 +146,8 @@ CallbackLatch.isCalled = function() {
  */
 CallbackLatch.prototype._invokeCallback = function() {
     // Only callback once
-    if(this._single && this._called) {
-        console.warn('Trying to invoke a callback a second time, while this callback latch is configured to only call back once.');
-        return;
-    }
+    if(this._single && this._called)
+        throw new Error('Trying to invoke a callback a second time, while this callback latch is configured to only call back once.');
 
     // Make sure there's anything to call back to
     if(this._finalCallback === null || this._finalCallback === undefined) {

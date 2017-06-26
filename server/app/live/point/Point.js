@@ -1000,6 +1000,7 @@ Point.prototype.setUserAssignmentAssignments = function(userId, assignments, err
     // Reset the list of assignments
     this._userAssignmentMem[userId.toString()] = assignments.length > 0 ? [] : undefined;
 
+    // Determine whether we called back
     var calledBack = false;
 
     // Keep a reference to this

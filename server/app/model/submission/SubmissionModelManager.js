@@ -217,7 +217,7 @@ SubmissionModelManager.prototype.getSubmissions = function(user, assignment, cal
 
     // Determine the Redis cache key
     var redisCacheKey = REDIS_KEY_ROOT + ':' + (user !== null ? user.getIdHex() : '0' ) +
-        ':' + (user !== null ? user.getIdHex() : '0' ) + ':getSubmissions';
+        ':' + (assignment !== null ? user.getIdHex() : '0' ) + ':getSubmissions';
 
     // Store this instance
     const self = this;

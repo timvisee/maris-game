@@ -340,7 +340,7 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
 
     // Parse the game and user values
     if(game instanceof Game)
-        game = game.getGameModel();
+        game = game.getId();
     else if(game instanceof ObjectId || (_.isString(game) && ObjectId.isValid(game))) {
         parseLatch.add();
         Core.model.gameModelManager.getGameById(game, function(err, result) {
@@ -360,7 +360,7 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
         });
     }
     if(user instanceof User)
-        user = user.getUserModel();
+        user = user.getId();
     else if(user instanceof ObjectId || (_.isString(user) && ObjectId.isValid(user))) {
         parseLatch.add();
         Core.model.userModelManager.getUserById(user, function(err, result) {
@@ -407,11 +407,12 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
             var result = [];
 
             // Create a callback latch
-            var latch = new CallbackLatch(assignments.length);
+            var latch = new CallbackLatch();
 
             // Loop through the assignments and determine whether they don't have any submissions
             assignments.forEach(function(assignment) {
                 // Get the submissions for this assignment
+                latch.add();
                 Core.model.submissionModelManager.getSubmissions(user, assignment, function(err, submissions) {
                     // Call back errors
                     if(err !== null) {
