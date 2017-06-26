@@ -545,12 +545,13 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
             stateChanged = true;
 
         // Send the point data if the state changed
-        if(stateChanged)
-        // Broadcast the point data to all relevant user
-            self.broadcastData(function(err) {
+        if(stateChanged) {
+            // Broadcast the point data to all relevant user
+            self.broadcastData(function (err) {
                 // Call back errors
-                if(err !== null) {
-                    callback(err);
+                if (err !== null) {
+                    console.error('Failed to send point data to user, ignoring.');
+                    console.error(err);
                     return;
                 }
 
@@ -558,8 +559,71 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
                 callback(null, true);
             });
 
+            // Create a callback latch
+            var notificationLatch = new CallbackLatch();
+            var calledBack = false;
+
+            // Get some point values
+            var pointName;
+            var pointActive;
+
+            // Get the name of the point
+            notificationLatch.add();
+            self.getName(function(err, name) {
+                // Call back errors
+                if (err !== null) {
+                    console.error('Failed to send notification to user, ignoring.');
+                    console.error(err);
+                    return;
+                }
+
+                // Set the name
+                pointName = name;
+
+                // Resolve the latch
+                notificationLatch.resolve();
+            });
+
+            // Check whether the point is active for the user
+            notificationLatch.add();
+            self.isVisibleFor(liveUser, function(err, pointVisible) {
+                // Call back errors
+                if (err !== null) {
+                    console.error('Failed to send notification to user, ignoring.');
+                    console.error(err);
+                    return;
+                }
+
+                // Set the name
+                pointActive = pointVisible;
+
+                // Resolve the latch
+                notificationLatch.resolve();
+            });
+
+            // Send the notification
+            notificationLatch.then(function() {
+                // Make sure the point is active for the user
+                if(!pointActive)
+                    return;
+
+                // Define the message
+                var message = 'Punt <b>' + pointName + '</b> ' + (visible ? 'binnen' : 'buiten') + ' bereik';
+
+                // Send a notification to the user
+                Core.realTime.packetProcessor.sendPacketUser(PacketType.MESSAGE_RESPONSE, {
+                    error: false,
+                    message,
+                    dialog: false,
+                    toast: true,
+                    vibrate: visible,
+                    ttl: 5 * 1000
+                }, liveUser.getId());
+            });
+        }
+
         else
-        // Call back
+            // Call back
             callback(null, false);
     });
 };
