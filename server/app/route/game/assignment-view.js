@@ -70,32 +70,29 @@ module.exports = {
             }
         };
 
-        // Get all submissions for this user, on this assignment
-        Core.model.submissionModelManager.getSubmissions(user, null, function(err, submissions) {
+        // Check whether the user has management permissions
+        game.hasManagePermission(user, function(err, hasManagePermission) {
             // Call back errors
-            if (err !== null) {
+            if(err !== null) {
                 callback(err);
                 return;
             }
 
-            // Create a callback latch
-            var latch = new CallbackLatch();
-            var calledBack = false;
-
-            // Get the live game
-            latch.add();
-            Core.gameManager.getGame(game, function(err, liveGame) {
+            // Get all submissions for this user, on this assignment
+            Core.model.submissionModelManager.getSubmissions(!hasManagePermission ? user : null, null, function(err, submissions) {
                 // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
+                if (err !== null) {
+                    callback(err);
                     return;
                 }
 
-                // Get the live user
+                // Create a callback latch
+                var latch = new CallbackLatch();
+                var calledBack = false;
+
+                // Get the live game
                 latch.add();
-                liveGame.getUser(user, function(err, liveUser) {
+                Core.gameManager.getGame(game, function(err, liveGame) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
@@ -104,9 +101,9 @@ module.exports = {
                         return;
                     }
 
-                    // Get the visible points for this user
+                    // Get the live user
                     latch.add();
-                    liveGame.pointManager.getVisiblePoints(user, function(err, points) {
+                    liveGame.getUser(user, function(err, liveUser) {
                         // Call back errors
                         if(err !== null) {
                             if(!calledBack)
@@ -115,92 +112,107 @@ module.exports = {
                             return;
                         }
 
-                        // Loop through the points
-                        points.forEach(function(point) {
-                            // Determine whether the point is in-range, return early if it's not
-                            if(!point.isInRangeMemory(liveUser))
+                        // Get the visible points for this user
+                        latch.add();
+                        liveGame.pointManager.getVisiblePoints(user, function(err, points) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
                                 return;
+                            }
 
-                            // Get the assignments for the user
-                            latch.add();
-                            point.getUserAssignmentAssignments(user, {
-                                open: true
-                            }, function(err, assignments) {
-                                // Call back errors
-                                if(err !== null) {
-                                    if(!calledBack)
-                                        callback(err);
-                                    calledBack = true;
+                            // Loop through the points
+                            points.forEach(function(point) {
+                                // Determine whether the point is in-range, return early if it's not
+                                if(!point.isInRangeMemory(liveUser))
                                     return;
-                                }
 
-                                // Loop through the assignments
-                                assignments.forEach(function(assignment) {
-                                    // Return early if called back
-                                    if(calledBack)
+                                // Get the assignments for the user
+                                latch.add();
+                                point.getUserAssignmentAssignments(user, {
+                                    open: true
+                                }, function(err, assignments) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        if(!calledBack)
+                                            callback(err);
+                                        calledBack = true;
                                         return;
+                                    }
 
-                                    // Create a assignment object
-                                    var assignmentObject = {
-                                        id: assignment.getIdHex(),
-                                        name: null,
-                                        points: 1,
-                                        retry: false
-                                    };
-
-                                    // Create a latch
-                                    var assignmentLatch = new CallbackLatch();
-                                    latch.add();
-
-                                    // Get the name of the assignment
-                                    assignmentLatch.add();
-                                    assignment.getName(function(err, name) {
-                                        // Call back errors
-                                        if(err !== null) {
-                                            if(!calledBack)
-                                                callback(err);
-                                            calledBack = true;
+                                    // Loop through the assignments
+                                    assignments.forEach(function(assignment) {
+                                        // Return early if called back
+                                        if(calledBack)
                                             return;
-                                        }
 
-                                        // Set the name
-                                        assignmentObject.name = name;
+                                        // Create a assignment object
+                                        var assignmentObject = {
+                                            id: assignment.getIdHex(),
+                                            name: null,
+                                            points: 1,
+                                            retry: false
+                                        };
 
-                                        // Resolve the latch
-                                        assignmentLatch.resolve();
+                                        // Create a latch
+                                        var assignmentLatch = new CallbackLatch();
+                                        latch.add();
+
+                                        // Get the name of the assignment
+                                        assignmentLatch.add();
+                                        assignment.getName(function(err, name) {
+                                            // Call back errors
+                                            if(err !== null) {
+                                                if(!calledBack)
+                                                    callback(err);
+                                                calledBack = true;
+                                                return;
+                                            }
+
+                                            // Set the name
+                                            assignmentObject.name = name;
+
+                                            // Resolve the latch
+                                            assignmentLatch.resolve();
+                                        });
+
+                                        // Check whether the user can retry this submission
+                                        assignmentLatch.add();
+                                        assignment.isRetry(function(err, retry) {
+                                            // Call back errors
+                                            if(err !== null) {
+                                                if(!calledBack)
+                                                    callback(err);
+                                                calledBack = true;
+                                                return;
+                                            }
+
+                                            // Set whether the user can retry
+                                            assignmentObject.retry = retry;
+
+                                            // Resolve the latch
+                                            assignmentLatch.resolve();
+                                        });
+
+                                        // Continue
+                                        assignmentLatch.then(function() {
+                                            // Add the assignment object to the list
+                                            result.available.push(assignmentObject);
+
+                                            // Resolve the latch
+                                            latch.resolve();
+                                        });
                                     });
 
-                                    // Check whether the user can retry this submission
-                                    assignmentLatch.add();
-                                    assignment.isRetry(function(err, retry) {
-                                        // Call back errors
-                                        if(err !== null) {
-                                            if(!calledBack)
-                                                callback(err);
-                                            calledBack = true;
-                                            return;
-                                        }
-
-                                        // Set whether the user can retry
-                                        assignmentObject.retry = retry;
-
-                                        // Resolve the latch
-                                        assignmentLatch.resolve();
-                                    });
-
-                                    // Continue
-                                    assignmentLatch.then(function() {
-                                        // Add the assignment object to the list
-                                        result.available.push(assignmentObject);
-
-                                        // Resolve the latch
-                                        latch.resolve();
-                                    });
+                                    // Resolve the latch
+                                    latch.resolve();
                                 });
-
-                                // Resolve the latch
-                                latch.resolve();
                             });
+
+                            // Resolve the latch
+                            latch.resolve();
                         });
 
                         // Resolve the latch
@@ -211,19 +223,172 @@ module.exports = {
                     latch.resolve();
                 });
 
-                // Resolve the latch
-                latch.resolve();
-            });
+                // Separate each submission in their own category
+                latch.add(submissions.length);
+                submissions.forEach(function(submission) {
+                    // Just stop when we've already called back
+                    if(calledBack)
+                        return;
 
-            // Separate each submission in their own category
-            latch.add(submissions.length);
-            submissions.forEach(function(submission) {
-                // Just stop when we've already called back
-                if(calledBack)
-                    return;
+                    // Get the game
+                    submission.getGame(function(err, submissionGame) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                callback(err);
+                            calledBack = true;
+                            return;
+                        }
 
-                // Get the game
-                submission.getGame(function(err, submissionGame) {
+                        // Skip if this is a submission for a different game
+                        if(submissionGame === null || submissionGame === undefined || !game.getId().equals(submissionGame.getId())) {
+                            // Resolve the latch and return
+                            latch.resolve();
+                            return;
+                        }
+
+                        // Create a submission object
+                        var submissionObject = {
+                            id: submission.getIdHex(),
+                            name: null,
+                            user: {
+                                id: null,
+                                name: ''
+                            },
+                            approve_state: null,
+                            points: 1,
+                            retry: false
+                        };
+
+                        // Create a latch
+                        var submissionLatch = new CallbackLatch();
+
+                        // Get the name for the submission
+                        submissionLatch.add();
+                        submission.getAssignment(function(err, assignment) {
+                            // Make sure the assignment is something
+                            if(err === null && (assignment === null || assignment === undefined))
+                                err = new Error('Failed to get assignment instance.');
+
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Get the name of the assignment
+                            submissionLatch.add();
+                            assignment.getName(function(err, name) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Set the name
+                                submissionObject.name = name;
+
+                                // Resolve the latch
+                                submissionLatch.resolve();
+                            });
+
+                            // Check whether the user can retry this submission
+                            submissionLatch.add();
+                            assignment.isRetry(function(err, retry) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Set whether the user can retry
+                                submissionObject.retry = retry;
+
+                                // Resolve the latch
+                                submissionLatch.resolve();
+                            });
+
+                            // Resolve the latch
+                            submissionLatch.resolve();
+                        });
+
+                        // Get the user that submitted this submission
+                        submissionLatch.add();
+                        submission.getUser(function(err, submissionUser) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the ID
+                            submissionObject.user.id = submissionUser.getIdHex();
+
+                            // Get the name
+                            submissionUser.getName(function(err, name) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Set the name
+                                submissionObject.user.name = name;
+
+                                // Resolve the latch
+                                submissionLatch.resolve();
+                            });
+                        });
+
+                        // Get the state for the submission
+                        submissionLatch.add();
+                        submission.getApprovalState(function(err, state) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the approval state
+                            submissionObject.approve_state = state;
+
+                            // Set the points to zero if the state is rejected
+                            if(state === ApprovalState.REJECTED)
+                                submissionObject.points = 0;
+
+                            // Resolve the latch
+                            submissionLatch.resolve();
+                        });
+
+                        // Put the submission object in the proper section when we're done
+                        submissionLatch.then(function() {
+                            // Put the submission in the proper section
+                            if (submissionObject.approve_state === ApprovalState.PENDING)
+                                result.pending.push(submissionObject);
+                            else
+                                result.rated.push(submissionObject);
+
+                            // Resolve the latch
+                            latch.resolve();
+                        });
+                    });
+                });
+
+                // Set whether the user has approval permissions
+                latch.add();
+                game.hasManagePermission(user, function(err, managePermission) {
                     // Call back errors
                     if(err !== null) {
                         if(!calledBack)
@@ -232,176 +397,21 @@ module.exports = {
                         return;
                     }
 
-                    // Skip if this is a submission for a different game
-                    if(submissionGame === null || submissionGame === undefined || !game.getId().equals(submissionGame.getId())) {
-                        // Resolve the latch and return
-                        latch.resolve();
-                        return;
-                    }
+                    // Set whether the user has permission
+                    result.user.canApprove = managePermission;
 
-                    // Create a submission object
-                    var submissionObject = {
-                        id: submission.getIdHex(),
-                        name: null,
-                        user: {
-                            id: null,
-                            name: ''
-                        },
-                        approve_state: null,
-                        points: 1,
-                        retry: false
-                    };
+                    // Resolve the latch
+                    latch.resolve();
+                });
 
-                    // Create a latch
-                    var submissionLatch = new CallbackLatch();
-
-                    // Get the name for the submission
-                    submissionLatch.add();
-                    submission.getAssignment(function(err, assignment) {
-                        // Make sure the assignment is something
-                        if(err === null && (assignment === null || assignment === undefined))
-                            err = new Error('Failed to get assignment instance.');
-
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Get the name of the assignment
-                        submissionLatch.add();
-                        assignment.getName(function(err, name) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Set the name
-                            submissionObject.name = name;
-
-                            // Resolve the latch
-                            submissionLatch.resolve();
-                        });
-
-                        // Check whether the user can retry this submission
-                        submissionLatch.add();
-                        assignment.isRetry(function(err, retry) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Set whether the user can retry
-                            submissionObject.retry = retry;
-
-                            // Resolve the latch
-                            submissionLatch.resolve();
-                        });
-
-                        // Resolve the latch
-                        submissionLatch.resolve();
-                    });
-
-                    // Get the user that submitted this submission
-                    submissionLatch.add();
-                    submission.getUser(function(err, submissionUser) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the ID
-                        submissionObject.user.id = submissionUser.getIdHex();
-
-                        // Get the name
-                        submissionUser.getName(function(err, name) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Set the name
-                            submissionObject.user.name = name;
-
-                            // Resolve the latch
-                            submissionLatch.resolve();
-                        });
-                    });
-
-                    // Get the state for the submission
-                    submissionLatch.add();
-                    submission.getApprovalState(function(err, state) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                callback(err);
-                            calledBack = true;
-                            return;
-                        }
-
-                        // Set the approval state
-                        submissionObject.approve_state = state;
-
-                        // Set the points to zero if the state is rejected
-                        if(state === ApprovalState.REJECTED)
-                            submissionObject.points = 0;
-
-                        // Resolve the latch
-                        submissionLatch.resolve();
-                    });
-
-                    // Put the submission object in the proper section when we're done
-                    submissionLatch.then(function() {
-                        // Put the submission in the proper section
-                        if (submissionObject.approve_state === ApprovalState.PENDING)
-                            result.pending.push(submissionObject);
-                        else
-                            result.rated.push(submissionObject);
-
-                        // Resolve the latch
-                        latch.resolve();
-                    });
+                // Process the submissions when all have been fetched
+                latch.then(function() {
+                    // Call back the result object
+                    callback(null, result);
                 });
             });
-
-            // Set whether the user has approval permissions
-            latch.add();
-            game.hasManagePermission(user, function(err, managePermission) {
-                // Call back errors
-                if(err !== null) {
-                    if(!calledBack)
-                        callback(err);
-                    calledBack = true;
-                    return;
-                }
-
-                // Set whether the user has permission
-                result.user.canApprove = managePermission;
-
-                // Resolve the latch
-                latch.resolve();
-            });
-
-            // Process the submissions when all have been fetched
-            latch.then(function() {
-                // Call back the result object
-                callback(null, result);
-            });
         });
+
     },
 
     /**
