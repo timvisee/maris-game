@@ -480,24 +480,6 @@ GameModel.prototype.getUserState = function(user, callback) {
  * @param {UserGameState=} User's game state.
  */
 
-
-/**
- * Get the teams for this game.
- *
- * @param {GameModel~getTeamsCallback} callback Called back with the list of teams or when an error occurred.
- */
-GameModel.prototype.getTeams = function(callback) {
-    Core.model.gameTeamModelManager.getGameTeams(this, callback);
-};
-
-/**
- * Called back with the list of teams or when an error occurred.
- *
- * @callback GameModel~getTeamsCallback
- * @param {Error|null} Error instance if an error occurred, null if not.
- * @param {Array} Array of team model instances.
- */
-
 /**
  * Check whether the given user has permission to manage this game.
  * A user will have permission if it's the host of the game, or if the user is administrator.
@@ -577,6 +559,104 @@ GameModel.prototype.hasManagePermission = function(user, callback) {
  * @callback GameModel~hasManagePermissionCallback
  * @param {Error|null} Error instance if an error occurred.
  * @param {boolean} True if the user has permission to manage the game, false if not.
+ */
+
+/**
+ * Get a list of manager users for this game.
+ * The user must be part of the game to be a manager.
+ *
+ * @param {*} filters Array of users or user ID's, or a single user or user ID.
+ * @param {GameModel~getManageUsersCallback} callback Called with the result or when an error occurred.
+ */
+GameModel.prototype.getManageUsers = function(filters, callback) {
+    // The filter must be a array
+    if(!_.isArray(filters))
+        filters = [filters];
+
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Process the list of filters
+    var filterIds = [];
+    filters.forEach(function(value) {
+        // Return early if called back
+        if(calledBack)
+            return;
+
+        // Process
+        if(_.isString(value))
+            filterIds.push(value);
+        else if(value instanceof ObjectId)
+            filterIds.push(value.toString().toLowerCase());
+        else if(value instanceof UserModel || value instanceof User)
+            filterIds.push(value.getIdHex().toLowerCase());
+        else {
+            if(!calledBack)
+                callback(new Error('Invalid filter given.'));
+            calledBack = true;
+        }
+    });
+
+    // Create a list with managers
+    var managers = [];
+
+    // Keep a reference to this
+    const self = this;
+
+    // Get the complete list of players
+    latch.add();
+    Core.model.gameUserModelManager.getGameUsers(this, null, function(err, users) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Loop through the users and determine whether they are manager
+        users.forEach(function(user) {
+            // Skip if this user is defined in the filter list
+            if(_.includes(filterIds, user.getIdHex().toLowerCase()))
+                return;
+
+            // Check whether the user has management permission
+            latch.add();
+            self.hasManagePermission(user, function(err, hasPermission) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Add the user if he has permission
+                if(hasPermission)
+                    managers.push(user);
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Call back the list of users
+    latch.then(function() {
+        callback(null, managers);
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback GameModel~getManageUsersCallback
+ * @param {Error|null} Error instance if an error occurred.
+ * @param {UserModel[]=} List of users that are managers.
  */
 
 // Export the user class
