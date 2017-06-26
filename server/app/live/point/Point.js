@@ -832,7 +832,7 @@ Point.prototype.getUserAssignmentAssignments = function(user, filter, callback) 
                 return;
 
             // Get the assignment by it's ID
-            Core.model.assignment.getAssignmentById(assignmentId, function(err, assignment) {
+            Core.model.assignmentModelManager.getAssignmentById(assignmentId, function(err, assignment) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)

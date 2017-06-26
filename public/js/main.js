@@ -1318,7 +1318,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_LOCATIONS_UPDATE,
     const hasPoints = packet.hasOwnProperty('points');
 
     // Show a notification
-    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', factories: ' + (hasPoints ? packet.points.length : 0) + ')');
+    console.log('Received location data (users: ' + (hasUsers ? packet.users.length : 0) + ', points: ' + (hasPoints ? packet.points.length : 0) + ')');
 
     // Update the users locations
     if(hasUsers)
@@ -3508,7 +3508,7 @@ function updatePointMarkers(points) {
             marker.rangeCircle.setStyle({
                 opacity: point.inRange ? 1 : 0.4,
                 dashArray: point.inRange ? '' : '5,5',
-                color: point.inRange ? 'darkgreen' : 'darkorange'
+                color: point.inRange ? 'green' : 'darkorange'
             });
 
             // Add the marker and range circle to the map

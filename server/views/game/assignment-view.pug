@@ -3,12 +3,12 @@ ul(data-role='listview').game-assignments-list
     // Section for when assignments are available
     if submissions.available.length > 0
         li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar (' + submissions.available.length + ')'
-        each submission in submissions.available
-            li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
+        each assignment in submissions.available
+            li: a.wow.fadeInUp(href='/game/' + game.id + '/assignment/' + assignment.id + '/submit', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= assignment.name
                 span.ui-li-count
                     i.zmdi.zmdi-puzzle-piece.ui-pull-left.
                         &nbsp;&nbsp;
-                    = submission.points
+                    = assignment.points
 
     // Label for assignments that are pending
     if submissions.pending.length > 0

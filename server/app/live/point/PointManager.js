@@ -346,28 +346,53 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
     var latch = new CallbackLatch(this.points.length);
     var calledBack = false;
 
-    // Loop through the list of points, and check whether the given user has assignments on it
-    this.points.forEach(function(point) {
-        // Return early if we already called back, and make sure the point is valid
-        if(calledBack || point === null || point === undefined)
-            return;
+    // Keep a reference to this
+    const self = this;
 
-        // Check whether the point is visible
-        point.isVisibleFor(user, function(err, visible) {
+    // Get the live game
+    Core.gameManager.getGame(this.game.getId(), function(err, liveGame) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Get the live user
+        liveGame.getUser(user.getId(), function(err, liveUser) {
             // Call back errors
-            if(err !== null) {
-                if(!calledBack)
+            if (err !== null) {
+                if (!calledBack)
                     callback(err);
                 calledBack = true;
                 return;
             }
 
-            // Add the point if it's visible
-            if(visible)
-                result.push(point);
+            // Loop through the list of points, and check whether the given user has assignments on it
+            self.points.forEach(function(point) {
+                // Return early if we already called back, and make sure the point is valid
+                if(calledBack || point === null || point === undefined)
+                    return;
 
-            // Resolve the latch
-            latch.resolve();
+                // Check whether the point is visible
+                point.isVisibleFor(liveUser, function(err, visible) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Add the point if it's visible
+                    if(visible)
+                        result.push(point);
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+            });
         });
     });
 

@@ -71,7 +71,127 @@ module.exports = {
             var latch = new CallbackLatch();
             var calledBack = false;
 
-            // TODO: Add the available assignments to complete.
+            // Get the live game
+            latch.add();
+            Core.gameManager.getGame(game, function(err, liveGame) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Get the live user
+                liveGame.getUser(user, function(err, liveUser) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Get the visible points for this user
+                    liveGame.pointManager.getVisiblePoints(user, function(err, points) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                callback(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Loop through the points
+                        points.forEach(function(point) {
+                            // Determine whether the point is in-range, return early if it's not
+                            if(!point.isInRangeMemory(liveUser))
+                                return;
+
+                            // Get the assignments for the user
+                            latch.add();
+                            point.getUserAssignmentAssignments(user, {
+                                open: true
+                            }, function(err, assignments) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Loop through the assignments
+                                assignments.forEach(function(assignment) {
+                                    // Return early if called back
+                                    if(calledBack)
+                                        return;
+
+                                    // Create a assignment object
+                                    var assignmentObject = {
+                                        id: assignment.getIdHex(),
+                                        name: null,
+                                        points: 1,
+                                        retry: false
+                                    };
+
+                                    // Create a latch
+                                    var assignmentLatch = new CallbackLatch();
+                                    latch.add();
+
+                                    // Get the name of the assignment
+                                    assignment.getName(function(err, name) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            if(!calledBack)
+                                                callback(err);
+                                            calledBack = true;
+                                            return;
+                                        }
+
+                                        // Set the name
+                                        assignmentObject.name = name;
+
+                                        // Resolve the latch
+                                        assignmentLatch.resolve();
+                                    });
+
+                                    // Check whether the user can retry this submission
+                                    assignmentLatch.add();
+                                    assignment.isRetry(function(err, retry) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            if(!calledBack)
+                                                callback(err);
+                                            calledBack = true;
+                                            return;
+                                        }
+
+                                        // Set whether the user can retry
+                                        assignmentObject.retry = retry;
+
+                                        // Resolve the latch
+                                        assignmentLatch.resolve();
+                                    });
+
+                                    // Continue
+                                    assignmentLatch.then(function() {
+                                        // Add the assignment object to the list
+                                        result.available.push(assignmentObject);
+
+                                        // Resolve the latch
+                                        latch.resolve();
+                                    });
+                                });
+
+                                latch.resolve();
+                            });
+                        });
+
+                        latch.resolve();
+                    });
+                });
+            });
 
             // Separate each submission in their own category
             latch.add(submissions.length);
