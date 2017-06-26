@@ -40,12 +40,12 @@ var LayoutRenderer = function() {};
 /**
  * Prepare the configuration, for pages to render.
  *
- * @param req Express request object.
- * @param res Express response object.
- * @param {function} next Callback for the next page.
+ * @param {object|null} req Express request object.
+ * @param {object|null} res Express response object.
+ * @param {function|null} next Callback for the next page.
  * @param {string} pugName Pug name of the layout to render.
  * @param {string|undefined} [pageTitle] Preferred page title.
- * @param {Object|undefined} [options] Additional options.
+ * @param {object|undefined} [options] Additional options.
  * @param {LayoutRenderer~prepareConfigCallback} callback Callback with the result or when an error occurred.
  */
 LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, options, callback) {
@@ -58,17 +58,24 @@ LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, opti
                 code: appInfo.VERSION_CODE
             }
         },
-        session: {
+    };
+
+    // Add the session section and page parameters
+    if(req !== null) {
+        // Add the session section
+        config.session = {
             valid: req.session.valid,
             user: {}
-        },
-        page: {
+        };
+
+        // Add the page section
+        config.page = {
             title: pugName.charAt(0).toUpperCase() + pugName.substring(1).toLowerCase(),
             leftButton: 'menu',
             rightButton: 'options',
-            url: req.originalUrl
-        }
-    };
+            url: req !== null ? req.originalUrl : undefined
+        };
+    }
 
     // Create a callback latch
     var latch = new CallbackLatch();
@@ -77,7 +84,7 @@ LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, opti
     var calledBack = false;
 
     // Get the user's name if we've a session
-    if(req.session.valid) {
+    if(req !== null && req.session.valid) {
         // TODO: Combine all these name queries in a single query
 
         // Get the first name
@@ -86,7 +93,7 @@ LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, opti
             // Call back errors
             if(err !== null) {
                 if(!calledBack)
-                    next(err);
+                    callback(err);
                 calledBack = true;
                 return;
             }
@@ -124,14 +131,14 @@ LayoutRenderer.prepareConfig = function(req, res, next, pugName, pageTitle, opti
  *
  * @callback LayoutRenderer~prepareConfigCallback
  * @param {Error|null} Error instance when an error occurred, null otherwise.
- * @param {object} Page object.
+ * @param {object=} Page object.
  */
 
 /**
  * Render and show the view.
  *
- * @param req Express request object.
- * @param res Express response object.
+ * @param {object} req Express request object.
+ * @param {object} res Express response object.
  * @param {function} next Callback for the next page.
  * @param {string} pugName Pug name of the layout to render.
  * @param {string|undefined} [pageTitle] Preferred page title.
@@ -154,9 +161,9 @@ LayoutRenderer.renderAndShow = function(req, res, next, pugName, pageTitle, opti
 /**
  * Render the view and call back it's HTML.
  *
- * @param req Express request object.
- * @param res Express response object.
- * @param {function} next Callback for the next page.
+ * @param {object|null} req Express request object.
+ * @param {object|null} res Express response object.
+ * @param {function|null} next Callback for the next page.
  * @param {string} pugName Pug name of the layout to render.
  * @param {string|undefined} [pageTitle] Preferred page title.
  * @param {Object|undefined} [options] Additional options.

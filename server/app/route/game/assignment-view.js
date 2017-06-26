@@ -35,11 +35,18 @@ module.exports = {
      * @param {object} res Express response object.
      * @param {buildSubmissionsFieldCallback} callback Callback with the result or when an error occurred.
      */
-    buildSubmissionsField: (req, res, callback) => {
-        // Get the user and game
-        const user = req.session.user;
-        const game = req.game;
+    buildSubmissionsFieldForRequest: (req, res, callback) => {
+        module.exports.buildSubmissionsField(req.session.user, req.game, callback);
+    },
 
+    /**
+     * Build the submissions field to use when rendering submission lists.
+     *
+     * @param {UserModel} user User model.
+     * @param {GameModel} game Game model.
+     * @param {buildSubmissionsFieldCallback} callback Callback with the result or when an error occurred.
+     */
+    buildSubmissionsField: (user, game, callback) => {
         // Call back if the user is invalid
         if(user === undefined) {
             callback(new Error('Onbekende gebruiker.'));
@@ -335,14 +342,31 @@ module.exports = {
     /**
      * Render the view, and get it's HTML.
      *
-     * @param req Express request object.
-     * @param res Express response object.
+     * @param {object|null} req Express request object.
+     * @param {object|null} res Express response object.
+     * @param {object|null} options Options object.
      * @param {renderCallback} callback Callback with the result.
      */
-    render: (req, res, callback) => {
-        // Render the view and call back the result HTML
-        LayoutRenderer.render(req, res, next, 'game/assignment-view', 'Opdrachten', options, callback);
-    }
+    renderForRequest: (req, res, options, callback) => {
+        // Process the options parameter
+        if(options === null || options === undefined)
+            options = {};
+
+        // Build the submissions field
+        module.exports.buildSubmissionsFieldForRequest(req, res, function(err, submissions) {
+            // Call back errors
+            if(err !== null) {
+                callback(err);
+                return;
+            }
+
+            // Set the submissions
+            options.submissions = submissions;
+
+            // Render the view and call back the result HTML
+            LayoutRenderer.render(req, res, null, 'game/assignment-view', 'Opdrachten', options, callback);
+        });
+    },
 
     /**
      * Called with the rendered view or when an error occurred.
@@ -351,4 +375,38 @@ module.exports = {
      * @param {Error|null} Error instance if an error occurred.
      * @param {string} Rendered view as HTML.
      */
+
+    /**
+     * Render the view, and get it's HTML.
+     *
+     * @param {UserModel} user User model.
+     * @param {GameModel} game Game model.
+     * @param {object|null} options Options object.
+     * @param {renderCallback} callback Callback with the result.
+     */
+    render: (user, game, options, callback) => {
+        // Process the options parameter
+        if(options === null || options === undefined)
+            options = {};
+
+        // Build the submissions field
+        module.exports.buildSubmissionsField(user, game, function(err, submissions) {
+            // Call back errors
+            if(err !== null) {
+                callback(err);
+                return;
+            }
+
+            // Set the submissions
+            options.submissions = submissions;
+
+            // Set the game
+            options.game = {
+                id: game.getIdHex()
+            };
+
+            // Render the view and call back the result HTML
+            LayoutRenderer.render(null, null, null, 'game/assignment-view', 'Opdrachten', options, callback);
+        });
+    }
 };

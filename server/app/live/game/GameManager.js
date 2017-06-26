@@ -34,6 +34,8 @@ var User = require('../user/User');
 var UserModel = require('../../model/user/UserModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 
+var viewAssignment = require('../../route/game/assignment-view');
+
 /**
  * GameManager class.
  *
@@ -102,7 +104,7 @@ GameManager.prototype.getGame = function(gameId, callback) {
             }
 
             // Make sure the stage is valid
-            if(stage == 0) {
+            if(stage === 0) {
                 callback(null, null);
                 return;
             }
@@ -155,7 +157,7 @@ GameManager.prototype.getLoadedGame = function(gameId) {
     // Loop through the list of games
     this.games.forEach(function(entry) {
         // Skip if we already found a game
-        if(result != null)
+        if(result !== null)
             return;
 
         // Check whether the game ID equals the game
@@ -174,7 +176,7 @@ GameManager.prototype.getLoadedGame = function(gameId) {
  * @return {boolean} True if the game is currently loaded, false if not.
  */
 GameManager.prototype.isGameLoaded = function(gameId) {
-    return this.getLoadedGame(gameId) != null;
+    return this.getLoadedGame(gameId) !== null;
 };
 
 /**
@@ -403,7 +405,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
         userConstraint = userConstraint.getId();
     else if(_.isString(userConstraint) && ObjectId.isValid(userConstraint))
         userConstraint = new ObjectId(userConstraint);
-    else if(userConstraint != undefined && !(userConstraint instanceof ObjectId)) {
+    else if(userConstraint !== undefined && !(userConstraint instanceof ObjectId)) {
         callback(new Error('Invalid user instance'));
         return;
     }
@@ -494,9 +496,13 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 // Create a point latch
                 var dataLatch = new CallbackLatch();
 
-                // Create a points and users list
-                var points = [];
-                var users = [];
+                // Define the packet object to send
+                var packetObject = {
+                    game: liveGame.getIdHex(),
+                    users: [],
+                    points: [],
+                    assignmentView: null
+                };
 
                 // Loop through the list of points
                 dataLatch.add();
@@ -567,7 +573,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                         // Put the point in the list
                         pointLatch.then(function() {
                             // Create and add the point
-                            points.push(pointObject);
+                            packetObject.points.push(pointObject);
 
                             // Resolve the latch
                             dataLatch.resolve();
@@ -578,6 +584,26 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                     dataLatch.resolve();
                 });
 
+                // Get the assignment view source
+                dataLatch.add();
+                viewAssignment.render(liveUser.getUserModel(), liveGame.getGameModel(), null, function(err, viewSource) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            if(_.isFunction(callback))
+                                callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the view
+                    packetObject.assignmentView = viewSource;
+
+                    // Resolve the game latch
+                    dataLatch.resolve();
+                });
+
+                // Warning: Must update to packetObject.users instead of users
                 // liveGame.pointManager.points.forEach(function(livePoint) {
                 //     // Skip each user if we already called back
                 //     if(calledBack)
@@ -713,13 +739,6 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
 
                 // Send the data to the proper sockets when done
                 dataLatch.then(function() {
-                    // Create a packet object
-                    const packetObject = {
-                        game: liveGame.getIdHex(),
-                        users,
-                        points
-                    };
-
                     // Create a packet and send it to the correct user/sockets
                     if(sockets.length === 0)
                         Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_LOCATIONS_UPDATE, packetObject, liveUser);

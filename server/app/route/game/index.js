@@ -236,7 +236,7 @@ router.get('/:game', function(req, res, next) {
 
     // Build the submissions field
     latch.add();
-    viewAssignments.buildSubmissionsField(req, res, function(err, submissions) {
+    viewAssignments.buildSubmissionsFieldForRequest(req, res, function(err, submissions) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
