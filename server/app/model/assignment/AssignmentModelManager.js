@@ -396,7 +396,7 @@ AssignmentModelManager.prototype.getAssignmentsWithoutSubmissions = function(gam
         }
 
         // Get the list of assignments
-        self.getAssignments(game, user, function(err, assignments) {
+        self.getAssignments(game, null, function(err, assignments) {
             // Call back errors
             if(err !== null) {
                 callback(err);

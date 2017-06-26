@@ -70,7 +70,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
     var calledBack = false;
 
     // Create a function to call back an error
-    const callbackError = function() {
+    const callbackError = function(err) {
         // Only call back once
         if(calledBack)
             return;
@@ -81,6 +81,9 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
             message: 'Er is een fout opgetreden bij het sturen van uw locatie, door een interne server error.',
             dialog: true
         }, socket);
+
+        // Print the error
+        console.error(err);
 
         // Set the called back flag
         calledBack = true;
@@ -114,7 +117,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
     // Parse the coordinate
     const coordinate = Coordinate.parse(rawLocation);
     if(coordinate === null) {
-        callbackError();
+        callbackError(new Error('Ongeldig coordinaat.'));
         return;
     }
 
@@ -126,7 +129,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
             console.error(err);
 
             // Call back an error
-            callbackError();
+            callbackError(err);
             return;
         }
 
@@ -138,7 +141,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         game.getStage(function(err, stage) {
             // Call back errors
             if(err !== null || stage !== 1) {
-                callbackError();
+                callbackError(err);
                 return;
             }
 
@@ -151,7 +154,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         game.getUserState(user, function(err, userState) {
             // Call back errors and make sure the user has the correct state
             if(err !== null || !userState.participant) {
-                callbackError();
+                callbackError(err);
                 return;
             }
 
@@ -167,7 +170,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
         Core.gameManager.getGame(game, function(err, result) {
             // Call back errors
             if(err !== null || result === null) {
-                callbackError();
+                callbackError(err);
                 return;
             }
 
@@ -184,7 +187,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
             liveGame.getUser(user, function(err, liveUser) {
                 // Call back errors
                 if(err !== null || liveUser === null) {
-                    callbackError();
+                    callbackError(err);
                     return;
                 }
 
@@ -201,7 +204,7 @@ LocationUpdateHandler.prototype.handler = function(packet, socket) {
                 liveGame.pointManager.updateUserPoints(user, function(err) {
                     // Call back errors
                     if(err !== null)
-                        callbackError();
+                        callbackError(err);
                 });
 
                 // // Update the location of all other users to determine whether they're in range for the shop
