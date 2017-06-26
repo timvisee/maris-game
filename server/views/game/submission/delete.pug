@@ -12,6 +12,11 @@ block content
                     td= submission.assignment.description
                 tr: td Door
                     td= submission.user.name
+                tr: td Pogingen
+                    if submission.assignment.retry
+                        td Onbeperkt
+                    else
+                        td 1x
                 tr: td Status
                     td
                         if submission.approve_state == 0

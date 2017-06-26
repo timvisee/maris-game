@@ -99,7 +99,8 @@ module.exports = {
                     assignment: {
                         id: null,
                         name: '',
-                        description: ''
+                        description: '',
+                        retry: false
                     },
                     user: {
                         id: null,
@@ -172,6 +173,24 @@ module.exports = {
 
                     // Set the description
                     options.submission.assignment.description = description;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Fetch the retry state
+                latch.add();
+                assignment.isRetry(function(err, retry) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the property
+                    options.submission.assignment.retry = retry;
 
                     // Resolve the latch
                     latch.resolve();

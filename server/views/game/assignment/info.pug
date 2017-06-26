@@ -19,12 +19,11 @@ block content
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
-            tr: td Meerdere pogingen:
-                td
-                    if assignment.retry
-                        span(style='color: green;') Ja
-                    else
-                        span(style='color: red;') Nee
+            tr: td Pogingen:
+                if assignment.retry
+                    td Onbeperkt
+                else
+                    td 1x
 
     br
     .button-list

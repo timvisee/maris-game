@@ -16,8 +16,11 @@ block content
                         td(class='point-' + point.id + '-in-range'): span(style='color: green;') In bereik
                     else
                         td(class='point-' + point.id + '-in-range'): span(style='color: red;') Buiten bereik
-                tr: td Point
-                    td= point.id
+                tr: td Pogingen
+                    if assignment.retry
+                        td Onbeperkt
+                    else
+                        td 1x
 
         br
         form(method='POST', action=page.url + '/#')
