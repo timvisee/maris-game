@@ -3632,7 +3632,7 @@ function updateAssignmentView(viewSource) {
         var subView = view.find('.game-assignments-list');
 
         // Fade it out
-        subView.fadeOut(150, function() {
+        subView.stop().fadeOut(150, function() {
             // Flush it with the new view
             view.show().html(viewSource).enhanceWithin();
         });

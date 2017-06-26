@@ -63,7 +63,10 @@ module.exports = {
         var result = {
             available: [],
             pending: [],
-            rated: []
+            rated: [],
+            user: {
+                canApprove: false
+            }
         };
 
         // Get all submissions for this user, on this assignment
@@ -336,6 +339,24 @@ module.exports = {
                         latch.resolve();
                     });
                 });
+            });
+
+            // Set whether the user has approval permissions
+            latch.add();
+            game.hasManagePermission(user, function(err, managePermission) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set whether the user has permission
+                result.user.canApprove = managePermission;
+
+                // Resolve the latch
+                latch.resolve();
             });
 
             // Process the submissions when all have been fetched
