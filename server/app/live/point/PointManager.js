@@ -619,7 +619,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
             // Continue when we're done
             pointLatch.then(function() {
                 // Broadcast updated location data to players
-                Core.gameManager.broadcastLocationData(0, self.game, user, null, function(err) {
+                Core.gameManager.broadcastLocationData(0, self.game, user, true, null, function(err) {
                     // Handle errors
                     if(err !== null) {
                         console.warn('An error occurred while broadcasting location data to a user.');

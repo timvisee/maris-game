@@ -552,11 +552,7 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
                 if (err !== null) {
                     console.error('Failed to send point data to user, ignoring.');
                     console.error(err);
-                    return;
                 }
-
-                // Call back
-                callback(null, true);
             });
 
             // Create a callback latch
@@ -596,6 +592,9 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
 
                 // Set the name
                 pointActive = pointVisible;
+
+                // Call back, the state is only changed if the point is active for the user
+                callback(null, pointVisible);
 
                 // Resolve the latch
                 notificationLatch.resolve();

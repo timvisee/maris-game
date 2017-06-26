@@ -52,7 +52,7 @@ var GameManager = function() {
 
     // Set up the location update interval
     setInterval(function() {
-        Core.gameManager.broadcastLocationData(config.game.locationUpdateInterval, undefined, undefined, undefined, function(err) {
+        Core.gameManager.broadcastLocationData(config.game.locationUpdateInterval, undefined, undefined, false, undefined, function(err) {
             // Show errors in the console
             if(err !== null)
                 console.error('An error occurred while broadcasting location data to clients, ignoring (' + err + ')');
@@ -389,7 +389,7 @@ GameManager.prototype.unloadGame = function(gameId) {
  * @param {Array|*|undefined} sockets Array of sockets or a single socket to send the location data to. Undefined or an empty array to send to all sockets for the user.
  * @param {GameManager~broadcastDataCallback} [callback] Called on success or when an error occurred.
  */
-GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstraint, userConstraint, sockets, callback) {
+GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstraint, userConstraint, updateAssignments, sockets, callback) {
     // Get the game ID if set
     if((gameConstraint instanceof GameModel) || (gameConstraint instanceof Game))
         gameConstraint = gameConstraint.getId();
@@ -585,23 +585,25 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 });
 
                 // Get the assignment view source
-                dataLatch.add();
-                viewAssignment.render(liveUser.getUserModel(), liveGame.getGameModel(), null, function(err, viewSource) {
-                    // Call back errors
-                    if(err !== null) {
-                        if(!calledBack)
-                            if(_.isFunction(callback))
-                                callback(err);
-                        calledBack = true;
-                        return;
-                    }
+                if(updateAssignments) {
+                    dataLatch.add();
+                    viewAssignment.render(liveUser.getUserModel(), liveGame.getGameModel(), null, function(err, viewSource) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                if(_.isFunction(callback))
+                                    callback(err);
+                            calledBack = true;
+                            return;
+                        }
 
-                    // Set the view
-                    packetObject.assignmentView = viewSource;
+                        // Set the view
+                        packetObject.assignmentView = viewSource;
 
-                    // Resolve the game latch
-                    dataLatch.resolve();
-                });
+                        // Resolve the game latch
+                        dataLatch.resolve();
+                    });
+                }
 
                 // Warning: Must update to packetObject.users instead of users
                 // liveGame.pointManager.points.forEach(function(livePoint) {
