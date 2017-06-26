@@ -19,7 +19,10 @@ mixin availableList
 mixin pendingList
     li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'In afwachting (' + submissions.pending.length + ')'
     each submission in submissions.pending
-        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
+        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
+            = submission.name
+            if submissions.user.id !== submission.user.id
+                span(style="color: gray;")= '  ·  ' + submission.user.name
             if submissions.user.canApprove
                 span.ui-li-count(style='color: darkorange;')
                     i.zmdi.zmdi-notifications-active.ui-pull-left.animated.infinite.swing
@@ -35,7 +38,10 @@ mixin pendingList
 mixin ratedList
     li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beoordeeld (' + submissions.rated.length + ')'
     each submission in submissions.rated
-        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= submission.name
+        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
+            = submission.name
+            if submissions.user.id !== submission.user.id
+                span(style="color: gray;")= '  ·  ' + submission.user.name
             if submission.approve_state === 1
                 span.ui-li-count(style='color: green;')
                     i.zmdi.zmdi-thumb-up.ui-pull-left.

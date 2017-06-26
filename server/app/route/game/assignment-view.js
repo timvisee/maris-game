@@ -65,6 +65,7 @@ module.exports = {
             pending: [],
             rated: [],
             user: {
+                id: user.getIdHex(),
                 canApprove: false
             }
         };
@@ -242,6 +243,10 @@ module.exports = {
                     var submissionObject = {
                         id: submission.getIdHex(),
                         name: null,
+                        user: {
+                            id: null,
+                            name: ''
+                        },
                         approve_state: null,
                         points: 1,
                         retry: false
@@ -303,6 +308,38 @@ module.exports = {
 
                         // Resolve the latch
                         submissionLatch.resolve();
+                    });
+
+                    // Get the user that submitted this submission
+                    submissionLatch.add();
+                    submission.getUser(function(err, submissionUser) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                callback(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Set the ID
+                        submissionObject.user.id = submissionUser.getIdHex();
+
+                        // Get the name
+                        submissionUser.getName(function(err, name) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the name
+                            submissionObject.user.name = name;
+
+                            // Resolve the latch
+                            submissionLatch.resolve();
+                        });
                     });
 
                     // Get the state for the submission
