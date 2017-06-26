@@ -47,7 +47,8 @@ const PacketType = {
     APP_STATUS_REQUEST: 33,
     APP_STATUS_UPDATE: 34,
     GAME_POINT_RANGE_UPDATE: 35,
-    GAME_SUBMISSION_APPROVAL_CHANGE: 36
+    GAME_SUBMISSION_APPROVAL_CHANGE: 36,
+    GAME_SUBMISSION_CHANGE: 37
 };
 
 /**
@@ -4995,6 +4996,62 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_APPROV
                 }
             }
         });
+    }
+
+    // Flush the submission pages
+    Maris.utils.flushPages(new RegExp('^\\/game\\/' + Maris.utils.getGameId() + '\\/submission\\/' + packet.submission), false);
+});
+
+// Update submission pages on change
+Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE, function(packet) {
+    // Make sure a message has been set
+    if(!packet.hasOwnProperty('submission') || !packet.hasOwnProperty('name') || !packet.hasOwnProperty('state') || !packet.hasOwnProperty('own'))
+        return;
+
+    // // Make sure the map data is for the current game
+    // if(Maris.utils.getGameId() != packet.game) {
+    //     console.log('Received location data for inactive game, ignoring...');
+    //     return;
+    // }
+
+    // Show a proper popup if it's the current page
+    if(packet.submission.toLowerCase() === Maris.utils.getSubmissionId()) {
+        // Edited submissions
+        if(packet.state === 'edit') {
+            // Show the dialog
+            showDialog({
+                title: 'Aangepast',
+                message: 'Deze inzending is zojuist aangepast.<br /><br />Wilt u deze pagina verversen, of de aapassing voor nu negeren?',
+                actions: [{
+                    text: 'Verversen',
+                    state: 'primary',
+                    icon: 'zmdi zmdi-refresh',
+                    action: function() {
+                        Maris.utils.reloadPage();
+                    }
+                }, {
+                    text: 'Negeren',
+                    state: 'warning',
+                    icon: 'zmdi zmdi-close'
+                }]
+            });
+
+        } else if(packet.state === 'delete') {
+            // Show the dialog
+            showDialog({
+                title: 'Verwijderd',
+                message: 'Deze inzending is zojuist verwijderd en niet meer beschikbaar.<br /><br />Ga alstublieft terug naar het speloverzicht.',
+                actions: [{
+                    text: 'Speloverzicht',
+                    state: 'primary',
+                    icon: 'zmdi zmdi-home',
+                }]
+            }, function() {
+                // Redirect the user to the game page
+                Maris.utils.navigateToPath('/game/' + Maris.utils.getGameId());
+            });
+
+        }
     }
 
     // Flush the submission pages

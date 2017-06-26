@@ -277,4 +277,15 @@ module.exports = {
      * - own: True if the player owns this submission, false if not.
      */
     GAME_SUBMISSION_APPROVAL_CHANGE: 36,
+
+    /**
+     * A submission has been changed.
+     *
+     * Data:
+     * - submission: ID of the submission.
+     * - name: Name of the point
+     * - state: edit|delete
+     * - own: True if the player owns this submission, false if not.
+     */
+    GAME_SUBMISSION_CHANGE: 37,
 };

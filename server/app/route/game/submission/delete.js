@@ -30,6 +30,7 @@ var AssignmentDatabase = require('../../../model/assignment/AssignmentDatabase')
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../util/CallbackLatch');
+const PacketType = require("../../../realtime/PacketType");
 
 // Export the module
 module.exports = {
@@ -377,17 +378,99 @@ module.exports = {
 
             // TODO: Delete the live submission if there is any
 
-            // Delete the model
-            submission.delete(function(err) {
+            // Get the submission user and assignment name
+            var submissionOwner;
+            var submissionName;
+
+            // Create a latch
+            var updateLatch = new CallbackLatch();
+
+            // Get the owner of the submission
+            updateLatch.add();
+            submission.getUser(function(err, owner) {
                 // Call back errors
                 if(err !== null) {
-                    next(err);
+                    console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
+                    console.error(err);
                     return;
                 }
 
-                // Go back to the submission overview page when done
-                // TODO: Maybe redirect to a different, possibly better page?
-                res.redirect('/game/' + game.getIdHex() + '/');
+                // Set the owner
+                submissionOwner = owner;
+
+                // Resolve the latch
+                updateLatch.resolve();
+            });
+
+            // Get the assignment
+            updateLatch.add();
+            submission.getAssignment(function(err, assignment) {
+                // Call back errors
+                if(err !== null) {
+                    console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
+                    console.error(err);
+                    return;
+                }
+
+                // Get the name of the assignment
+                assignment.getName(function(err, name) {
+                    // Call back errors
+                    if(err !== null) {
+                        console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
+                        console.error(err);
+                        return;
+                    }
+
+                    // Set the name
+                    submissionName = name;
+
+                    // Resolve the latch
+                    updateLatch.resolve();
+                });
+            });
+
+            // Continue the latch
+            updateLatch.then(function() {
+                // Send the change to the user
+                Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                    submission: submission.getIdHex(),
+                    name: submissionName,
+                    state: 'delete',
+                    own: true
+                }, submissionOwner);
+
+                // Get a list of manager users on this game, to also broadcast this message to
+                game.getManageUsers(submissionOwner, function(err, managers) {
+                    // Call back errors
+                    if(err !== null) {
+                        console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
+                        console.error(err);
+                        return;
+                    }
+
+                    // Send the change to the managers
+                    managers.forEach(function(manageUser) {
+                        Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                            submission: submission.getIdHex(),
+                            name: submissionName,
+                            state: 'delete',
+                            own: false
+                        }, manageUser);
+                    });
+                });
+
+                // Delete the model
+                submission.delete(function(err) {
+                    // Call back errors
+                    if(err !== null) {
+                        next(err);
+                        return;
+                    }
+
+                    // Go back to the submission overview page when done
+                    // TODO: Maybe redirect to a different, possibly better page?
+                    res.redirect('/game/' + game.getIdHex() + '/');
+                });
             });
         });
     },
