@@ -256,4 +256,14 @@ module.exports = {
      * - status: object with all status properties
      */
     APP_STATUS_UPDATE: 34,
+
+    /**
+     * An update to define whether the user is in range of the given point.
+     *
+     * Data:
+     * - point: ID of the point.
+     * - name: Name of the point
+     * - inRange: True if in range, false if not.
+     */
+    GAME_POINT_RANGE_UPDATE: 35,
 };

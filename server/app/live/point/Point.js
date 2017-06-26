@@ -606,17 +606,11 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
                 if(!pointActive)
                     return;
 
-                // Define the message
-                var message = 'Punt <b>' + pointName + '</b> ' + (visible ? 'binnen' : 'buiten') + ' bereik';
-
                 // Send a notification to the user
-                Core.realTime.packetProcessor.sendPacketUser(PacketType.MESSAGE_RESPONSE, {
-                    error: false,
-                    message,
-                    dialog: false,
-                    toast: true,
-                    vibrate: visible,
-                    ttl: 5 * 1000
+                Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_POINT_RANGE_UPDATE, {
+                    point: self.getIdHex(),
+                    name: pointName,
+                    inRange: visible
                 }, liveUser.getId());
             });
         }
@@ -641,7 +635,7 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
  * @param {User} liveUser User.
  */
 Point.prototype.isInRangeMemory = function(liveUser) {
-    return this._userRangeMem.indexOf(liveUser) >= 0;
+    return this._userRangeMem.indexOf(liveUser.getIdHex()) >= 0;
 };
 
 /**
@@ -661,9 +655,9 @@ Point.prototype.setInRangeMemory = function(liveUser, inRange) {
 
     // Update the range array
     if(inRange)
-        this._userRangeMem.push(liveUser);
+        this._userRangeMem.push(liveUser.getIdHex());
     else
-        this._userRangeMem.splice(this._userRangeMem.indexOf(liveUser), 1);
+        this._userRangeMem.splice(this._userRangeMem.indexOf(liveUser.getIdHex()), 1);
 
     // Return the result
     return true;
@@ -1008,6 +1002,15 @@ Point.prototype.hasUserAssignment = function(user, assignment, callback) {
 
     // Define a variable to keep track whether we called back
     var calledBack = false;
+
+    // Get the assignment IDs
+    var ids = this._userAssignmentMem[user.toString()];
+
+    // Make sure there's any assignment
+    if(ids === null || ids === undefined || ids.length === 0) {
+        callback(null, false);
+        return;
+    }
 
     // Loop through the list of assignments
     this._userAssignmentMem[user.toString()].forEach(function(assignmentId) {

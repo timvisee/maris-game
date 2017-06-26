@@ -11,6 +11,13 @@ block content
                     td= assignment.name
                 tr: td Beschrijving
                     td= assignment.description
+                tr: td Bereik
+                    if point.inRange
+                        td(class='point-' + point.id + '-in-range'): span(style='color: green;') In bereik
+                    else
+                        td(class='point-' + point.id + '-in-range'): span(style='color: red;') Buiten bereik
+                tr: td Point
+                    td= point.id
 
         br
         form(method='POST', action=page.url + '/#')
@@ -24,7 +31,7 @@ block content
 
             br
             .button-list
-                button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Antwoord inzenden
+                button(class='ui-btn ui-btn-raised clr-primary point-' + point.id + '-submission-submit', type='submit', data-ajax='false') Antwoord inzenden
                 a.ui-btn(href='#', data-rel='back', data-direction='reverse', data-wow-delay='0.4s')
                     i.zmdi.zmdi-arrow-back
                     | &nbsp;&nbsp;Ga terug

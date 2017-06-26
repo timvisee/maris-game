@@ -45,7 +45,8 @@ const PacketType = {
     GAME_DATA_REQUEST: 14,
     GAME_DATA: 15,
     APP_STATUS_REQUEST: 33,
-    APP_STATUS_UPDATE: 34
+    APP_STATUS_UPDATE: 34,
+    GAME_POINT_RANGE_UPDATE: 35
 };
 
 /**
@@ -4858,4 +4859,36 @@ function initPointSelectMap() {
 
 $(document).bind('pageshow', function() {
     initPointSelectMap();
+});
+
+// Point range update
+Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_POINT_RANGE_UPDATE, function(packet) {
+    // Make sure a message has been set
+    if(!packet.hasOwnProperty('point') || !packet.hasOwnProperty('name') || !packet.hasOwnProperty('inRange'))
+        return;
+
+    // // Make sure the map data is for the current game
+    // if(Maris.utils.getGameId() != packet.game) {
+    //     console.log('Received location data for inactive game, ignoring...');
+    //     return;
+    // }
+    
+    // Show a notification to the user
+    showNotification('Punt <b>' + packet.name + '</b> ' + (packet.inRange ? 'binnen' : 'buiten') + ' bereik', {
+        toast: true,
+        native: false,
+        vibrate: true,
+        vibrationPattern: 50
+    });
+
+    // Update point labels and states
+    if(packet.inRange) {
+        $('.point-' + packet.point + '-in-range').html('<span style="color: green;">In bereik</span>');
+        $('.point-' + packet.point + '-submission-submit').removeAttr('disabled');
+    } else {
+        $('.point-' + packet.point + '-in-range').html('<span style="color: red;">Buiten bereik</span>');
+        $('.point-' + packet.point + '-submission-submit').attr('disabled', 'disabled');
+    }
+    
+    // TODO: Flush the background instances of all relevant point pages
 });

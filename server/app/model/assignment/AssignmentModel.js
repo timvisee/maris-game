@@ -412,6 +412,75 @@ AssignmentModel.prototype.setRetry = function(retry, callback) {
 };
 
 /**
+ * Find the point this assignment is currently attached to.
+ *
+ * @param {UserModel} user User to find the point for.
+ * @param {GameModel} game Game to find the point in.
+ * @param {AssignmentModel~findPointCallback} callback Called with the result, or when an error occurred.
+ */
+AssignmentModel.prototype.findPoint = function(user, game, callback) {
+    // Keep a reference to this
+    const self = this;
+
+    // Get the live game
+    Core.gameManager.getGame(game, function(err, liveGame) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Create a callback latch
+        var latch = new CallbackLatch();
+        var calledBack = false;
+
+        // Loop through the points
+        liveGame.pointManager.points.forEach(function(livePoint) {
+            // Return early if called back
+            if(calledBack)
+                return;
+
+            // Check whether this point has the assignment
+            latch.add();
+            livePoint.hasUserAssignment(user, self, function(err, hasAssignment) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Call back this point if it has the assignment
+                if(hasAssignment) {
+                    if(!calledBack)
+                        callback(null, livePoint);
+                    calledBack = true;
+                    return;
+                }
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Call back after nothing is found
+        latch.then(function() {
+            if(!calledBack)
+                callback(null, null);
+        });
+    });
+};
+
+/**
+ * Called with the result or when an error occurred.
+ *
+ * @callback AssignmentModel~findPointCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {Point|null} Live point instance if found, null otherwise.
+ */
+
+/**
  * Delete the assignment.
  *
  * @param {AssignmentModel~deleteCallback} [callback] Called on success, or when an error occurred.
