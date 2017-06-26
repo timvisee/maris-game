@@ -1,6 +1,6 @@
 // Mixin for the available list
 mixin availableList
-    li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar (' + submissions.available.length + ')'
+    li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar  ·  ' + submissions.available.length
         if submissions.available.length === 0
             p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's').
                 Hier geen opdrachten beschikbaar...#[br]
@@ -17,7 +17,7 @@ mixin availableList
 
 // Mixin for the pending list
 mixin pendingList
-    li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'In afwachting (' + submissions.pending.length + ')'
+    li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'In afwachting  ·  ' + submissions.pending.length
     each submission in submissions.pending
         li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
             = submission.name
@@ -36,7 +36,7 @@ mixin pendingList
 
 // Mixin for the rated list
 mixin ratedList
-    li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beoordeeld (' + submissions.rated.length + ')'
+    li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beoordeeld  ·  ' + submissions.rated.length
     each submission in submissions.rated
         li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
             = submission.name
