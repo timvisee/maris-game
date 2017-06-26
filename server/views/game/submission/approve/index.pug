@@ -9,31 +9,31 @@ block content
                 td= submission.assignment.description
             tr: td Status
                 td
-                    if submission.approve_state == 0
+                    if submission.approve_state === 0
                         span(style='color: gray; font-style: italic;') In afwachting
-                    else if submission.approve_state == 1
+                    else if submission.approve_state === 1
                         span(style='color: green;') Goedgekeurd
-                    else if submission.approve_state == 2
+                    else if submission.approve_state === 2
                         span(style='color: red;') Afgekeurd
-            unless submission.answer_text == null
+            unless submission.answer_text === null
                 tr: td Antwoord
                     td= submission.answer_text
-            unless submission.answer_file == null
+            unless submission.answer_file === null
                 tr: td Bestand
                     td= submission.answer_file
 
     // Show the approval buttons
     br
     .button-list
-        if submission.approve_state != 1
+        if submission.approve_state !== 1
             a.ui-btn.clr-btn-green.clr-btn-accent-green(href=page.url + '/accept', title='Inzending accepteren')
                 i.zmdi.zmdi-thumb-up
                 | &nbsp;&nbsp;Inzending goedkeuren
-        if submission.approve_state != 2
+        if submission.approve_state !== 2
             a.ui-btn.clr-btn-red.clr-btn-accent-red(href=page.url + '/reject', title='Inzending afwijzen')
                 i.zmdi.zmdi-thumb-down
                 | &nbsp;&nbsp;Inzending afkeuren
-        if submission.approve_state != 0
+        if submission.approve_state !== 0
             a.ui-btn(href=page.url + '/reset', title='Goedkeuring ongedaan maken voor deze inzending')
                 i.zmdi.zmdi-thumb-up-down
                 | &nbsp;&nbsp;Goedkeuring ongedaan maken

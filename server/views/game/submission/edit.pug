@@ -19,11 +19,11 @@ block content
                     td 1x
             tr: td Status
                 td
-                    if submission.approve_state == 0
+                    if submission.approve_state === 0
                         span(style='color: gray; font-style: italic;') In afwachting
-                    else if submission.approve_state == 1
+                    else if submission.approve_state === 1
                         span(style='color: green;') Goedgekeurd
-                    else if submission.approve_state == 2
+                    else if submission.approve_state === 2
                         span(style='color: red;') Afgekeurd
 
     br
@@ -31,7 +31,7 @@ block content
         if submission.assignment.allow_text
             label(for='field-submission-text') Antwoord:
                 textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')
-                    unless submission.answer_text == null
+                    unless submission.answer_text === null
                         = submission.answer_text
 
         if submission.assignment.allow_file

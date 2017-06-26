@@ -53,12 +53,12 @@ block content
                     td= assignment.description
 
                 // Show text submissions
-                unless submission.text == null
+                unless null == submission.text
                     tr: td Inzending
                         td= submission.text
 
                 // Show file submissions
-                unless submission.file == null
+                unless submission.file === null
                     tr: td Antwoord
                         td: i(style='color: gray;') Bestand
 

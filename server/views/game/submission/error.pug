@@ -13,6 +13,6 @@ block content
                 | &nbsp;&nbsp;Ga terug
 
         //- Show the submission view button
-        unless submission.id == null
+        unless submission.id === null
             a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken') Inzending bekijken
 
