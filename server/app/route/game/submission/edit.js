@@ -28,6 +28,7 @@ var LayoutRenderer = require('../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../util/CallbackLatch');
 const PacketType = require("../../../realtime/PacketType");
+const ApprovalState = require("../../../model/submission/ApprovalState");
 
 // Export the module
 module.exports = {
@@ -524,6 +525,21 @@ module.exports = {
                     // Set the file field
                     applyLatch.add();
                     submission.setAnswerFile(submissionFile, function(err) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                next(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Resolve the latch
+                        applyLatch.resolve();
+                    });
+
+                    // Set the approval state
+                    applyLatch.add();
+                    submission.setApprovalState(ApprovalState.PENDING, function(err) {
                         // Call back errors
                         if(err !== null) {
                             if(!calledBack)

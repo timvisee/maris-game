@@ -1,10 +1,11 @@
 extends ../../base/page
 
 block content
-    p.
-        Vul op deze pagina uw antwoord in, en klik op de knop om uw antwoord in te zenden.
-
     div(align="center")
+        p Pas hieronder de antwoorden aan, en klik op de knop om de verandering toe te passen.
+        if submission.approve_state !== 0
+        p Na het aanpassen zal uw inzending opnieuw goedgekeurd moeten worden.
+
         table.table-list.ui-responsive
             tr: td Naam
                 td= submission.assignment.name
