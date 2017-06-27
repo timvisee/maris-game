@@ -116,6 +116,7 @@ module.exports = {
                     id: assignment.getIdHex(),
                     name: null,
                     description: null,
+                    retry: false,
                     allow_text: true,
                     allow_file: false
                 },
@@ -160,6 +161,24 @@ module.exports = {
 
                 // Set the assignment description
                 options.assignment.description = description;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Get the assignment retry state
+            latch.add();
+            assignment.isRetry(function(err, isRetry) {
+                // Handle errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the assignment retry state
+                options.assignment.retry = isRetry;
 
                 // Resolve the latch
                 latch.resolve();

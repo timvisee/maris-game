@@ -519,7 +519,9 @@ Point.prototype.isVisibleFor = function(liveUser, callback) {
         latch.add();
         self.hasUserAssignmentAssignments(liveUser, {
             open: true,
-            pending: true
+            pending: true,
+            retryable: true
+
         }, function(err, hasAssignments) {
             // Call back errors
             if(err !== null) {
@@ -815,7 +817,7 @@ Point.prototype.getUserAssignmentAssignmentIds = function(userId, filter, callba
                     if(filter.open && submissions.length === 0)
                         keep = true;
 
-                    else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
+                    else if(filter.pending || filter.accepted || filter.rejected || filter.approved || filter.retryable) {
                         // Loop through the list of submissions
                         submissions.forEach(function(submission) {
                             // Return early if called back or if already determined to keep the submission
@@ -849,8 +851,29 @@ Point.prototype.getUserAssignmentAssignmentIds = function(userId, filter, callba
                                 else if(filter.approved && approvalState !== ApprovalState.PENDING)
                                     keep = true;
 
-                                // Resolve the latch
-                                filterLatch.resolve();
+                                // Check whether it's retryable
+                                if(!keep && filter.retryable && approvalState === ApprovalState.REJECTED) {
+                                    // Check whether the user can retry this assignment
+                                    assignment.isRetry(function(err, isRetry) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            if(!calledBack)
+                                                callback(err);
+                                            calledBack = true;
+                                            return;
+                                        }
+
+                                        // Keep it if it's retryable
+                                        if(isRetry)
+                                            keep = true;
+
+                                        // Resolve the latch
+                                        filterLatch.resolve();
+                                    });
+
+                                } else
+                                    // Resolve the latch
+                                    filterLatch.resolve();
                             });
                         });
                     }
@@ -889,6 +912,7 @@ Point.prototype.getUserAssignmentAssignmentIds = function(userId, filter, callba
  * @param {boolean} [approved] True to include assignments with approved submissions, false if not.
  * @param {boolean} [accepted] True to include assignments with accepted submissions, false if not.
  * @param {boolean} [rejected] True to include assignments with rejected submissions, false if not.
+ * @param {boolean} [retryable] True to include assignments which are rejected but retryable, false if not.
  */
 
 /**
