@@ -5,25 +5,25 @@ block content
         table.table-list.ui-responsive
             tr: td Naam
                 td= assignment.name
-            tr: td Beschrijving
+            tr: td Opdracht
                 td= assignment.description
-            tr: td Tekst antwoord:
+            tr: td Pogingen
+                if assignment.retry
+                    td Onbeperkt
+                else
+                    td 1x
+            tr: td Antwoord
                 td
                     if assignment.answer_text
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
-            tr: td Bestand antwoord:
+            tr: td Bestand
                 td
                     if assignment.answer_file
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
-            tr: td Pogingen:
-                if assignment.retry
-                    td Onbeperkt
-                else
-                    td 1x
 
     br
     .button-list

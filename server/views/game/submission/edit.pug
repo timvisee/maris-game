@@ -9,16 +9,16 @@ block content
         table.table-list.ui-responsive
             tr: td Naam
                 td= submission.assignment.name
-            tr: td Beschrijving
+            tr: td Opdracht
                 td= submission.assignment.description
-            tr: td Door
+            tr: td Ingezonden
                 td= submission.user.name
             tr: td Pogingen
                 if submission.assignment.retry
                     td Onbeperkt
                 else
                     td 1x
-            tr: td Status
+            tr: td Beoordeling
                 td
                     if submission.approve_state === 0
                         span(style='color: gray; font-style: italic;') In afwachting

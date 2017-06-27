@@ -3,11 +3,11 @@ extends ../../../base/page
 block content
     div(align="center")
         table.table-list.ui-responsive
-            tr: td Voor
+            tr: td Naam
                 td= submission.assignment.name
-            tr: td Beschrijving
+            tr: td Opdracht
                 td= submission.assignment.description
-            tr: td Status
+            tr: td Beoordeling
                 td
                     if submission.approve_state === 0
                         span(style='color: gray; font-style: italic;') In afwachting
@@ -17,7 +17,11 @@ block content
                         span(style='color: red;') Afgekeurd
             unless submission.answer_text === null
                 tr: td Antwoord
-                    td= submission.answer_text
+                    td
+        unless submission.answer_text === null
+            p(style='border: 1px darkgray solid; padding: 8px')= submission.answer_text
+
+        table.table-list.ui-responsive
             unless submission.answer_file === null
                 tr: td Bestand
                     td= submission.answer_file
