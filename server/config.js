@@ -374,7 +374,13 @@ config.validation.gameNameMaxLength = 128;
  * The range of a point in a game as radius from the center in meters.
  * @type {number}
  */
-config.game.pointRange = 15;
+config.game.pointRange = 12;
+
+/**
+ * The range of a point in a game as radius from the center in meters when the point is active.
+ * @type {number}
+ */
+config.game.pointRangeActive = 20;
 
 /**
  * The number of assignments on each point for a user.

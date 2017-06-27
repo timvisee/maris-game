@@ -400,17 +400,52 @@ Point.prototype.isUserInRange = function(liveUser, callback) {
         return;
     }
 
-    // Get the point location
-    this.getPointModel().getLocation(function(err, pointLocation) {
+    // Create a callback latch
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    // Factory range and location
+    var factoryRange;
+    var factoryLocation;
+
+    // Get the range
+    latch.add();
+    this.getRange(liveUser, function(err, range) {
         // Call back errors
         if(err !== null) {
-            callback(err);
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
             return;
         }
 
+        // Set the range
+        factoryRange = range;
+
         // Resolve the latch
-        callback(null, pointLocation.isInRange(liveUser.getLocation(), config.game.pointRange));
+        latch.resolve();
     });
+
+    // Get the point location
+    latch.add();
+    this.getPointModel().getLocation(function(err, location) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Set the location
+        factoryLocation = location;
+
+        // Resolve the latch
+        latch.resolve();
+    });
+
+    // Complete the latch
+    latch.then(() => callback(null, factoryLocation.isInRange(liveUser.getLocation(), factoryRange)));
 };
 
 /**
@@ -1172,6 +1207,28 @@ Point.prototype.removeUserAssignmentAssignments = function(userId, assignments, 
  *
  * @callback Point~errorCallback
  * @param {Error} Error instance defining the error that occurred.
+ */
+
+/**
+ * Get the range of the point.
+ *
+ * @param {User|undefined} liveUser Live user instance to get the range for, or undefined to get the global point range.
+ * @param {Point~getRangeCallback} callback Called back with the range or when an error occurred.
+ */
+Point.prototype.getRange = function(liveUser, callback) {
+    // Check whether the active or global range should be used, call back the result
+    if(this.isInRangeMemory(liveUser))
+        callback(null, config.game.pointRangeActive);
+    else
+        callback(null, config.game.pointRange);
+};
+
+/**
+ * Called back with the range or when an error occurred.
+ *
+ * @callback Point~getRangeCallback
+ * @param {Error|null} Error instance if an error occurred, null on success.
+ * @param {Number=} Point range in meters.
  */
 
 /**
