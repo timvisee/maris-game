@@ -3605,7 +3605,7 @@ function updatePointMarkers(points) {
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'Punt bneheren',
+                        text: 'Punt beheren',
                         state: 'normal',
                         icon: 'zmdi zmdi-edit',
                         action: function() {

@@ -204,7 +204,7 @@ SubmissionModelManager.prototype.getSubmissions = function(user, assignment, cal
     if(user === undefined)
         user = null;
     if(assignment === undefined)
-        user = null;
+        assignment = null;
 
     // Add the user and assignment to the query object if specified
     if(user !== null)
@@ -217,7 +217,7 @@ SubmissionModelManager.prototype.getSubmissions = function(user, assignment, cal
 
     // Determine the Redis cache key
     var redisCacheKey = REDIS_KEY_ROOT + ':' + (user !== null ? user.getIdHex() : '0' ) +
-        ':' + (assignment !== null ? user.getIdHex() : '0' ) + ':getSubmissions';
+        ':' + (assignment !== null ? assignment.getIdHex() : '0' ) + ':getSubmissions';
 
     // Store this instance
     const self = this;
