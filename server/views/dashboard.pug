@@ -8,17 +8,21 @@ block tabs
 
 block content
     div(data-role='nd2tab', data-tab='dashboard')
-        p Welkom #{session.user.name}!
+        div(align='center')
+            p Welkom #{session.user.name}!
 
-        p.
-            Je gebruikt een vroeg prototype van #{app.name}, en dit product is voorlopig nog niet klaar.#[br]
-            #[br]
-            #{app.name} is op dit moment in de pre-alpha staat en bevat waarschijnlijk nog bugs, glitches en andere ongewilde praktijken.
+            img(src='/img/logobohemen.jpg')
 
+            p U gebruikt momenteel een prototype van #{app.name}.
+
+        br
         .button-list
-            a.ui-btn(href='https://github.com/timvisee/maris-game', title='Support on GitHub') View on GitHub
-            a.ui-btn(href='/about', title='About') About
-            a.ui-btn.clr-warning(href='/logout', title='Logout') Logout
+            a.ui-btn(href='/about', title='Over')
+                i.zmdi.zmdi-info
+                | &nbsp;&nbsp;Over #{app.name}
+            a.ui-btn.clr-warning(href='/logout', title='Uitlogge')
+                i.zmdi.zmdi-stop
+                | &nbsp;&nbsp;Uitloggen
 
     div(data-role='nd2tab', data-tab='games')
         - var fadeDelay = -0.1;

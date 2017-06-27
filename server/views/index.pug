@@ -1,7 +1,9 @@
 extends base/page
 
 block content
-    p Welkom bij #{app.name}.
+    div(align='center')
+        img(src='/img/logobohemen.jpg')
+        p Welkom bij #{app.name}.
 
     - var nextParam = next !== undefined ? '?next=' + next : '';
 
