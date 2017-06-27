@@ -507,7 +507,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
         var missingPoints = Math.max(config.game.pointMinClean - cleanPoints, 0);
 
         // We're done if there are enough clean points available
-        if(missingPoints <= 0) {
+        if(missingPoints === 0) {
             if(!calledBack)
                 callback(null);
             calledBack = true;

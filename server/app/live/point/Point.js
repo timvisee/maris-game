@@ -811,51 +811,48 @@ Point.prototype.getUserAssignmentAssignmentIds = function(userId, filter, callba
                     // Create a callback latch for the filtering
                     var filterLatch = new CallbackLatch();
 
-                    // Apply filtering
-                    if(filter !== null) {
-                        // Filter open assignments
-                        if(filter.open && submissions.length === 0)
-                            keep = true;
+                    // Filter open assignments
+                    if(filter.open && submissions.length === 0)
+                        keep = true;
 
-                        else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
-                            // Loop through the list of submissions
-                            submissions.forEach(function(submission) {
-                                // Return early if called back or if already determined to keep the submission
-                                if(calledBack || keep)
+                    else if(filter.pending || filter.accepted || filter.rejected || filter.approved) {
+                        // Loop through the list of submissions
+                        submissions.forEach(function(submission) {
+                            // Return early if called back or if already determined to keep the submission
+                            if(calledBack || keep)
+                                return;
+
+                            // Get the approval state
+                            filterLatch.add();
+                            submission.getApprovalState(function(err, approvalState) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
                                     return;
+                                }
 
-                                // Get the approval state
-                                filterLatch.add();
-                                submission.getApprovalState(function(err, approvalState) {
-                                    // Call back errors
-                                    if(err !== null) {
-                                        if(!calledBack)
-                                            callback(err);
-                                        calledBack = true;
-                                        return;
-                                    }
-
-                                    // Return early if determined to keep the submission
-                                    if(keep) {
-                                        filterLatch.resolve();
-                                        return;
-                                    }
-
-                                    // Filter
-                                    if(filter.pending && approvalState === ApprovalState.PENDING)
-                                        keep = true;
-                                    else if(filter.accepted && approvalState === ApprovalState.APPROVED)
-                                        keep = true;
-                                    else if(filter.rejected && approvalState === ApprovalState.REJECTED)
-                                        keep = true;
-                                    else if(filter.approved && approvalState !== null)
-                                        keep = true;
-
-                                    // Resolve the latch
+                                // Return early if determined to keep the submission
+                                if(keep) {
                                     filterLatch.resolve();
-                                });
+                                    return;
+                                }
+
+                                // Filter
+                                if(filter.pending && approvalState === ApprovalState.PENDING)
+                                    keep = true;
+                                else if(filter.accepted && approvalState === ApprovalState.APPROVED)
+                                    keep = true;
+                                else if(filter.rejected && approvalState === ApprovalState.REJECTED)
+                                    keep = true;
+                                else if(filter.approved && approvalState !== ApprovalState.PENDING)
+                                    keep = true;
+
+                                // Resolve the latch
+                                filterLatch.resolve();
                             });
-                        }
+                        });
                     }
 
                     // Continue with the latch
