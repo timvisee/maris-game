@@ -615,6 +615,15 @@ module.exports = {
                                 own: true
                             }, submissionOwner);
 
+                            // Resend the game location data
+                            Core.gameManager.broadcastLocationData(0, game, submissionOwner, true, undefined, function(err) {
+                                // Call back errors
+                                if(err !== null) {
+                                    console.error('Failed to broadcast location data to user, ignoring.');
+                                    console.error(err);
+                                }
+                            });
+
                             // Get a list of manager users on this game, to also broadcast this message to
                             game.getManageUsers(submissionOwner, function(err, managers) {
                                 // Call back errors
@@ -632,6 +641,15 @@ module.exports = {
                                         state: 'edit',
                                         own: false
                                     }, manageUser);
+
+                                    // Resend the game location data
+                                    Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            console.error('Failed to broadcast location data to user, ignoring.');
+                                            console.error(err);
+                                        }
+                                    });
                                 });
                             });
                         });

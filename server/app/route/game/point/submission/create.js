@@ -31,6 +31,7 @@ var SubmissionDatabase = require('../../../../model/submission/SubmissionDatabas
 var LayoutRenderer = require('../../../../layout/LayoutRenderer');
 var SubmissionParam = require('../../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../../util/CallbackLatch');
+const PacketType = require("../../../../realtime/PacketType");
 
 // Define and export the module
 module.exports = {
@@ -471,7 +472,47 @@ module.exports = {
 
                         // Show the game creation page
                         latch.then(function() {
+                            // Render the success page
                             LayoutRenderer.renderAndShow(req, res, next, 'game/submission/submit', 'Antwoord ingezonden', options);
+
+                            // Resend the game location data
+                            Core.gameManager.broadcastLocationData(0, game, user, true, undefined, function(err) {
+                                // Call back errors
+                                if(err !== null) {
+                                    console.error('Failed to broadcast location data to user, ignoring.');
+                                    console.error(err);
+                                }
+                            });
+
+                            // Get a list of manager users on this game, to also broadcast this created submission to
+                            game.getManageUsers(user, function(err, managers) {
+                                // Call back errors
+                                if(err !== null) {
+                                    console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
+                                    console.error(err);
+                                    return;
+                                }
+
+                                // Send the change to the managers
+                                managers.forEach(function(manageUser) {
+                                    // Send the packet
+                                    Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                                        submission: submissionModel.getIdHex(),
+                                        name: options.submission.name,
+                                        state: 'create',
+                                        own: false
+                                    }, manageUser);
+
+                                    // Resend the game location data
+                                    Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            console.error('Failed to broadcast location data to user, ignoring.');
+                                            console.error(err);
+                                        }
+                                    });
+                                });
+                            });
                         });
                     });
                 });

@@ -5005,7 +5005,7 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_APPROV
 // Update submission pages on change
 Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE, function(packet) {
     // Make sure a message has been set
-    if(!packet.hasOwnProperty('submission') || !packet.hasOwnProperty('name') || !packet.hasOwnProperty('state') || !packet.hasOwnProperty('own'))
+    if(!packet.hasOwnProperty('submission') || !packet.hasOwnProperty('state') || !packet.hasOwnProperty('own'))
         return;
 
     // // Make sure the map data is for the current game
@@ -5014,10 +5014,25 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE
     //     return;
     // }
 
-    // Show a proper popup if it's the current page
-    if(packet.submission.toLowerCase() === Maris.utils.getSubmissionId()) {
-        // Edited submissions
-        if(packet.state === 'edit') {
+    // Show a notification for new submissions
+    if(packet.state === 'create') {
+        // Show a notification to view the submission
+        showNotification('Antwoord ontvangen...', {
+            toast: true,
+            vibrate: true,
+            ttl: 20 * 1000,
+            action: {
+                text: 'Beoordelen',
+                action: function() {
+                    $.mobile.navigate('/game/' + Maris.state.activeGame + '/submission/' + packet.submission, {
+                        transition: 'flow'
+                    });
+                }
+            }
+        });
+
+    } else if(packet.state === 'edit') {
+        if(packet.submission.toLowerCase() === Maris.utils.getSubmissionId()) {
             // Show the dialog
             showDialog({
                 title: 'Aangepast',
@@ -5035,8 +5050,25 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE
                     icon: 'zmdi zmdi-close'
                 }]
             });
+        } else {
+            // Show a notification to view the submission
+            showNotification('Antwoord aangepast...', {
+                toast: true,
+                vibrate: true,
+                ttl: 20 * 1000,
+                action: {
+                    text: 'Beoordelen',
+                    action: function() {
+                        $.mobile.navigate('/game/' + Maris.state.activeGame + '/submission/' + packet.submission, {
+                            transition: 'flow'
+                        });
+                    }
+                }
+            });
+        }
 
-        } else if(packet.state === 'delete') {
+    } else if(packet.state === 'delete') {
+        if(packet.submission.toLowerCase() === Maris.utils.getSubmissionId()) {
             // Show the dialog
             showDialog({
                 title: 'Verwijderd',
@@ -5050,7 +5082,6 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE
                 // Redirect the user to the game page
                 Maris.utils.navigateToPath('/game/' + Maris.utils.getGameId());
             });
-
         }
     }
 

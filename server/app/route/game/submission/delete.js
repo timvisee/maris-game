@@ -457,19 +457,40 @@ module.exports = {
                             own: false
                         }, manageUser);
                     });
-                });
 
-                // Delete the model
-                submission.delete(function(err) {
-                    // Call back errors
-                    if(err !== null) {
-                        next(err);
-                        return;
-                    }
+                    // Delete the model
+                    submission.delete(function(err) {
+                        // Call back errors
+                        if(err !== null) {
+                            next(err);
+                            return;
+                        }
 
-                    // Go back to the submission overview page when done
-                    // TODO: Maybe redirect to a different, possibly better page?
-                    res.redirect('/game/' + game.getIdHex() + '/');
+                        // Resend the game location data
+                        Core.gameManager.broadcastLocationData(0, game, submissionOwner, true, undefined, function(err) {
+                            // Call back errors
+                            if(err !== null) {
+                                console.error('Failed to broadcast location data to user, ignoring.');
+                                console.error(err);
+                            }
+                        });
+
+                        // Send the change to the managers
+                        managers.forEach(function(manageUser) {
+                            // Resend the game location data
+                            Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
+                                // Call back errors
+                                if(err !== null) {
+                                    console.error('Failed to broadcast location data to user, ignoring.');
+                                    console.error(err);
+                                }
+                            });
+                        });
+
+                        // Go back to the submission overview page when done
+                        // TODO: Maybe redirect to a different, possibly better page?
+                        res.redirect('/game/' + game.getIdHex() + '/');
+                    });
                 });
             });
         });
