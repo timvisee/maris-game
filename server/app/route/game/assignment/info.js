@@ -90,6 +90,9 @@ module.exports = {
                 page: {
                     leftButton: 'back'
                 },
+                game: {
+                    id: game.getIdHex()
+                },
                 assignment: {
                     name: '',
                     description: '',
