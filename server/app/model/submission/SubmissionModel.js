@@ -1228,7 +1228,17 @@ SubmissionModel.prototype.getPermissionObject = function(user, callback) {
 
 // TODO: Document this
 SubmissionModel.prototype.getPoints = function(callback) {
-    callback(null, 1);
+    // Get the assignment
+    this.getAssignment(function(err, assignment) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Get the points
+        assignment.getPoints(callback);
+    });
 };
 
 // TODO: Document this

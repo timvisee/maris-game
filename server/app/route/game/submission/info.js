@@ -103,6 +103,7 @@ module.exports = {
                         id: null,
                         name: '',
                         description: '',
+                        points: 1,
                         retry: false
                     },
                     user: {
@@ -179,6 +180,24 @@ module.exports = {
 
                     // Set the description
                     options.submission.assignment.description = description;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
+                // Fetch the points state
+                latch.add();
+                assignment.getPoints(function(err, points) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the property
+                    options.submission.assignment.points = points;
 
                     // Resolve the latch
                     latch.resolve();

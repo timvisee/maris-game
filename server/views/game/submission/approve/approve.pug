@@ -15,6 +15,8 @@ block content
                     td= submission.assignment.name
                 tr: td Opdracht
                     td= submission.assignment.description
+                tr: td Punten
+                    td= submission.assignment.points
                 unless submission.answer_text === null
                     tr: td Antwoord
                         td

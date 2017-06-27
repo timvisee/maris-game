@@ -178,6 +178,24 @@ module.exports = {
                                             assignmentLatch.resolve();
                                         });
 
+                                        // Get the points of the assignment
+                                        assignmentLatch.add();
+                                        assignment.getPoints(function(err, points) {
+                                            // Call back errors
+                                            if(err !== null) {
+                                                if(!calledBack)
+                                                    callback(err);
+                                                calledBack = true;
+                                                return;
+                                            }
+
+                                            // Set the points
+                                            assignmentObject.points = points;
+
+                                            // Resolve the latch
+                                            assignmentLatch.resolve();
+                                        });
+
                                         // Check whether the user can retry this submission
                                         assignmentLatch.add();
                                         assignment.isRetry(function(err, retry) {
@@ -291,6 +309,24 @@ module.exports = {
 
                                 // Set the name
                                 submissionObject.name = name;
+
+                                // Resolve the latch
+                                submissionLatch.resolve();
+                            });
+
+                            // Get the points of the assignment
+                            submissionLatch.add();
+                            assignment.getPoints(function(err, points) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        callback(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Set the points
+                                submissionObject.points = points;
 
                                 // Resolve the latch
                                 submissionLatch.resolve();

@@ -115,7 +115,8 @@ module.exports = {
                     submission: {
                         assignment: {
                             name: '',
-                            description: ''
+                            description: '',
+                            points: 0
                         },
                         answer_text: null,
                         answer_file: null
@@ -169,6 +170,24 @@ module.exports = {
 
                         // Set the property
                         options.submission.assignment.description = description;
+
+                        // Resolve the latch
+                        latch.resolve();
+                    });
+
+                    // Fetch the points
+                    latch.add();
+                    assignment.getPoints(function(err, points) {
+                        // Call back errors
+                        if(err !== null) {
+                            if(!calledBack)
+                                next(err);
+                            calledBack = true;
+                            return;
+                        }
+
+                        // Set the property
+                        options.submission.assignment.points = points;
 
                         // Resolve the latch
                         latch.resolve();

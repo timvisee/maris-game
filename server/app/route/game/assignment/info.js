@@ -93,6 +93,7 @@ module.exports = {
                 assignment: {
                     name: '',
                     description: '',
+                    points: 1,
                     answer_text: false,
                     answer_file: false,
                     retry: false
@@ -134,6 +135,24 @@ module.exports = {
 
                 // Set the property
                 options.assignment.description = description;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
+            // Fetch the points
+            latch.add();
+            assignment.getPoints(function(err, points) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.points = points;
 
                 // Resolve the latch
                 latch.resolve();

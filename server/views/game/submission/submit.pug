@@ -16,6 +16,11 @@ block content
                         td(class='point-' + point.id + '-in-range'): span(style='color: green;') In bereik
                     else
                         td(class='point-' + point.id + '-in-range'): span(style='color: red;') Buiten bereik
+                tr: td Punten
+                    td
+                        i.zmdi.zmdi-puzzle-piece.ui-pull-left.
+                            &nbsp;&nbsp;
+                        = assignment.points
                 tr: td Pogingen
                     if assignment.retry
                         td Onbeperkt

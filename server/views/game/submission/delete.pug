@@ -12,6 +12,14 @@ block content
                     td= submission.assignment.description
                 tr: td Ingezonden
                     td= submission.user.name
+                tr: td Punten
+                    td
+                        if submission.approve_state === 0
+                            = submission.assignment.points
+                        else if submission.approve_state === 1
+                            span(style='color: green;')= submission.assignment.points
+                        else if submission.approve_state === 2
+                            span(style='color: red;')= submission.assignment.points
                 tr: td Pogingen
                     if submission.assignment.retry
                         td Onbeperkt
@@ -20,10 +28,16 @@ block content
                 tr: td Beoordeling
                     td
                         if submission.approve_state === 0
+                            i.zmdi.zmdi-puzzle-piece.ui-pull-left.
+                                &nbsp;
                             span(style='color: gray; font-style: italic;') In afwachting
                         else if submission.approve_state === 1
+                            i.zmdi.zmdi-thumb-up.ui-pull-left(style='color: green;').
+                                &nbsp;
                             span(style='color: green;') Goedgekeurd
                         else if submission.approve_state === 2
+                            i.zmdi.zmdi-thumb-down.ui-pull-left(style='color: red;').
+                                &nbsp;
                             span(style='color: red;') Afgekeurd
                 unless  submission.approve_user.id === null
                     tr: td Beoordelaar
