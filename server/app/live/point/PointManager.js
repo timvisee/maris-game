@@ -590,7 +590,7 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
             // Loop through each point, and attach assignments to it
             chosenPoints.forEach(function(point) {
                 // Determine how many assignments to pick
-                var count = Math.min(Math.ceil(unusedAssignments.length / chosenPoints.length), config.game.pointMinClean);
+                var count = Math.min(Math.ceil(unusedAssignments.length / chosenPoints.length), config.game.pointAssignmentCount);
 
                 // Create a list of point assignments to attach
                 var pointAssignments = [];

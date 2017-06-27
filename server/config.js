@@ -380,7 +380,7 @@ config.game.pointRange = 15;
  * The number of assignments on each point for a user.
  * @type {number}
  */
-config.game.pointAssignmentCount = 3;
+config.game.pointAssignmentCount = 2;
 
 /**
  * The minimum number of 'clean' points a user must have.
