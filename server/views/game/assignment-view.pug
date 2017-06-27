@@ -2,10 +2,16 @@
 mixin availableList
     li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar  ·  ' + submissions.available.length
         if submissions.available.length === 0
-            p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's').
-                Hier geen opdrachten beschikbaar...#[br]
-                Loop naar een punt op de kaart#[br]
-                om opdrachten uit te kunnen voeren.
+            p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's')
+                if submissions.game.stage === 1
+                    span.
+                        Hier geen opdrachten beschikbaar...#[br]
+                        Loop naar een punt op de kaart#[br]
+                        om opdrachten uit te kunnen voeren.
+                else
+                    span.
+                        Opdrachten zijn alleen beschikbaar#[br]
+                        als het spel gestart is.
 
     if submissions.available.length > 0
         each assignment in submissions.available

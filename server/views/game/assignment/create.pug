@@ -62,7 +62,10 @@ block content
 
         br
         .button-list
-            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false')
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignment/create', title='Nieuwe opdracht toevoegen', data-ajax='false')
+                i.zmdi.zmdi-comment-edit.ui-pull-left
+                | &nbsp;&nbsp;Nieuwe opdracht toevoegen
+            a.ui-btn(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false')
                 i.zmdi.zmdi-account-add.ui-pull-left
                 | &nbsp;&nbsp;Opdrachtenoverzicht
             a.ui-btn(href='/game/' + game.id, title='Speloverzicht', data-ajax='false')

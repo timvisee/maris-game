@@ -61,6 +61,9 @@ module.exports = {
 
         // Create the submissions object
         var result = {
+            game: {
+                stage: 0
+            },
             available: [],
             pending: [],
             rated: [],
@@ -90,6 +93,24 @@ module.exports = {
                 var latch = new CallbackLatch();
                 var calledBack = false;
 
+                // Get the game stage
+                latch.add();
+                game.getStage(function(err, stage) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set the stage
+                    result.game.stage = stage;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
                 // Get the live game
                 latch.add();
                 Core.gameManager.getGame(game, function(err, liveGame) {
@@ -98,6 +119,12 @@ module.exports = {
                         if(!calledBack)
                             callback(err);
                         calledBack = true;
+                        return;
+                    }
+
+                    // Skip if the live game is null
+                    if(liveGame === null) {
+                        latch.resolve();
                         return;
                     }
 

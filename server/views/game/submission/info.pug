@@ -59,7 +59,7 @@ block content
             p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.answer_text
 
         table.table-list.ui-responsive
-            unless submission.answer_file === null
+            unless submission.answer_file === null || submission.answer_file === 'null'
                 tr: td Bestand
                     td= submission.answer_file
 

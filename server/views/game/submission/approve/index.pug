@@ -8,6 +8,7 @@ block content
             tr: td Opdracht
                 td
         p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.assignment.description
+        table.table-list.ui-responsive
             tr: td Beoordeling
                 td
                     if submission.approve_state === 0
@@ -42,6 +43,6 @@ block content
             a.ui-btn(href=page.url + '/reset', title='Goedkeuring ongedaan maken voor deze inzending')
                 i.zmdi.zmdi-thumb-up-down
                 | &nbsp;&nbsp;Goedkeuring ongedaan maken
-        a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id, title='Speloverzicht')
+        a.ui-btn(href='/game/' + game.id, title='Speloverzicht')
             i.zmdi.zmdi-home
             | &nbsp;&nbsp;Speloverzicht
