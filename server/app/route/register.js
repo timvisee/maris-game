@@ -45,6 +45,9 @@ router.get('/', function(req, res, next) {
     var pageVars = {
         page: {
             leftButton: 'back'
+        },
+        register: {
+            requireCode: config.user.registerRequireCode
         }
     };
 
@@ -63,6 +66,7 @@ router.post('/', function(req, res, next) {
     var password = req.body['field-password'];
     var passwordVerify = req.body['field-password-verify'];
     var name = req.body['field-name'];
+    var code = req.body['field-code'];
 
     // Validate username
     if(!Validator.isValidUsername(username)) {
@@ -139,6 +143,26 @@ router.post('/', function(req, res, next) {
         return;
     }
 
+    // Define the admin status
+    var isAdmin = false;
+
+    // Check whether codes are used
+    if(config.user.registerRequireCode) {
+        // Check whether the code matches the admin code
+        if(code.toString().trim().toLowerCase() === config.user.registerCodeAdmin.trim().toLowerCase()) {
+            isAdmin = true;
+
+        } else if(code.toString().trim().toLowerCase() !== config.user.registerCodeNormal.trim().toLowerCase()) {
+            // Show an error page
+            LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
+                message: 'De registartiecode die u heeft ingevuld is ongeldig.\n\n' +
+                'Ga alstublieft terug en neem contact op met de administrator voor een registratiecode.'
+            });
+            return;
+        }
+    }
+
+
     // Make sure the username of the user isn't already used
     Core.model.userModelManager.isUserWithUsername(username, function(err, result) {
         // Call back errors
@@ -167,54 +191,75 @@ router.post('/', function(req, res, next) {
                 return;
             }
 
-            // Get the IP address of the user
-            const ip = IpUtils.getIp(req);
+            // Create a latch
+            var latch = new CallbackLatch();
 
-            // Create a session for the user
-            Core.model.sessionModelManager.createSession(user, ip, function(err, sessionId, token) {
-                // Call back errors
-                if(err !== null) {
-                    next(err);
-                    return;
-                }
-
-                // Put the token in the user's cookie
-                res.cookie(config.session.cookieName, token, {
-                    maxAge: config.session.expire * 1000
-                });
-
-                // Update the session validator
-                SessionValidator.route(req, res, function(err) {
+            // Set the admin state
+            if(isAdmin) {
+                latch.add();
+                user.setAdmin(true, function(err) {
                     // Call back errors
-                    if(err !== null && err !== undefined) {
+                    if(err !== null) {
                         next(err);
                         return;
                     }
 
-                    // Create the page variables object
-                    var pageVars = {
-                        hideBackButton: true,
-                        success: true
-                    };
+                    // Resolve the latch
+                    latch.resolve();
+                });
+            }
 
-                    // Set the page message
-                    pageVars.message = 'Welkom ' + name + '!\n\n' +
-                        'U bent succesvol geregistreerd!';
+            // Continue
+            latch.then(function() {
+                // Get the IP address of the user
+                const ip = IpUtils.getIp(req);
 
-                    // Add the proper follow up message, and set the next URL if there is any
-                    if(!_.isString(req.param('next')))
-                        pageVars.message += '\n\n' +
-                            'Klik alstublieft op de knop hieronder om in te loggen en naar uw dashboard te gaan.';
-                    else {
-                        pageVars.message += '\n\n' +
-                            'Klik alstublieft op de knop hieronder om in te loggen zodat u de pagina kunt bekijken.';
-
-                        // Set the next parameter
-                        pageVars.next = req.param('next');
+                // Create a session for the user
+                Core.model.sessionModelManager.createSession(user, ip, function(err, sessionId, token) {
+                    // Call back errors
+                    if(err !== null) {
+                        next(err);
+                        return;
                     }
 
-                    // Show registration success page
-                    LayoutRenderer.renderAndShow(req, res, next, 'account/register', 'Succes', pageVars);
+                    // Put the token in the user's cookie
+                    res.cookie(config.session.cookieName, token, {
+                        maxAge: config.session.expire * 1000
+                    });
+
+                    // Update the session validator
+                    SessionValidator.route(req, res, function(err) {
+                        // Call back errors
+                        if(err !== null && err !== undefined) {
+                            next(err);
+                            return;
+                        }
+
+                        // Create the page variables object
+                        var pageVars = {
+                            hideBackButton: true,
+                            success: true
+                        };
+
+                        // Set the page message
+                        pageVars.message = 'Welkom ' + name + '!\n\n' +
+                            'U bent succesvol geregistreerd!';
+
+                        // Add the proper follow up message, and set the next URL if there is any
+                        if(!_.isString(req.param('next')))
+                            pageVars.message += '\n\n' +
+                                'Klik alstublieft op de knop hieronder om in te loggen en naar uw dashboard te gaan.';
+                        else {
+                            pageVars.message += '\n\n' +
+                                'Klik alstublieft op de knop hieronder om in te loggen zodat u de pagina kunt bekijken.';
+
+                            // Set the next parameter
+                            pageVars.next = req.param('next');
+                        }
+
+                        // Show registration success page
+                        LayoutRenderer.renderAndShow(req, res, next, 'account/register', 'Succes', pageVars);
+                    });
                 });
             });
         });

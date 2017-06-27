@@ -214,6 +214,31 @@ config.web.sslCertFile = '';
 
 
 /******************************************************************************
+ * User configuration.                                                        *
+ ******************************************************************************/
+
+/**
+ * Set to require a special registration code.
+ * @type {boolean}
+ */
+config.user.registerRequireCode = true;
+
+/**
+ * Special code for normal registrations.
+ *
+ * @type {string} Normal code.
+ */
+config.user.registerCodeNormal = 'normal';
+
+/**
+ * Special code for administrator registrations.
+ *
+ * @type {string} Administrator code.
+ */
+config.user.registerCodeAdmin = 'admin';
+
+
+/******************************************************************************
  * Real time configuration.                                                   *
  ******************************************************************************/
 

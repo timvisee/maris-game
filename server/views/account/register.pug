@@ -4,10 +4,10 @@ block content
     - var nextParam = next !== undefined ? '?next=' + next : '';
 
     unless success
-        p.
-            Vul uw geprefereerde gebruikersnaam en wachtwoord in om te registreren.#[br]
-            #[br]
-            Noot: Op dit moment is registratie alleen mogelijk met een speciale registratiecode.
+        p Vul uw geprefereerde gebruikersnaam en wachtwoord in om te registreren.
+
+        if register.requireCode
+            p Let op: Op dit moment is registratie alleen mogelijk met een speciale registratiecode.
 
         br
         form(method='POST', action='/register/' + nextParam + '#')
@@ -23,6 +23,10 @@ block content
 
             label(for='field-name') Naam:
             input(type='text', name='field-name', id='field-name', value='', data-clear-btn='true')
+
+            if register.requireCode
+                label(for='field-code') Registratiecode:
+                input(type='text', name='field-code', id='field-code', value='', data-clear-btn='true')
 
             br
             .button-list

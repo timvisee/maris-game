@@ -277,19 +277,19 @@ UserModel.prototype.isAdmin = function(callback) {
  * @param {boolean} isAdmin True if the user is administrator, false if not.
  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
  */
-UserModel.prototype.setCreateDate = function(isAdmin, callback) {
+UserModel.prototype.setAdmin = function(isAdmin, callback) {
     this.setField('is_admin', isAdmin, callback);
 };
 
-/**
- * Set whether the user is pro.
- *
- * @param {boolean} isPro True if the user is pro, false if not.
- * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
- */
-UserModel.prototype.setCreateDate = function(isPro, callback) {
-    this.setField('is_pro', isPro, callback);
-};
+// /**
+//  * Set whether the user is pro.
+//  *
+//  * @param {boolean} isPro True if the user is pro, false if not.
+//  * @param {UserModel~setFieldCallback} callback Called on success, or when an error occurred.
+//  */
+// UserModel.prototype.setCreateDate = function(isPro, callback) {
+//     this.setField('is_pro', isPro, callback);
+// };
 
 /**
  * Get the game state for the given game.
