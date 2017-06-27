@@ -527,7 +527,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                             name: null,
                             location: null,
                             inRange: livePoint.isInRangeMemory(liveUser),
-                            range: config.game.pointRange
+                            range: null
                         };
 
                         // Create a point latch
@@ -565,6 +565,24 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
 
                             // Set the name
                             pointObject.name = pointName;
+
+                            // Resolve the latch
+                            pointLatch.resolve();
+                        });
+
+                        // Get the name
+                        pointLatch.add();
+                        livePoint.getRange(liveUser, function(err, range) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    callback(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Set the name
+                            pointObject.range = range;
 
                             // Resolve the latch
                             pointLatch.resolve();
