@@ -444,10 +444,6 @@ module.exports = {
                                 // TODO: Maybe redirect to a different, possibly better page?
                                 res.redirect('/game/' + game.getIdHex() + '/');
                             });
-
-                            liveG
-
-
                         });
                     });
                 });

@@ -295,6 +295,16 @@ module.exports = {
             assignmentAnswerFile= assignmentAnswerFile === 'true';
             assignmentRetry = assignmentRetry === 'true';
 
+            // Make sure the user will be able to answer with one of the two
+            if(!assignmentAnswerText && !assignmentAnswerFile) {
+                // Show an error page
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
+                    message: 'Het is voor gebruikers niet mogelijk om te antwoorden op deze vraag, omdat alle antwoord mogelijkheden uit staan.\n\n' +
+                    'Ga alstublieft terug en zet tekst of bestand antwoorden aan.'
+                });
+                return;
+            }
+
             // Create a latch for updating the assignment
             var latch = new CallbackLatch();
             var calledBack = false;
