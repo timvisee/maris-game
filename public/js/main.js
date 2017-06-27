@@ -1044,7 +1044,9 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_STAGE_CHANGED, fu
         if(gameId == Maris.utils.getGameId()) {
             showNotification('Dit spel is aangepast.', {
                 action: {
-                    text: 'Verversen'
+                    text: 'Verversen',
+                    state: 'primary',
+                    icon: 'zmdi zmdi-refresh'
                 }
             }, function() {
                 Maris.utils.navigateToPath('/game/' + gameId);
@@ -1078,7 +1080,8 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_STAGE_CHANGED, fu
         // Create the dialog actions
         actions.push({
             text: 'Verversen',
-            type: 'primary'
+            state: 'primary',
+            icon: 'zmdi zmdi-refresh'
         });
 
     } else {
@@ -3593,7 +3596,8 @@ function updatePointMarkers(points) {
                 '        <td class="left"><i class="zmdi zmdi-dot-circle zmdi-hc-fw"></i> Bereikbaar</td><td>' + (point.inRange ? '<span style="color: green;">Ja</span>' : '<span style="color: red;">Nee</span>') + '</td>' +
                 '    </tr>' +
                 '</table>' +
-                '</div>';
+                '<br />' +
+                'Bekijk het <b>Opdrachten</b> tabblad voor een overzicht van de opdrachten.</div>';
 
             // Show a dialog
             showDialog({
@@ -3601,8 +3605,9 @@ function updatePointMarkers(points) {
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'Bekijk punt',
-                        state: 'primary',
+                        text: 'Punt beheren',
+                        state: 'normal',
+                        icon: 'zmdi zmdi-edit',
                         action: function() {
                             Maris.utils.navigateToPage('/game/' + Maris.utils.getGameId() + '/point/' + point.point, true, true, 'flip');
                         }
