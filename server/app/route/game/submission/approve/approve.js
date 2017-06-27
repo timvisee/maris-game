@@ -294,91 +294,162 @@ module.exports = {
                         return;
                     }
 
-                    // Get the submission user and assignment name
-                    var submissionOwner;
-                    var submissionName;
-
-                    // Create a latch
-                    var updateLatch = new CallbackLatch();
-
-                    // Get the owner of the submission
-                    updateLatch.add();
-                    submission.getUser(function(err, owner) {
-                        // Call back errors
-                        if(err !== null) {
-                            console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
-                            console.error(err);
-                            return;
-                        }
-
-                        // Set the owner
-                        submissionOwner = owner;
-
-                        // Resolve the latch
-                        updateLatch.resolve();
-                    });
-
                     // Get the assignment
-                    updateLatch.add();
                     submission.getAssignment(function(err, assignment) {
                         // Call back errors
                         if(err !== null) {
-                            console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
-                            console.error(err);
+                            next(err);
                             return;
                         }
 
-                        // Get the name of the assignment
-                        assignment.getName(function(err, name) {
+                        // Check whether the user can retry
+                        assignment.isRetry(function(err, isRetry) {
                             // Call back errors
                             if(err !== null) {
-                                console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
-                                console.error(err);
+                                next(err);
                                 return;
                             }
 
-                            // Set the name
-                            submissionName = name;
+                            // Create a callback latch
+                            var latch = new CallbackLatch();
+                            var removeFromPoint = false;
 
-                            // Resolve the latch
-                            updateLatch.resolve();
-                        });
-                    });
+                            // Remove the assignment from live points if the approved or rejected with no retry
+                            if(approvalState === ApprovalState.APPROVED || (approvalState === ApprovalState.REJECTED && !isRetry)) {
+                                removeFromPoint = true;
+                                latch.add();
+                                assignment.findPoint(user, game, function(err, livePoint) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        next(err);
+                                        return;
+                                    }
 
-                    // Continue the latch
-                    updateLatch.then(function() {
-                        // Send the change to the user
-                        Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, {
-                            submission: submission.getIdHex(),
-                            name: submissionName,
-                            approve_state: approvalState,
-                            own: true
-                        }, submissionOwner);
+                                    // Remove the assignments from the point
+                                    livePoint.removeUserAssignmentAssignments(user, assignment, function(err) {
+                                        if(err !== null) {
+                                            console.error('Failed to remove assignment from live point, ignoring.');
+                                            console.error(err);
+                                        }
+                                    });
 
-                        // Get a list of manager users on this game, to also broadcast this message to
-                        game.getManageUsers(submissionOwner, function(err, managers) {
-                            // Call back errors
-                            if(err !== null) {
-                                console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
-                                console.error(err);
-                                return;
+                                    // Resolve the latch
+                                    latch.resolve();
+                                });
                             }
 
-                            // Send the change to the managers
-                            managers.forEach(function(manageUser) {
-                                Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, {
-                                    submission: submission.getIdHex(),
-                                    name: submissionName,
-                                    approve_state: approvalState,
-                                    own: false
-                                }, manageUser);
+                            // Continue when the assignment is successfully removed from the live point
+                            latch.then(function() {
+                                // Update the points for the players, and reveal a new point if relevant
+                                if(removeFromPoint) {
+                                    Core.gameManager.getGame(game, function(err, liveGame) {
+                                        if(err !== null || liveGame === null) {
+                                            console.error('Failed to update user points, ignoring.');
+                                            if(err !== null)
+                                                console.error(err);
+                                        }
+
+                                        liveGame.pointManager.updateUserPoints(user, function(err) {
+                                            if(err !== null) {
+                                                console.error('Failed to update user points, ignoring.');
+                                                console.error(err);
+                                            }
+                                        });
+                                    });
+                                }
+
+                                // Get the submission user and assignment name
+                                var submissionOwner;
+                                var submissionName;
+
+                                // Create a latch
+                                var updateLatch = new CallbackLatch();
+
+                                // Get the owner of the submission
+                                updateLatch.add();
+                                submission.getUser(function(err, owner) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
+                                        console.error(err);
+                                        return;
+                                    }
+
+                                    // Set the owner
+                                    submissionOwner = owner;
+
+                                    // Resolve the latch
+                                    updateLatch.resolve();
+                                });
+
+                                // Get the assignment
+                                updateLatch.add();
+                                submission.getAssignment(function(err, assignment) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
+                                        console.error(err);
+                                        return;
+                                    }
+
+                                    // Get the name of the assignment
+                                    assignment.getName(function(err, name) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
+                                            console.error(err);
+                                            return;
+                                        }
+
+                                        // Set the name
+                                        submissionName = name;
+
+                                        // Resolve the latch
+                                        updateLatch.resolve();
+                                    });
+                                });
+
+                                // Continue the latch
+                                updateLatch.then(function() {
+                                    // Send the change to the user
+                                    Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, {
+                                        submission: submission.getIdHex(),
+                                        name: submissionName,
+                                        approve_state: approvalState,
+                                        own: true
+                                    }, submissionOwner);
+
+                                    // Get a list of manager users on this game, to also broadcast this message to
+                                    game.getManageUsers(submissionOwner, function(err, managers) {
+                                        // Call back errors
+                                        if(err !== null) {
+                                            console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
+                                            console.error(err);
+                                            return;
+                                        }
+
+                                        // Send the change to the managers
+                                        managers.forEach(function(manageUser) {
+                                            Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_APPROVAL_CHANGE, {
+                                                submission: submission.getIdHex(),
+                                                name: submissionName,
+                                                approve_state: approvalState,
+                                                own: false
+                                            }, manageUser);
+                                        });
+                                    });
+                                });
+
+                                // Go back to the submission overview page when done
+                                // TODO: Maybe redirect to a different, possibly better page?
+                                res.redirect('/game/' + game.getIdHex() + '/');
                             });
+
+                            liveG
+
+
                         });
                     });
-
-                    // Go back to the submission overview page when done
-                    // TODO: Maybe redirect to a different, possibly better page?
-                    res.redirect('/game/' + game.getIdHex() + '/');
                 });
             });
         });

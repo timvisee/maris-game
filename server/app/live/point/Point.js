@@ -1043,7 +1043,7 @@ Point.prototype.hasUserAssignment = function(user, assignment, callback) {
  * Set all assignments on this point for the given user.
  *
  * @param {UserModel|User|ObjectId|string} userId User model or a user ID.
- * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments
+ * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments.
  * @param {Point~errorCallback} err Called with an error, if an error occurred.
  */
 Point.prototype.setUserAssignmentAssignments = function(userId, assignments, err) {
@@ -1092,7 +1092,7 @@ Point.prototype.setUserAssignmentAssignments = function(userId, assignments, err
             assignmentId = new ObjectId(assignmentId);
 
         } else if(assignmentId instanceof AssignmentModel)
-            assignmentId = assignmentId.getIdHex();
+            assignmentId = assignmentId.getId();
 
         // Call back an error if the assignment ID isn't an object ID instance
         if(!(assignmentId instanceof ObjectId)) {
@@ -1108,6 +1108,63 @@ Point.prototype.setUserAssignmentAssignments = function(userId, assignments, err
         // Push the ID in the list
         self._userAssignmentMem[userId.toString()].push(assignmentId);
     });
+};
+
+/**
+ * Error callback.
+ *
+ * @callback Point~errorCallback
+ * @param {Error} Error instance defining the error that occurred.
+ */
+
+/**
+ * Remove assignments from this point for the given user.
+ *
+ * @param {UserModel|User|ObjectId|string} userId User model or a user ID.
+ * @param {AssignmentModel[]|ObjectId[]|string[]|AssignmentModel|ObjectId|string} assignments List of assignments to remove.
+ * @param {Point~errorCallback} err Called with an error, if an error occurred.
+ */
+Point.prototype.removeUserAssignmentAssignments = function(userId, assignments, err) {
+    // Parse the user ID
+    if(userId instanceof UserModel || userId instanceof User)
+        userId = userId.getId();
+    else if(_.isString(userId))
+        userId = new ObjectId(userId);
+
+    // Call back errors
+    if(userId === null || userId === undefined) {
+        err(new Error('Invalid user instance given.'));
+        return;
+    }
+
+    // Place a single item in an array
+    if(!_.isArray(assignments))
+        assignments = [assignments];
+
+    // Convert each assignment into an ID
+    assignments = assignments.map((value) => {
+        if(_.isString(value))
+            return value;
+        else if(value instanceof ObjectId)
+            return value.toString();
+        else if(value instanceof AssignmentModel)
+            return value.getIdHex();
+        else
+            return null;
+
+    }).filter((value) => value !== null);
+
+    // Get the list of IDs
+    var ids = this._userAssignmentMem[userId.toString()];
+
+    // Filter the IDs
+    ids = ids.filter((id) => !_.includes(assignments, id.toString()));
+
+    // Update the list
+    if(ids !== null && ids !== undefined && ids.length > 0)
+        this._userAssignmentMem[userId.toString()] = ids;
+    else
+        delete this._userAssignmentMem[userId.toString()];
 };
 
 /**
