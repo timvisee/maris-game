@@ -1,0 +1,278 @@
+extends ./base/page
+
+block content
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Application status
+
+        .card-supporting-text.has-action.has-title
+            p The cards below show the current status of the #{app.name} servers and sub-systems.
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Session
+
+        .card-supporting-text.has-action.has-title
+            p Status of your current session.
+            table.table-list.ui-responsive.session-user(style='width: 100%')
+                tr: td Logged in
+                    td
+                        if session.valid
+                            span.session-user-valid(style='color: green;') Yes
+                        else
+                            | No
+                if session.valid
+                    tr: td Name
+                        td: i.session-user-firstName= session.user.firstName
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Cluster Status
+
+        .card-supporting-text.has-action.has-title
+            p Status of the cluster and the available workers.
+            table.table-list.ui-responsive.status-cluster(style='width: 100%')
+                tr: td Servers
+                    td
+                        span.status-cluster-machineCount= status.cluster.serverCount
+                        span(style='color: gray;')  machine
+                tr: td Hypervisors
+                    td
+                        span.status-cluster-serverCount= ' ' + status.cluster.serverCount
+                        span(style='color: gray;')  process(es)
+                tr: td Workers
+                    td
+                        span.status-cluster-workerCount= status.cluster.workerCount
+                        span(style='color: gray;')  process(es)
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Worker Status
+
+        .card-supporting-text.has-action.has-title
+            p Status of the worker you're currently connected to.
+            table.table-list.ui-responsive.status-worker(style='width: 100%')
+                tr: td Worker ID
+                    td
+                        span.status-worker-id= status.worker.id
+                tr: td Process ID
+                    td
+                        span.status-worker-pid= status.worker.pid
+                tr: td Uptime
+                    td
+                        span.status-worker-uptime= status.worker.uptime
+                        span(style='color: gray;')  seconds
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Server Status
+
+        .card-supporting-text.has-action.has-title
+            p Status of the resources available to #{app.name} on the machine currently connected to.
+            table.table-list.ui-responsive.status-server(style='width: 100%')
+                tr: td OS
+                    td: span.status-server-os= status.server.os
+                        span(style="color: gray;")  (#{status.server.platform}/#{status.server.arch})
+                tr: td CPUs
+                    td
+                        span.status-server-cpus= status.server.cpus.length
+                        span(style="color: gray;")  cores
+                tr: td Model
+                    td: small: small.status-server-model= status.server.cpus[0].model
+                tr: td App Memory
+                    td
+                        span.status-server-memory-app-heapFree= status.server.memory_app.heapFreeHuman
+                        span(style="color: gray;")  heap free
+                tr: td
+                    td
+                        span.status-server-memory-app-heapUsed= status.server.memory_app.heapUsedHuman
+                        span(style="color: gray;")  heap used
+                tr: td
+                    td
+                        span.status-server-memory-app-heapTotal= status.server.memory_app.heapTotalHuman
+                        span(style="color: gray;")  heap size
+                tr: td
+                    td
+                        span.status-server-memory-app-rss= status.server.memory_app.rssHuman
+                        span(style="color: gray;")  resident set
+                tr: td
+                    td
+                        span.status-server-memory-app-external= status.server.memory_app.externalHuman
+                        span(style="color: gray;")  external
+                tr: td(colspan=2)
+                    div#status-chart-server-memory-app(style='width: 100%; height: 200px;')
+                tr: td System Memory
+                    td
+                        span.status-server-memory-system-free= status.server.memory_system.freeHuman
+                        span(style="color: gray;")  free
+                tr: td
+                    td
+                        span.status-server-memory-system-used= status.server.memory_system.usedHuman
+                        span(style="color: gray;")  used
+                tr: td
+                    td
+                        span.status-server-memory-system-total= status.server.memory_system.totalHuman
+                        span(style="color: gray;")  total
+                tr: td(colspan=2)
+                    div#status-chart-server-memory-system(style='width: 100%; height: 200px;')
+                tr: td Load
+                    td
+                        span.status-server-load-1= status.server.loadavgHuman[0]
+                        span(style="color: gray;")  avg 1 min
+                tr: td
+                    td
+                        span.status-server-load-5= status.server.loadavgHuman[1]
+                        span(style="color: gray;")  avg 5 min
+                tr: td
+                    td
+                        span.status-server-load-15= status.server.loadavgHuman[2]
+                        span(style="color: gray;")  avg 15 min
+                tr: td(colspan=2)
+                    div#status-chart-server-load(style='width: 100%; height: 200px;')
+                tr: td Latency
+                    td: span(style="color: gray;") Recent response times:
+                tr: td
+                    td
+                        span.status-server-latency-min= status.server.latencyHuman[1]
+                        span(style="color: gray;")  min
+                tr: td
+                    td
+                        span.status-server-latency-50= status.server.latencyHuman[2]
+                        span(style="color: gray;")  50%-th
+                tr: td
+                    td
+                        span.status-server-latency-90= status.server.latencyHuman[3]
+                        span(style="color: gray;")  90%-th
+                tr: td
+                    td
+                        span.status-server-latency-99= status.server.latencyHuman[4]
+                        span(style="color: gray;")  99%-th
+                tr: td
+                    td
+                        span.status-server-latency-max= status.server.latencyHuman[0]
+                        span(style="color: gray;")  max
+                tr: td(colspan=2)
+                    div#status-chart-server-latency(style='width: 100%; height: 200px;')
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Game Logic
+
+        .card-supporting-text.has-action.has-title
+            p Status of the sub-system processing the logic for all active games.
+            table.table-list.ui-responsive.status-live(style='width: 100%')
+                tr: td Status
+                    td.status-live-status
+                        if status.live.gameCount > 0
+                            span(style='color: green;') Working
+                        else
+                            span Idle
+                tr: td Loaded games
+                    td.status-live-gameCount= status.live.gameCount
+                tr: td(colspan=2)
+                    div#status-chart-live-gameCount(style='width: 100%; height: 200px;')
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Real-time
+
+        .card-supporting-text.has-action.has-title
+            p Status of the server handling all real-time connections to clients.
+            table.table-list.ui-responsive.status-realtime(style='width: 100%')
+                tr: td Status
+                    td.status-realtime-online
+                        if status.realtime.online
+                            span(style='color: green;') Online
+                        else
+                            span(style='color: red;') Offline
+                tr: td Connected clients
+                    td.status-realtime-connections= status.realtime.connections
+                tr: td(colspan=2)
+                    div#status-chart-realtime-connections(style='width: 100%; height: 200px;')
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Web Server
+
+        .card-supporting-text.has-action.has-title
+            p Status of the web server providing you this front-end.
+            table.table-list.ui-responsive.status-web(style='width: 100%')
+                tr: td Status
+                    td.status-web-online: span(style='color: green;') Online
+                tr: td Uptime
+                    td.status-web-uptime #{status.web.uptime} seconds
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Database
+
+        .card-supporting-text.has-action.has-title
+            p Status of the database server.
+            table.table-list.ui-responsive.status-mongo(style='width: 100%')
+                tr: td Status
+                    td.status-mongo-online
+                        if status.mongo.online
+                            span(style='color: green;') Online
+                        else
+                            span(style='color: red;') Offline
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title External Cache
+
+        .card-supporting-text.has-action.has-title
+            p Status of the in-memory caching server.
+            table.table-list.ui-responsive.status-redis(style='width: 100%')
+                tr: td Status
+                    td.status-redis-online
+                        if status.redis.online
+                            span(style='color: green;') Online
+                        else
+                            span(style='color: red;') Offline
+                if status.redis.online
+                    tr: td Uptime
+                        td.status-redis-uptime #{status.redis.uptime} seconds
+                    tr: td Queries processed
+                        td.status-redis-commandCount= status.redis.commandCount
+                    tr: td(colspan=2)
+                            div#status-chart-redis-commandCount(style='width: 100%; height: 200px;')
+                    tr: td Cached fields
+                        td.status-redis-keyCount= status.redis.keyCount
+                    tr: td(colspan=2)
+                        div#status-chart-redis-keyCount(style='width: 100%; height: 200px;')
+                    tr: td Memory
+                        td
+                            span.status-redis-memory-used= status.redis.memoryHuman
+                            span(style="color: gray;")  used
+                    tr: td
+                        td
+                            span.status-redis-memory-lua= status.redis.memoryLuaHuman
+                            span(style="color: gray;")  LUA
+                    tr: td
+                        td
+                            span.status-redis-memory-rss= status.redis.memoryRssHuman
+                            span(style="color: gray;")  resident set
+                    tr: td
+                        td
+                            span.status-redis-memory-peak= status.redis.memoryPeakHuman
+                            span(style="color: gray;")  peak
+                    tr: td(colspan=2)
+                        div#status-chart-redis-memory(style='width: 100%; height: 200px;')
+
+    .nd2-card.wow.fadeInUp
+        .card-title.has-supporting-text
+            h3.card-primary-title Internal Cache
+
+        .card-supporting-text.has-action.has-title
+            p Status of the high-performance internal caching sub-system.
+            table.table-list.ui-responsive.status-cache(style='width: 100%')
+                tr: td Queries processed
+                    td.status-cache-queryCount= status.cache.queryCount
+                tr: td(colspan=2)
+                    div#status-chart-cache-queryCount(style='width: 100%; height: 200px;')
+                tr: td Cached objects
+                    td.status-cache-objectCount= status.cache.objectCount
+                tr: td Cached fields
+                    td.status-cache-fieldCount= status.cache.fieldCount
+                tr: td(colspan=2)
+                    div#status-chart-cache-count(style='width: 100%; height: 200px;')

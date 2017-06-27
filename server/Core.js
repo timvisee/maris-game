@@ -75,7 +75,7 @@ Core.model.assignmentModelManager = null;
  *
  * @type {SubmissionModelManager|null} Submission model manager, or null if it isn't instantiated yet.
  */
-Core.model.SubmissionModelManager = null;
+Core.model.submissionModelManager = null;
 
 /**
  * HTTP(S) server instance.
@@ -118,6 +118,15 @@ Core.realTime = null;
  * @type {EventLoopMonitor}
  */
 Core.eventLoopMonitor = null;
+
+/**
+ * Global application status.
+ */
+Core.status = {
+    internalCache: {
+        queryCount: 0
+    }
+};
 
 // Export the class
 module.exports = Core;

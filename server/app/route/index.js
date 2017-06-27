@@ -31,7 +31,7 @@ var register = require('./register');
 var games = require('./games');
 var game = require('./game/index');
 var about = require('./about');
-var create = require('./game/create');
+var status = require('./status');
 
 var appInfo = require('../../appInfo');
 var Core = require('../../Core');
@@ -148,7 +148,8 @@ router.use('/game', game);
 // About page
 router.use('/about', about);
 
-// TODO: Add (back) status route
+// Status page
+router.use('/status', status);
 
 /**
  * Get the game list.
