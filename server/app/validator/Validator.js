@@ -123,7 +123,8 @@ Validator.formatName = function(name) {
     name = name.trim();
 
     // Capitalize the character, and return
-    return name[0].toUpperCase() + name.slice(1).toLowerCase();
+    // return name[0].toUpperCase() + name.slice(1).toLowerCase();
+    return name;
 };
 
 /**
