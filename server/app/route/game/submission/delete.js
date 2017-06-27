@@ -466,6 +466,15 @@ module.exports = {
                             return;
                         }
 
+                        // Send game data to all users
+                        Core.gameManager.sendGameDataToAll(game, function(err) {
+                            // Call back errors
+                            if(err !== null) {
+                                console.error('Failed to send all game data');
+                                console.error(err);
+                            }
+                        });
+
                         // Resend the game location data
                         Core.gameManager.broadcastLocationData(0, game, submissionOwner, true, undefined, function(err) {
                             // Call back errors

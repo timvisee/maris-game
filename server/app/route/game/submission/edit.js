@@ -606,6 +606,15 @@ module.exports = {
 
                         // Continue the latch
                         updateLatch.then(function() {
+                            // Send game data to all users
+                            Core.gameManager.sendGameDataToAll(game, function(err) {
+                                // Call back errors
+                                if(err !== null) {
+                                    console.error('Failed to send all game data');
+                                    console.error(err);
+                                }
+                            });
+
                             // Send the change to the user
                             Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
                                 submission: submission.getIdHex(),
