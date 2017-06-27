@@ -22,6 +22,10 @@
 
 var _ = require('lodash');
 var crypto = require('crypto');
+var path = require('path');
+var fs = require('fs');
+
+const config = require("../../../../config");
 
 var Core = require('../../../../Core');
 var LayoutRenderer = require('../../../layout/LayoutRenderer');
@@ -29,6 +33,8 @@ var SubmissionParam = require('../../../router/middleware/SubmissionParam');
 var CallbackLatch = require('../../../util/CallbackLatch');
 const PacketType = require("../../../realtime/PacketType");
 const ApprovalState = require("../../../model/submission/ApprovalState");
+const HashUtils = require("../../../hash/HashUtils");
+const Formatter = require("../../../format/Formatter");
 
 // Export the module
 module.exports = {
@@ -412,7 +418,7 @@ module.exports = {
     post: (req, res, next) => {
         // Get the login field values
         var submissionText = req.body['field-submission-text'];
-        var submissionFile = req.body['field-submission-file'];
+        var submissionFile = req.files !== null ? req.files['field-submission-file'] : null;
 
         // Make sure the user has a valid session
         if(!req.requireValidSession())
@@ -522,167 +528,223 @@ module.exports = {
                         return;
                     }
 
-                    // Create an apply latch
-                    var applyLatch = new CallbackLatch();
+                    // Create a file latch
+                    var fileLatch = new CallbackLatch();
 
-                    // Set the text field
-                    applyLatch.add();
-                    submission.setAnswerText(submissionText, function(err) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
+                    // Process the file upload
+                    var submissionFileName = null;
+                    if(submissionFile !== null) {
+                        // Add the latch
+                        fileLatch.add();
+                        console.log('File upload: Received filed (name: \'' + submissionFile.name + '\', mimetype: \'' + submissionFile.mimetype + '\')');
 
-                        // Resolve the latch
-                        applyLatch.resolve();
-                    });
+                        // Get the extension of the file
+                        var uploadExt = submissionFile.name.trim().split('.').pop();
 
-                    // Set the file field
-                    applyLatch.add();
-                    submission.setAnswerFile(submissionFile, function(err) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
+                        // Determine the file path to use
+                        var filePath;
+                        do {
+                            // Generate a random file name
+                            var fileName = HashUtils.randomHash() + '.' + uploadExt;
 
-                        // Resolve the latch
-                        applyLatch.resolve();
-                    });
+                            // Update the file path
+                            filePath = path.join(config.upload.path, fileName);
 
-                    // Set the approval state
-                    applyLatch.add();
-                    submission.setApprovalState(ApprovalState.PENDING, function(err) {
-                        // Call back errors
-                        if(err !== null) {
-                            if(!calledBack)
-                                next(err);
-                            calledBack = true;
-                            return;
-                        }
+                        } while(fs.existsSync(filePath));
 
-                        // Resolve the latch
-                        applyLatch.resolve();
-                    });
+                        // Show a status message
+                        console.log('File upload: Moving file to \'' + filePath + '\'...');
 
-                    // Redirect to the submission info page
-                    applyLatch.then(function() {
-                        // Get the submission user and assignment name
-                        var submissionOwner;
-                        var submissionName;
-
-                        // Create a latch
-                        var updateLatch = new CallbackLatch();
-
-                        // Get the owner of the submission
-                        updateLatch.add();
-                        submission.getUser(function(err, owner) {
-                            // Call back errors
-                            if(err !== null) {
-                                console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
+                        // Move the file
+                        submissionFile.mv(filePath, function(err) {
+                            // Handle errors
+                            if(err) {
+                                // Show a status message
+                                console.error('File upload: Failed to upload and move file!');
                                 console.error(err);
+
+                                // Call back the error
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
                                 return;
                             }
 
-                            // Set the owner
-                            submissionOwner = owner;
+                            // Show a status message
+                            console.log('File upload: File successfully moved! (size: \'' + Formatter.formatBytes(fs.statSync(filePath).size) + '\')');
+
+                            // Set the file name for the submission in the database
+                            submissionFileName = fileName;
 
                             // Resolve the latch
-                            updateLatch.resolve();
+                            latch.resolve();
                         });
+                    }
 
-                        // Get the assignment
-                        updateLatch.add();
-                        submission.getAssignment(function(err, assignment) {
+                    // Continue
+                    fileLatch.then(function() {
+                        // Create an apply latch
+                        var applyLatch = new CallbackLatch();
+
+                        // Set the text field
+                        applyLatch.add();
+                        submission.setAnswerText(submissionText, function(err) {
                             // Call back errors
                             if(err !== null) {
-                                console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
-                                console.error(err);
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
                                 return;
                             }
 
-                            // Get the name of the assignment
-                            assignment.getName(function(err, name) {
+                            // Resolve the latch
+                            applyLatch.resolve();
+                        });
+
+                        // Set the file field
+                        applyLatch.add();
+                        submission.setAnswerFile(submissionFileName, function(err) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Resolve the latch
+                            applyLatch.resolve();
+                        });
+
+                        // Set the approval state
+                        applyLatch.add();
+                        submission.setApprovalState(ApprovalState.PENDING, function(err) {
+                            // Call back errors
+                            if(err !== null) {
+                                if(!calledBack)
+                                    next(err);
+                                calledBack = true;
+                                return;
+                            }
+
+                            // Resolve the latch
+                            applyLatch.resolve();
+                        });
+
+                        // Redirect to the submission info page
+                        applyLatch.then(function() {
+                            // Get the submission user and assignment name
+                            var submissionOwner;
+                            var submissionName;
+
+                            // Create a latch
+                            var updateLatch = new CallbackLatch();
+
+                            // Get the owner of the submission
+                            updateLatch.add();
+                            submission.getUser(function(err, owner) {
                                 // Call back errors
                                 if(err !== null) {
-                                    console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
+                                    console.error('Failed to get owner of submission, to send the changed state update to, ignoring.');
                                     console.error(err);
                                     return;
                                 }
 
-                                // Set the name
-                                submissionName = name;
+                                // Set the owner
+                                submissionOwner = owner;
 
                                 // Resolve the latch
                                 updateLatch.resolve();
                             });
-                        });
 
-                        // Continue the latch
-                        updateLatch.then(function() {
-                            // Send game data to all users
-                            Core.gameManager.sendGameDataToAll(game, function(err) {
+                            // Get the assignment
+                            updateLatch.add();
+                            submission.getAssignment(function(err, assignment) {
                                 // Call back errors
                                 if(err !== null) {
-                                    console.error('Failed to send all game data');
-                                    console.error(err);
-                                }
-                            });
-
-                            // Send the change to the user
-                            Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
-                                submission: submission.getIdHex(),
-                                name: submissionName,
-                                state: 'edit',
-                                own: true
-                            }, submissionOwner);
-
-                            // Resend the game location data
-                            Core.gameManager.broadcastLocationData(0, game, submissionOwner, true, undefined, function(err) {
-                                // Call back errors
-                                if(err !== null) {
-                                    console.error('Failed to broadcast location data to user, ignoring.');
-                                    console.error(err);
-                                }
-                            });
-
-                            // Get a list of manager users on this game, to also broadcast this message to
-                            game.getManageUsers(submissionOwner, function(err, managers) {
-                                // Call back errors
-                                if(err !== null) {
-                                    console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
+                                    console.error('Failed to get assignment of the submission, unable to update submission state to user, ignoring.');
                                     console.error(err);
                                     return;
                                 }
 
-                                // Send the change to the managers
-                                managers.forEach(function(manageUser) {
-                                    Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
-                                        submission: submission.getIdHex(),
-                                        name: submissionName,
-                                        state: 'edit',
-                                        own: false
-                                    }, manageUser);
+                                // Get the name of the assignment
+                                assignment.getName(function(err, name) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to get name of submission, to send the changed state update to, ignoring.');
+                                        console.error(err);
+                                        return;
+                                    }
 
-                                    // Resend the game location data
-                                    Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
-                                        // Call back errors
-                                        if(err !== null) {
-                                            console.error('Failed to broadcast location data to user, ignoring.');
-                                            console.error(err);
-                                        }
+                                    // Set the name
+                                    submissionName = name;
+
+                                    // Resolve the latch
+                                    updateLatch.resolve();
+                                });
+                            });
+
+                            // Continue the latch
+                            updateLatch.then(function() {
+                                // Send game data to all users
+                                Core.gameManager.sendGameDataToAll(game, function(err) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to send all game data');
+                                        console.error(err);
+                                    }
+                                });
+
+                                // Send the change to the user
+                                Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                                    submission: submission.getIdHex(),
+                                    name: submissionName,
+                                    state: 'edit',
+                                    own: true
+                                }, submissionOwner);
+
+                                // Resend the game location data
+                                Core.gameManager.broadcastLocationData(0, game, submissionOwner, true, undefined, function(err) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to broadcast location data to user, ignoring.');
+                                        console.error(err);
+                                    }
+                                });
+
+                                // Get a list of manager users on this game, to also broadcast this message to
+                                game.getManageUsers(submissionOwner, function(err, managers) {
+                                    // Call back errors
+                                    if(err !== null) {
+                                        console.error('Failed to get manager users of game, unable to broadcast submission change to, ignoring.');
+                                        console.error(err);
+                                        return;
+                                    }
+
+                                    // Send the change to the managers
+                                    managers.forEach(function(manageUser) {
+                                        Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                                            submission: submission.getIdHex(),
+                                            name: submissionName,
+                                            state: 'edit',
+                                            own: false
+                                        }, manageUser);
+
+                                        // Resend the game location data
+                                        Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
+                                            // Call back errors
+                                            if(err !== null) {
+                                                console.error('Failed to broadcast location data to user, ignoring.');
+                                                console.error(err);
+                                            }
+                                        });
                                     });
                                 });
                             });
-                        });
 
-                        // Redirect the user
-                        res.redirect('/game/' + game.getIdHex() + '/submission/' + submission.getIdHex());
+                            // Redirect the user
+                            res.redirect('/game/' + game.getIdHex() + '/submission/' + submission.getIdHex());
+                        });
                     });
                 });
             });

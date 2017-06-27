@@ -32,6 +32,7 @@ config.api = {};
 config.realtime = {};
 config.cluster = {};
 config.web = {};
+config.upload = {};
 config.user = {};
 config.security = {};
 config.session = {};
@@ -211,6 +212,35 @@ config.web.sslKeyFile = '';
  * @type {string} File path.
  */
 config.web.sslCertFile = '';
+
+
+/******************************************************************************
+ * Upload configuration.                                                      *
+ ******************************************************************************/
+
+/**
+ * Define whether uploads are enabled.
+ * @type {boolean}
+ */
+config.upload.enabled = true;
+
+/**
+ * Maximum file size of uploads.
+ * @type {int} Size in bytes.
+ */
+config.upload.maxFileSize = 256 * 1024 * 1024;
+
+/**
+ * Path to upload the files to.
+ * @type {boolean}
+ */
+config.upload.path = __dirname + '/../public/uploads';
+
+/**
+ * Public reachable path.
+ * @type {string}
+ */
+config.upload.publicPath = '/public/uploads';
 
 
 /******************************************************************************

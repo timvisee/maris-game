@@ -21,6 +21,7 @@
  ******************************************************************************/
 
 var express = require('express');
+var fileUpload = require('express-fileupload');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -76,6 +77,15 @@ Router.prototype.init = function(callback) {
     Core.expressApp.use(bodyParser.urlencoded({extended: false}));
     Core.expressApp.use(cookieParser());
     Core.expressApp.use('/public', express.static(publicPath));
+
+    // Configure file uploads
+    if(config.upload.enabled)
+        Core.expressApp.use(fileUpload({
+            limits: {
+                fileSize: config.upload.maxFileSize
+            },
+            safeFileNames: false
+        }));
 
     // Configuring route
     console.log('Configuring router...');

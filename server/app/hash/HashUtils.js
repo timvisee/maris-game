@@ -30,11 +30,29 @@ var bcrypt = require('bcryptjs');
  */
 var useGlobalSalt = true;
 
+// Define the hashing characters.
+const HASH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
 /**
  * @class
  * @constructor
  */
 var HashUtils = function() {};
+
+/**
+ * Generate a random hash as string.
+ *
+ * @return {string} Hash.
+ */
+HashUtils.randomHash = function() {
+    var hash;
+
+    // Build the hath
+    for(var i = 0; i < 64; i++)
+        hash += HASH_CHARS.charAt(Math.floor(Math.random() * HASH_CHARS.length));
+
+    return hash;
+};
 
 /**
  * Hash the given secret.

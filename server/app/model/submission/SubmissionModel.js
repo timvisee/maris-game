@@ -454,6 +454,33 @@ SubmissionModel.prototype.getAnswerFile = function(callback) {
  */
 
 /**
+ * Get the file answer for the submission as URL.
+ *
+ * @param {SubmissionModel~getAnswerFileUrlCallback} callback Called with file answer or when an error occurred.
+ */
+SubmissionModel.prototype.getAnswerFileUrl = function(callback) {
+    // Get the file
+    this.getAnswerFile(function(err, file) {
+        // Call back errors
+        if(err !== null || file === null || file.trim().length === 0) {
+            callback(err, null);
+            return;
+        }
+
+        // Get the base URL and append the file to it
+        callback(null, config.upload.publicPath + '/' + file.trim());
+    });
+};
+
+/**
+ * Called with the file answer as URL or when an error occurred.
+ *
+ * @callback SubmissionModel~getAnswerFileUrlCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {string|null} File answer as URL or null.
+ */
+
+/**
  * Set the file answer of the submission.
  *
  * @param {string|null} file File answer.
