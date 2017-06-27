@@ -31,7 +31,7 @@ block content
                         h3.card-primary-title Gebruikers goedkeuren
 
                     .card-supporting-text.has-action.has-title.
-                        #{game.usersCount.requested} gebruiker#{game.usersCount.requested == 1 ? ' heeft' : 's hebben'} een aanvraag gedaan om deel te nemen aan dit spel, en wacht#{game.usersCount.requested == 1 ? '' : 'en'} op goedkeuring.
+                        #{game.usersCount.requested} gebruiker#{game.usersCount.requested === 1 ? ' heeft' : 's hebben'} een aanvraag gedaan om deel te nemen aan dit spel, en wacht#{game.usersCount.requested == 1 ? '' : 'en'} op goedkeuring.
                         Klik op de onderstaande knop om gebruikers goed te keuren.
 
                     .card-action
@@ -90,13 +90,23 @@ block content
                                 td Afgerond
                     tr: td Deelnemers
                         td= game.usersCount.totalAccepted
-                            span.gray  gebruiker#{game.usersCount.totalAccepted == 1 ? '' : 's'}
+                            span.gray  gebruiker#{game.usersCount.totalAccepted === 1 ? '' : 's'}
                     if game.usersCount.requested > 0
                         tr: td Aangevraagd
                             td= game.usersCount.requested
-                                span.gray  gebruiker#{game.usersCount.requested == 1 ? '' : 's'}
+                                span.gray  gebruiker#{game.usersCount.requested === 1 ? '' : 's'}
 
             .card-action
                 .row.between-xs: .col-xs-12: .box
                     a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/info', data-transition='slide') Meer info
                     a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/players', data-transition='slide') Deelnemers
+
+        if game.stage >= 1
+            .nd2-card.wow.fadeInUp.card-standings
+                .card-title.has-supporting-text
+                    h3.card-primary-title Scorebord
+
+                .card-supporting-text.has-action.has-title
+                    p Dit is de huidige stand op het scorebord:
+                    table.table-list.ui-responsive.current-standings
+                        tr: td: i(style='font-weight: normal; color: gray;') Laden...

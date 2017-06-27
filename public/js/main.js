@@ -3961,22 +3961,6 @@ function updateGameDataVisuals() {
             gameActionsList.trigger('create');
     }
 
-    // Check whether we have any factory data
-    if(data.hasOwnProperty('factory')) {
-        // Update the factory cost label
-        if(data.factory.hasOwnProperty('cost'))
-            $('.game-factory-cost').html(data.factory.cost != 0 ? formatMoney(data.factory.cost, true) : 'Gratis');
-    }
-
-    if(data.hasOwnProperty('balance')) {
-        if(data.balance.hasOwnProperty('money'))
-            activePage.find('.game-balance-money').html(formatMoney(data.balance.money, false));
-        if(data.balance.hasOwnProperty('in'))
-            activePage.find('.game-balance-in').html(formatGoods(data.balance.in));
-        if(data.balance.hasOwnProperty('out'))
-            activePage.find('.game-balance-out').html(formatGoods(data.balance.out));
-    }
-
     if(data.hasOwnProperty('standings')) {
         const list = activePage.find('.current-standings');
 

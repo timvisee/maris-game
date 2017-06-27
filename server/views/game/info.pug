@@ -42,3 +42,13 @@ block content
             .card-action
                 .row.between-xs: .col-xs-12: .box
                     a.ui-btn.ui-btn-inline.waves-effect.waves-button.waves-effect.waves-button(href=page.url + '/../manage', data-transition='slide') Beheer
+
+    if game.stage >= 1
+        .nd2-card.wow.fadeInUp.card-standings
+            .card-title.has-supporting-text
+                h3.card-primary-title Scorebord
+
+            .card-supporting-text.has-action.has-title
+                p Dit is de huidige stand op het scorebord:
+                table.table-list.ui-responsive.current-standings
+                    tr: td: i(style='font-weight: normal; color: gray;') Laden...

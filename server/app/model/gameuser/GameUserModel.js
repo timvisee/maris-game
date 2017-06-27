@@ -26,6 +26,7 @@ var Core = require('../../../Core');
 var GameUserDatabase = require('./GameUserDatabase');
 var BaseModel = require('../../database/BaseModel');
 var ConversionFunctions = require('../../database/ConversionFunctions');
+var CallbackLatch = require('../../util/CallbackLatch');
 
 /**
  * GameUserModel class.
@@ -320,6 +321,117 @@ GameUserModel.prototype.isSpectator = function(callback) {
  */
 GameUserModel.prototype.setSpectator = function(isSpectator, callback) {
     this.setField('is_spectator', isSpectator, callback);
+};
+
+/**
+ * Get the game score for this user.
+ *
+ * TODO: Document this
+ *
+ * @param callback
+ */
+GameUserModel.prototype.getScore = function(callback) {
+    var latch = new CallbackLatch();
+    var calledBack = false;
+
+    var game;
+    var submissions;
+
+    latch.add();
+    this.getGame(function(err, result) {
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        game = result;
+
+        latch.resolve();
+    });
+
+    // Get the user
+    latch.add();
+    this.getUser(function(err, user) {
+        // The user must not be null
+        if(user === null)
+            user = new Error('Failed to fetch user.');
+
+        // Call back errors
+        if(err !== null) {
+            if(!calledBack)
+                callback(err);
+            calledBack = true;
+            return;
+        }
+
+        // Get all submissions for this user
+        Core.model.submissionModelManager.getSubmissions(user, null, function(err, result) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    callback(err);
+                calledBack = true;
+                return;
+            }
+
+            submissions = result;
+
+            latch.resolve();
+        });
+    });
+
+
+    latch.then(function() {
+        // Create a score latch
+        var scoreLatch = new CallbackLatch();
+
+        // Define the score
+        var score = 0;
+
+        // Loop through the submissions and make sure their game is correct
+        submissions.forEach(function(submission) {
+            // Get the game of the submission
+            scoreLatch.add();
+            submission.getGame(function(err, submissionGame) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Skip them if the game isn't equal
+                if(submissionGame === null || !game.getId().equals(submissionGame.getId())) {
+                    scoreLatch.resolve();
+                    return;
+                }
+
+                // Get the earned points for this submission
+                submission.getEarnedPoints(function(err, points) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    score += points;
+
+                    scoreLatch.resolve();
+                });
+            });
+        });
+
+        // Call back the score
+        scoreLatch.then(function() {
+            callback(null, score);
+        });
+    });
 };
 
 // Export the user class

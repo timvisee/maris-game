@@ -807,11 +807,7 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
 GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
     // Create a data object to send back
     var gameData = {
-        factories: [],
-        shops: [],
-        strength: {},
         standings: [],
-        pings: []
     };
 
     // Convert the sockets to an array
@@ -819,9 +815,6 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
         sockets = [];
     else if(!_.isArray(sockets))
         sockets = [sockets];
-
-    // Store this instance
-    const self = this;
 
     // Make sure we only call back once
     var calledBack = false;
@@ -847,8 +840,8 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
         callback(null);
     };
 
-    // Get the game stage
-    game.getStage(function(err, gameStage) {
+    // Get the game standings
+    game.getStandings(user, function(err, standings) {
         // Call back errors
         if(err !== null) {
             if(!calledBack)
@@ -857,150 +850,11 @@ GameManager.prototype.sendGameData = function(game, user, sockets, callback) {
             return;
         }
 
-        // Set the game stage
-        gameData.stage = gameStage;
+        // Set the standings
+        gameData.standings = standings;
 
-        // TODO: Resolve or remove this
-        // Send the game data if the game isn't active
-        // if(gameStage != 1) {
-        //     sendGameData();
-        //     return;
-        // }
-
-        // Create a callback latch
-        var latch = new CallbackLatch();
-
-        // Get the user state
-        latch.add();
-        game.getUserState(user, function(err, userState) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Resolve the latch
-            latch.resolve();
-        });
-
-        // Get the live game
-        latch.add();
-        self.getGame(game, function(err, liveGame) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Resolve the latch and continue if we didn't find a live game
-            if(liveGame === null) {
-                latch.resolve();
-                return;
-            }
-
-            // TODO: Add the point data
-            // latch.add();
-            // liveGame.factoryManager.getVisibleFactories(user, function(err, factories) {
-            //     // Call back errors
-            //     if(err !== null) {
-            //         if(!calledBack)
-            //             callback(err);
-            //         calledBack = true;
-            //         return;
-            //     }
-            //
-            //     // Loop through the factories
-            //     factories.forEach(function(factory) {
-            //         // Create a point latch
-            //         latch.add();
-            //         var factoryLatch = new CallbackLatch();
-            //
-            //         // Create a point object
-            //         var factoryObject = {
-            //             id: factory.getIdHex()
-            //         };
-            //
-            //         // Get the point name
-            //         factoryLatch.add();
-            //         factory.getName(function(err, name) {
-            //             // Call back errors
-            //             if(err !== null) {
-            //                 if(!calledBack)
-            //                     callback(err);
-            //                 calledBack = true;
-            //                 return;
-            //             }
-            //
-            //             // Set the point name
-            //             factoryObject.name = name;
-            //
-            //             // Resolve the point latch
-            //             factoryLatch.resolve();
-            //         });
-            //
-            //         // Add the point data when we're done and resolve the regular latch
-            //         factoryLatch.then(function() {
-            //             // Add the point object
-            //             gameData.factories.push(factoryObject);
-            //
-            //             // Resolve the latch
-            //             latch.resolve();
-            //         });
-            //     });
-            //
-            //     // Resolve the latch
-            //     latch.resolve();
-            // });
-
-            // Resolve the latch
-            latch.resolve();
-        });
-
-        // Get the game standings
-        latch.add();
-        Core.gameManager.getGame(game, function(err, liveGame) {
-            // Call back errors
-            if(err !== null) {
-                if(!calledBack)
-                    callback(err);
-                calledBack = true;
-                return;
-            }
-
-            // Make sure the game isn't null
-            if(liveGame === null) {
-                latch.resolve();
-                return;
-            }
-
-            // TODO: Get the number of points everybody has
-            // Get the amount of money each team has
-            // liveGame.getTeamMoney(undefined, function (err, standings) {
-            //     // Call back errors
-            //     if (err !== null) {
-            //         if (!calledBack)
-            //             callback(err);
-            //         calledBack = true;
-            //         return;
-            //     }
-
-                // Set the standings object
-                gameData.standings = [];
-
-            //     // Resolve the latch
-            //     latch.resolve();
-            // });
-        });
-
-        // Send the game data when we're done
-        latch.then(function() {
-            // Send the game data
-            sendGameData();
-        });
+        // Send the game data
+        sendGameData();
     });
 };
 

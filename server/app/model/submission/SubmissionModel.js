@@ -1226,5 +1226,34 @@ SubmissionModel.prototype.getPermissionObject = function(user, callback) {
  * @param {boolean} approve True if the user has approve permissions, false if not.
  */
 
+// TODO: Document this
+SubmissionModel.prototype.getPoints = function(callback) {
+    callback(null, 1);
+};
+
+// TODO: Document this
+SubmissionModel.prototype.getEarnedPoints = function(callback) {
+    // Keep a reference to this
+    const self = this;
+
+    // Get the approval state
+    this.getApprovalState(function(err, approveState) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Call back zero if the state isn't approved
+        if(approveState !== ApprovalState.APPROVED) {
+            callback(null, 0);
+            return;
+        }
+
+        // Get the points and call it back
+        self.getPoints(callback);
+    });
+};
+
 // Export the submission class
 module.exports = SubmissionModel;

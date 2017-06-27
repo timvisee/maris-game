@@ -659,5 +659,104 @@ GameModel.prototype.getManageUsers = function(filters, callback) {
  * @param {UserModel[]=} List of users that are managers.
  */
 
+GameModel.prototype.getStandings = function(currentUser, callback) {
+    // Keep a reference to this
+    const self = this;
+
+    // Get all game users
+    Core.model.gameUserModelManager.getGameUsers(self, {
+        participants: true
+    }, function(err, users) {
+        // Call back errors
+        if(err !== null) {
+            callback(err);
+            return;
+        }
+
+        // Create a callback latch
+        var latch = new CallbackLatch();
+        var calledBack = false;
+
+        // Create the standings list
+        var standings = [];
+
+        // Loop through the users
+        latch.add(users.length);
+        users.forEach(function(user) {
+            var userLatch = new CallbackLatch();
+
+            // Create the object
+            var userObject = {
+                me: currentUser !== null && currentUser !== undefined && currentUser.getId().equals(user.getId()),
+                score: 0,
+                name: null
+            };
+
+            // Get the game user
+            userLatch.add();
+            Core.model.gameUserModelManager.getGameUser(self, user, function(err, gameUser) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Get the score
+                gameUser.getScore(function(err, score) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            callback(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Skip if the score is zero
+                    if(score <= 0) {
+                        latch.resolve();
+                        return;
+                    }
+
+                    // Set the score
+                    userObject.score = score;
+
+                    userLatch.resolve();
+                });
+            });
+
+            // Get the name
+            userLatch.add();
+            user.getName(function(err, name) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        callback(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the score
+                userObject.name = name;
+
+                userLatch.resolve();
+            });
+
+            userLatch.then(function() {
+                standings.push(userObject);
+
+                // Resolve the latch
+                latch.resolve();
+            });
+        });
+
+        // Call back the standings
+        latch.then(function() {
+            callback(err, standings);
+        });
+    });
+};
+
 // Export the user class
 module.exports = GameModel;
