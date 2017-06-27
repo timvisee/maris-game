@@ -876,7 +876,7 @@ GameManager.prototype.sendGameDataToAll = function(game, callback) {
     const self = this;
 
     // Make sure the game isn't null
-    if(game == null) {
+    if(game === null) {
         callback(new Error('Game is null.'));
         return;
     }

@@ -3868,99 +3868,6 @@ function updateGameDataVisuals() {
     // Get the active page
     const activePage = getActivePage();
 
-    // Get the game actions list
-    const gameActionsList = activePage.find('.game-actions-list');
-
-    // Check whether we found a game actions list
-    if(gameActionsList.length > 0) {
-        // Remove the game data loading label
-        gameActionsList.find('.game-data-load-label').remove();
-
-        // Count the number of cards
-        var cardCount = 0;
-
-        // Determine whether anything is changed
-        var changed = false;
-
-        // Determine whether we should show the factory build button
-        const showFactoryBuild = data.hasOwnProperty('factory') && data.factory.hasOwnProperty('canBuild') && data.factory.canBuild;
-        if(showFactoryBuild)
-            cardCount++;
-
-        // Get the factory build card element if available
-        var factoryBuildCardElement = gameActionsList.find('.card-factory-build');
-
-        // Create an array with the factory IDs that are shown
-        var factoryIds = [];
-
-        // Define the factory card selector prefix
-        const factoryCardSelector = 'card-factory';
-
-        // Loop through the list of factories
-        cardCount += data.factories.length;
-        data.factories.forEach(function(factory) {
-            // Add the factory ID to the array
-            factoryIds.push(factory.id);
-
-            // Determine the card selector for this factory´s card and get the elements for it
-            var factoryCardElement = gameActionsList.find('.' + factoryCardSelector + '[data-factory-id=\'' + factory.id + '\']');
-
-            // Skip this run if it already exists
-            if(factoryCardElement.length > 0)
-                return;
-
-            // Create a new card for this factory
-            gameActionsList.prepend('<div class="nd2-card wow ' + factoryCardSelector + '" data-factory-id="' + factory.id + '">' +
-                '    <div class="card-title has-supporting-text">' +
-                '        <h3 class="card-primary-title">' + factory.name + '</h3>' +
-                '    </div>' +
-                '    <div class="card-action">' +
-                '        <div class="row between-xs">' +
-                '            <div class="col-xs-12">' +
-                '                <div class="box">' +
-                '                    <a href="/game/' + gameId + '/factory/' + factory.id + '" class="ui-btn waves-effect waves-button">' +
-                '                        <i class="zmdi zmdi-zoom-in"></i>&nbsp;' +
-                '                        Bekijk ' + NameConfig.factory.name + '' +
-                '                    </a>' +
-                '                </div>' +
-                '            </div>' +
-                '        </div>' +
-                '    </div>' +
-                '</div>');
-            changed = true;
-
-            // Slide out animation
-            cardAnimationSlideIn(gameActionsList.find('.' + factoryCardSelector + '[data-factory-id=\'' + factory.id + '\']'));
-        });
-
-        // Find all factory cards, and loop through them
-        const factoryCards = gameActionsList.find('.' + factoryCardSelector);
-        factoryCards.each(function() {
-            // Get the factory ID
-            const factoryId = $(this).data('factory-id');
-
-            // Delete the card if it's not in the factory IDs array
-            if(jQuery.inArray(factoryId, factoryIds) == -1)
-                cardAnimationSlideOut($(this));
-        });
-
-        // Create an array with the shop tokens that are shown
-        var shopTokens = [];
-
-        // Define the shop card selector prefix
-        const shopCardSelector = 'card-shop';
-
-        // Show a label if no card is shown
-        if(cardCount == 0)
-            gameActionsList.html('<div align="center" class="game-data-load-label">' +
-                '    <i>Geen acties beschikbaar...</i>' +
-                '</div>');
-
-        // Trigger the create event on the game actions list
-        if(changed)
-            gameActionsList.trigger('create');
-    }
-
     if(data.hasOwnProperty('standings')) {
         const list = activePage.find('.current-standings');
 
@@ -3984,11 +3891,6 @@ function updateGameDataVisuals() {
         // Trigger a create on the list
         list.trigger('create');
     }
-
-    // Check whether this is the active game
-    if(Maris.state.activeGame == gameId)
-        // Update the game stage
-        Maris.state.activeGameStage = data.stage;
 }
 
 /**
