@@ -449,9 +449,7 @@ module.exports = {
 
                         // Create a page options object
                         var options = {
-                            page: {
-                                leftButton: 'back'
-                            },
+                            hideBackButton: true,
                             created: true,
                             game: {
                                 id: game.getIdHex()

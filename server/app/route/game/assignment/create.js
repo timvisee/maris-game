@@ -204,9 +204,7 @@ module.exports = {
 
                 // Show the game creation page
                 LayoutRenderer.renderAndShow(req, res, next, 'game/assignment/create', 'Opdracht aangemaakt', {
-                    page: {
-                        leftButton: 'back'
-                    },
+                    hideBackButton: true,
                     created: true,
                     game: {
                         id: game.getIdHex()

@@ -14,4 +14,10 @@ block content
 
     br
     .button-list
-        a.ui-btn.ui-btn-raised.clr-primary.wow.fadeInUp(href=page.url + '/../assignment/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuwe opdracht aanmaken') Opdracht aanmaken
+        a.ui-btn.ui-btn-raised.clr-primary.wow.fadeInUp(href=page.url + '/../assignment/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuwe opdracht aanmaken')
+            i.zmdi.zmdi-comment-more
+            | &nbsp;&nbsp;Opdracht aanmaken
+        a.ui-btn.wow.fadeInUp(href='/game/' + game.id, data-wow-delay=(fadeDelay += 0.1) + 's', title='Speloverzicht')
+            i.zmdi.zmdi-home
+            | &nbsp;&nbsp;Speloverzicht
+

@@ -87,6 +87,9 @@ module.exports = {
                 page: {
                     leftButton: 'back'
                 },
+                game: {
+                    id: game.getIdHex()
+                },
                 created: false
             });
         });
@@ -216,9 +219,7 @@ module.exports = {
 
                 // Show the game creation page
                 LayoutRenderer.renderAndShow(req, res, next, 'game/point/create', 'Punt aangemaakt', {
-                    page: {
-                        leftButton: 'back'
-                    },
+                    hideBackButton: true,
                     created: true,
                     game: {
                         id: game.getIdHex()

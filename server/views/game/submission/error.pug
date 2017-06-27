@@ -14,5 +14,10 @@ block content
 
         //- Show the submission view button
         unless submission.id === null
-            a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken') Inzending bekijken
+            a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken')
+                i.zmdi.zmdi-zoom-in
+                | &nbsp;&nbsp;Inzending bekijken
+        a.ui-btn.wow.fadeInUp(href='/game/' + game.id, data-wow-delay=(fadeDelay += 0.1) + 's', title='Speloverzicht')
+            i.zmdi.zmdi-home
+            | &nbsp;&nbsp;Speloverzicht
 

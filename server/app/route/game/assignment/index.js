@@ -95,6 +95,7 @@ module.exports = {
 
             // Create a game object
             var gameObject = {
+                id: game.getIdHex(),
                 assignments: []
             };
 

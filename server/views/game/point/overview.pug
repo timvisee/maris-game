@@ -14,4 +14,9 @@ block content
 
     br
     .button-list
-        a.ui-btn.ui-btn-raised.clr-primary.wow.fadeInUp(href=page.url + '/../point/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuw punt aanmaken') Punt aanmaken
+        a.ui-btn.ui-btn-raised.clr-primary.wow.fadeInUp(href=page.url + '/../point/create', data-wow-delay=(fadeDelay += 0.1) + 's', title='Nieuw punt aanmaken')
+            i.zmdi.zmdi-pin-drop
+            | &nbsp;&nbsp;Punt aanmaken
+        a.ui-btn.wow.fadeInUp(href='/game/' + game.id, data-wow-delay=(fadeDelay += 0.1) + 's', title='Speloverzicht')
+            i.zmdi.zmdi-home
+            | &nbsp;&nbsp;Speloverzicht

@@ -39,7 +39,13 @@ block content
 
             br
             br
-            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Opdracht aanmaken
+            .button-list
+                button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
+                    i.zmdi.zmdi-comment-more.ui-pull-left
+                    | &nbsp;&nbsp;Opdracht aanmaken
+                a.ui-btn(href='/', data-rel='back', data-direction='reverse', title='Ga terug')
+                    i.zmdi.zmdi-arrow-back.ui-pull-left
+                    | &nbsp;&nbsp;Ga terug
 
     else
         p De opdracht is succesvol aangemaakt.
@@ -55,5 +61,12 @@ block content
 
         br
         .button-list
-            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false') Opdrachtenoverzicht
-            a.ui-btn(href='/game/' + game.id + '/assignment/' + assignment.id, title='Opdracht bekijken', data-ajax='false') Opdracht bekijken
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/assignments', title='Opdrachtenoverzicht', data-ajax='false')
+                i.zmdi.zmdi-account-add.ui-pull-left
+                | &nbsp;&nbsp;Opdrachtenoverzicht
+            a.ui-btn(href='/game/' + game.id, title='Speloverzicht', data-ajax='false')
+                i.zmdi.zmdi-comment-edit.ui-pull-left
+                | &nbsp;&nbsp;Speloverzicht
+            a.ui-btn(href='/game/' + game.id + '/assignment/' + assignment.id, title='Opdracht bekijken', data-ajax='false')
+                i.zmdi.zmdi-zoom-in.ui-pull-left
+                | &nbsp;&nbsp; Opdracht bekijken

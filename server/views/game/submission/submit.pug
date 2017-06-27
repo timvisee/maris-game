@@ -74,5 +74,9 @@ block content
 
         br
         .button-list
-            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id, title='Terug naar het spel') Terug naar het spel
-            a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken') Inzending bekijken
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id, title='Speloverzicht')
+                i.zmdi.zmdi-home
+                | &nbsp;&nbsp;Speloverzicht
+            a.ui-btn(href='/game/' + game.id + '/submission/' + submission.id, title='Inzending bekijken')
+                i.zmdi.zmdi-zoom-in
+                | &nbsp;&nbsp;Inzending bekijken
