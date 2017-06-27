@@ -28,7 +28,7 @@ var LayoutRenderer = require('../layout/LayoutRenderer');
 
 // About index
 router.get('/', function(req, res, next) {
-    LayoutRenderer.renderAndShow(req, res, next, 'about');
+    LayoutRenderer.renderAndShow(req, res, next, 'about', 'Over');
 });
 
 module.exports = router;
