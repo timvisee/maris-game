@@ -139,6 +139,13 @@ module.exports = {
                             return;
                         }
 
+                        // Skip if the live user instance is null
+                        if(liveUser === null) {
+                            console.warn("Live user instance is null in assignment-view.");
+                            latch.resolve();
+                            return;
+                        }
+
                         // Get the visible points for this user
                         latch.add();
                         liveGame.pointManager.getVisiblePoints(user, function(err, points) {

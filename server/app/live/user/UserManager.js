@@ -102,7 +102,7 @@ UserManager.prototype.getUser = function(userId, callback) {
             }
 
             // Make sure the stage is valid
-            if(stage != 1) {
+            if(stage !== 1) {
                 callback(null, null);
                 return;
             }

@@ -386,7 +386,7 @@ PointManager.prototype.getVisiblePoints = function(user, callback) {
                     }
 
                     // Add the point if it's visible
-                    if(visible)
+                    if(visible && point !== null)
                         result.push(point);
 
                     // Resolve the latch

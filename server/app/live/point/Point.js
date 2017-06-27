@@ -672,7 +672,7 @@ Point.prototype.updateRangeState = function(liveUser, callback) {
  * @param {User} liveUser User.
  */
 Point.prototype.isInRangeMemory = function(liveUser) {
-    return this._userRangeMem.indexOf(liveUser.getIdHex()) >= 0;
+    return liveUser !== null && liveUser !== undefined && this._userRangeMem.indexOf(liveUser.getIdHex()) >= 0;
 };
 
 /**
