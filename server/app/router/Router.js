@@ -75,7 +75,7 @@ Router.prototype.init = function(callback) {
     Core.expressApp.use(bodyParser.json());
     Core.expressApp.use(bodyParser.urlencoded({extended: false}));
     Core.expressApp.use(cookieParser());
-    Core.expressApp.use(express.static(publicPath));
+    Core.expressApp.use('/public', express.static(publicPath));
 
     // Configuring route
     console.log('Configuring router...');

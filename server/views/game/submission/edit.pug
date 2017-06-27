@@ -44,7 +44,7 @@ block content
                         span(style='color: red;') Afgekeurd
 
     br
-    form(method='POST', action=page.url + '/#')
+    form(method='POST', action=page.url + '/#', enctype="multipart/form-data")
         if submission.assignment.allow_text
             label(for='field-submission-text') Antwoord:
                 textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')
@@ -52,8 +52,8 @@ block content
                         = submission.answer_text
 
         if submission.assignment.allow_file
-            label(for='field-submission-text') Bestand (bestand vervangen):
-            input(type='file', name='field-submission-file', id='field-submission-file')
+            label(for='filename') Bestand (bestand vervangen):
+            input(type='file', name='filename', id='filename')
 
         br
         .button-list

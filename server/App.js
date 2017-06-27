@@ -65,7 +65,7 @@ var App = function(init) {
     this._init = false;
 
     // Initialize
-    if(init != undefined && init)
+    if(init !== undefined && init)
         this.init();
 };
 
