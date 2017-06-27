@@ -3567,6 +3567,7 @@ function updatePointMarkers(points) {
 
         } else {
             // Update the position and range
+            marker.setIcon(L.spriteIcon(point.inRange ? 'green' : 'orange'));
             marker.setLatLng(pos);
             marker.rangeCircle.setLatLng(pos);
             marker.rangeCircle.setRadius(point.range);
@@ -3574,7 +3575,8 @@ function updatePointMarkers(points) {
             // Set the point style
             marker.rangeCircle.setStyle({
                 opacity: point.inRange ? 1 : 0.4,
-                dashArray: point.inRange ? '' : '5,5'
+                dashArray: point.inRange ? '' : '5,5',
+                color: point.inRange ? 'green' : 'darkorange'
             });
         }
 
