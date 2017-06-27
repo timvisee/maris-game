@@ -141,6 +141,14 @@ var AssignmentModel = function(id) {
                     to: ConversionFunctions.boolToRedis
                 }
             },
+            points: {
+                mongo: {
+                    from: (value) => (value === null || value === undefined) ? 1 : value
+                },
+                redis: {
+                    from: (state) => parseInt(state)
+                }
+            },
             retry: {
                 redis: {
                     from: ConversionFunctions.boolFromRedis,
@@ -382,6 +390,33 @@ AssignmentModel.prototype.isAnswerFile = function(callback) {
  */
 AssignmentModel.prototype.setAnswerFile = function(answerFile, callback) {
     this.setField('answer_file', answerFile, callback);
+};
+
+/**
+ * Get the points this assignment is worth.
+ *
+ * @param {AssignmentModel~getPointsCallback} callback Called with user or when an error occurred.
+ */
+AssignmentModel.prototype.getPoints = function(callback) {
+    this.getField('points', callback);
+};
+
+/**
+ * Called with the result.
+ *
+ * @callback AssignmentModel~getPointsCallback
+ * @param {Error|null} Error instance if an error occurred, null otherwise.
+ * @param {int} Number of points this assignment is worth.
+ */
+
+/**
+ * Set the number of points this assignment is worth.
+ *
+ * @param {int} points Number of points.
+ * @param {AssignmentModel~setFieldCallback} callback Called on success, or when an error occurred.
+ */
+AssignmentModel.prototype.setPoints = function(points, callback) {
+    this.setField('points', points, callback);
 };
 
 /**

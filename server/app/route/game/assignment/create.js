@@ -105,6 +105,7 @@ module.exports = {
         var assignmentDescription = req.body['field-assignment-description'];
         var assignmentAnswerText = req.body['field-assignment-answer-text'];
         var assignmentAnswerFile = req.body['field-assignment-answer-file'];
+        var assignmentPoints = req.body['field-assignment-points'];
         var assignmentRetry = req.body['field-assignment-retry'];
 
         // Make sure the user has a valid session
@@ -170,6 +171,7 @@ module.exports = {
             // Parse the assignment booleans
             assignmentAnswerText = assignmentAnswerText === 'true';
             assignmentAnswerFile= assignmentAnswerFile === 'true';
+            assignmentPoints = parseInt(assignmentPoints);
             assignmentRetry = assignmentRetry === 'true';
 
             // Make sure the user will be able to answer with one of the two
@@ -182,8 +184,18 @@ module.exports = {
                 return;
             }
 
+            // Make sure the points are valid
+            if(isNaN(assignmentPoints) || assignmentPoints === null || assignmentPoints === undefined || !_.isInteger(assignmentPoints) || assignmentPoints < 0) {
+                // Show an error page
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
+                    message: 'Het aantal punten dat u heeft ingevuld is ongeldig.\n\n' +
+                    'Ga alstublieft terug en vul het aantal punten juist in.'
+                });
+                return;
+            }
+
             // Create the assignment
-            AssignmentDatabase.addAssignment(assignmentName, assignmentDescription, game, user, assignmentAnswerText, assignmentAnswerFile, assignmentRetry, function(err, assignmentModel) {
+            AssignmentDatabase.addAssignment(assignmentName, assignmentDescription, game, user, assignmentAnswerText, assignmentAnswerFile, assignmentPoints, assignmentRetry, function(err, assignmentModel) {
                 // Call back errors
                 if(err !== null) {
                     next(err);

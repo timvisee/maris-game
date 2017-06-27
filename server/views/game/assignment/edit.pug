@@ -29,14 +29,20 @@ block content
                         option(value='false', selected='selected') NEE
                         option(value='true') JA
 
-        label(for='field-assignment-retry') Meerdere pogingen:
-        select(name='field-assignment-retry', id='field-assignment-retry', data-role='flipswitch', selected=assignment.retry)
-            if assignment.retry
-                option(value='false') NEE
-                option(value='true', selected='selected') JA
-            else
-                option(value='false', selected='selected') NEE
-                option(value='true') JA
+        .row
+            .col-xs: .box
+                label(for='field-assignment-retry') Meerdere pogingen:
+                select(name='field-assignment-retry', id='field-assignment-retry', data-role='flipswitch', selected=assignment.retry)
+                    if assignment.retry
+                        option(value='false') NEE
+                        option(value='true', selected='selected') JA
+                    else
+                        option(value='false', selected='selected') NEE
+                        option(value='true') JA
+
+            .col-xs: .box
+                label(for='field-assignment-points') Punten:
+                input(type='text', name='field-assignment-points', id='field-assignment-points', value=assignment.points, data-clear-btn='true', data-randomize='true')
 
         br
         br

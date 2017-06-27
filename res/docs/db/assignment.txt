@@ -8,4 +8,5 @@ game_id : ID            ID of the game this assignment is part of.
 user_id : ID            ID of the user that created this assignment.
 answer_text : boolean   Weather to accept text as an answer.
 answer_file : boolean   Weather to accept a file as an answer (maybe a picture or video file).
+points : int            Number of points this assignment is worth.
 retry : boolean         Give players the ability to retry this assignment on failure.

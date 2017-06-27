@@ -26,10 +26,16 @@ block content
                         option(value='false', selected='selected') NEE
                         option(value='true') JA
 
-            label(for='field-assignment-retry') Meerdere pogingen:
-            select(name='field-assignment-retry', id='field-assignment-retry', data-role='flipswitch')
-                option(value='false') NEE
-                option(value='true', selected='selected') JA
+            .row
+                .col-xs: .box
+                    label(for='field-assignment-retry') Meerdere pogingen:
+                    select(name='field-assignment-retry', id='field-assignment-retry', data-role='flipswitch')
+                        option(value='false') NEE
+                        option(value='true', selected='selected') JA
+
+                .col-xs: .box
+                    label(for='field-assignment-points') Punten:
+                    input(type='text', name='field-assignment-points', id='field-assignment-points', value='1', data-clear-btn='true', data-randomize='true')
 
             br
             br
@@ -40,9 +46,9 @@ block content
 
         div(align="center")
             table.table-list.ui-responsive
-                tr: td Opdracht
+                tr: td Naam
                     td= assignment.name
-                tr: td Beschrijving
+                tr: td Opdracht
                     td= assignment.description
 
         p Klik op de onderstaande knop om terug te gaan naar het opdrachtenoverzicht.

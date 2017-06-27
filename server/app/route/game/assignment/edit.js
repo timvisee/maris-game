@@ -100,6 +100,7 @@ module.exports = {
                     description: '',
                     answer_text: false,
                     answer_file: false,
+                    points: 0,
                     retry: false
                 }
             };
@@ -180,6 +181,24 @@ module.exports = {
                 latch.resolve();
             });
 
+            // Fetch the points
+            latch.add();
+            assignment.getPoints(function(err, points) {
+                // Call back errors
+                if(err !== null) {
+                    if(!calledBack)
+                        next(err);
+                    calledBack = true;
+                    return;
+                }
+
+                // Set the property
+                options.assignment.points = points;
+
+                // Resolve the latch
+                latch.resolve();
+            });
+
             // Fetch the retry state
             latch.add();
             assignment.isRetry(function(err, retry) {
@@ -221,6 +240,7 @@ module.exports = {
         var assignmentDescription = req.body['field-assignment-description'];
         var assignmentAnswerText = req.body['field-assignment-answer-text'];
         var assignmentAnswerFile = req.body['field-assignment-answer-file'];
+        var assignmentPoints = req.body['field-assignment-points'];
         var assignmentRetry = req.body['field-assignment-retry'];
 
         // Make sure the user has a valid session
@@ -293,6 +313,7 @@ module.exports = {
             // Parse the assignment booleans
             assignmentAnswerText = assignmentAnswerText === 'true';
             assignmentAnswerFile= assignmentAnswerFile === 'true';
+            assignmentPoints = parseInt(assignmentPoints);
             assignmentRetry = assignmentRetry === 'true';
 
             // Make sure the user will be able to answer with one of the two
@@ -305,6 +326,16 @@ module.exports = {
                 return;
             }
 
+            // Make sure the points are valid
+            if(isNaN(assignmentPoints) || assignmentPoints === null || assignmentPoints === undefined || !_.isInteger(assignmentPoints) || assignmentPoints < 0) {
+                // Show an error page
+                LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
+                    message: 'Het aantal punten dat u heeft ingevuld is ongeldig.\n\n' +
+                    'Ga alstublieft terug en vul het aantal punten juist in.'
+                });
+                return;
+            }
+
             // Create a latch for updating the assignment
             var latch = new CallbackLatch();
             var calledBack = false;
@@ -312,7 +343,7 @@ module.exports = {
             // Create a function for setter callbacks
             var setterCallback = function(err) {
                 // Return if the error is null, or if we already called back
-                if(err === null || calledBack) {
+                if(err === null || err === undefined || calledBack) {
                     // Resolve the latch and return
                     latch.resolve();
                     return;
@@ -324,11 +355,12 @@ module.exports = {
             };
 
             // Update the assignment
-            latch.add(5);
+            latch.add(6);
             assignment.setName(assignmentName, setterCallback);
             assignment.setDescription(assignmentDescription, setterCallback);
             assignment.setAnswerText(assignmentAnswerText, setterCallback);
             assignment.setAnswerFile(assignmentAnswerFile, setterCallback);
+            assignment.setPoints(assignmentPoints, setterCallback());
             assignment.setRetry(assignmentRetry, setterCallback);
 
             // Redirect to the assignments overview page when done
