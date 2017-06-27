@@ -28,7 +28,7 @@
       <square150x150logo src="/img/favicon/mstile-150x150.png"/>
       <square310x310logo src="/img/favicon/mstile-310x310.png"/>
       <wide310x150logo src="/img/favicon/mstile-310x150.png"/>
-      <TileColor>#2a2a2a</TileColor>
+      <TileColor>#9C27B0</TileColor>
     </tile>
   </msapplication>
 </browserconfig>
