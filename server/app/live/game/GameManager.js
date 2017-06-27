@@ -707,55 +707,55 @@ GameManager.prototype.broadcastLocationData = function(scheduleTime, gameConstra
                 //     });
                 // });
 
-                // Loop through the list user
-                if(showOtherPlayers) {
-                    liveGame.userManager.users.forEach(function(otherLiveUser) {
-                        // Skip each user if we already called back
-                        if(calledBack)
-                            return;
-
-                        // Check whether the other user is visible for the current user
-                        dataLatch.add();
-                        otherLiveUser.isVisibleFor(liveUser, function(err, visible) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    if(_.isFunction(callback))
-                                        callback(err);
-                                calledBack = true;
-                                return;
-                            }
-
-                            // Make sure the user is visible
-                            if(!visible) {
-                                dataLatch.resolve();
-                                return;
-                            }
-
-                            // Get the name of the user
-                            otherLiveUser.getName(function(err, name) {
-                                // Call back errors
-                                if(err !== null) {
-                                    if(!calledBack)
-                                        if(_.isFunction(callback))
-                                            callback(err);
-                                    calledBack = true;
-                                    return;
-                                }
-
-                                // Create a user object and add it to the list
-                                users.push({
-                                    user: otherLiveUser.getIdHex(),
-                                    userName: name,
-                                    location: otherLiveUser.getLocation()
-                                });
-
-                                // Resolve the game latch
-                                dataLatch.resolve();
-                            });
-                        });
-                    });
-                }
+                // // Loop through the list user
+                // if(showOtherPlayers) {
+                //     liveGame.userManager.users.forEach(function(otherLiveUser) {
+                //         // Skip each user if we already called back
+                //         if(calledBack)
+                //             return;
+                //
+                //         // Check whether the other user is visible for the current user
+                //         dataLatch.add();
+                //         otherLiveUser.isVisibleFor(liveUser, function(err, visible) {
+                //             // Call back errors
+                //             if(err !== null) {
+                //                 if(!calledBack)
+                //                     if(_.isFunction(callback))
+                //                         callback(err);
+                //                 calledBack = true;
+                //                 return;
+                //             }
+                //
+                //             // Make sure the user is visible
+                //             if(!visible) {
+                //                 dataLatch.resolve();
+                //                 return;
+                //             }
+                //
+                //             // Get the name of the user
+                //             otherLiveUser.getName(function(err, name) {
+                //                 // Call back errors
+                //                 if(err !== null) {
+                //                     if(!calledBack)
+                //                         if(_.isFunction(callback))
+                //                             callback(err);
+                //                     calledBack = true;
+                //                     return;
+                //                 }
+                //
+                //                 // Create a user object and add it to the list
+                //                 packetObject.users.push({
+                //                     user: otherLiveUser.getIdHex(),
+                //                     userName: name,
+                //                     location: otherLiveUser.getLocation()
+                //                 });
+                //
+                //                 // Resolve the game latch
+                //                 dataLatch.resolve();
+                //             });
+                //         });
+                //     });
+                // }
 
                 // Send the data to the proper sockets when done
                 dataLatch.then(function() {

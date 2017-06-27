@@ -162,7 +162,6 @@ router.post('/', function(req, res, next) {
         }
     }
 
-
     // Make sure the username of the user isn't already used
     Core.model.userModelManager.isUserWithUsername(username, function(err, result) {
         // Call back errors

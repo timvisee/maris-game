@@ -1,0 +1,72 @@
+extends ../../base/page
+
+block content
+    unless created
+        p.
+            Op deze pagina kunt u een nieuwe gebruiker aanmaken voor dit spel.#[br]
+            #[br]
+            Vul de onderstaande velden in.
+        br
+
+        form(method='POST', action=page.url + '/#')
+            label(for='field-username') Gebruikersnaam:
+            input(type='text', name='field-username', id='field-username', value='', data-clear-btn='true')
+
+            label(for='field-password') Wachtwoord:
+            input(type='password', name='field-password', id='field-password', value='', data-clear-btn='true', autocomplete='off')
+
+            label(for='field-password-verify') Wachtwoord verificatie:
+            input(type='password', name='field-password-verify', id='field-password-verify', value='', data-clear-btn='true', autocomplete='off')
+
+            label(for='field-name') Naam:
+            input(type='text', name='field-name', id='field-name', value='', data-clear-btn='true')
+
+            //- Flip switches to define the user rol
+            br
+            .row
+                .col-xs: .box
+                    //- Flip switch for regular players
+                    label(for='field-participant') Deelnemer
+                    select(name='field-participant', id='field-participant', data-role='flipswitch', selected='selected')
+                        option(value='false') NEE
+                        option(value='true') JA
+
+                .col-xs: .box
+                    //- Flip switch for spectators
+                    label(for='field-spectator') Toeschouwer
+                    select(name='field-spectator', id='field-spectator', data-role='flipswitch', selected='selected')
+                        option(value='false') NEE
+                        option(value='true') JA
+
+            br
+            br
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false') Gebruiker aanmaken
+
+    else
+        p De gebruiker is succesvol aangemaakt.
+
+        div(align="center")
+            table.table-list.ui-responsive
+                tr: td Gebruikersnaam
+                    td= user.username
+                tr: td Naam
+                    td= user.name
+                tr: td Deelnemer
+                    if user.participant
+                        td(style='color: green;') Ja
+                    else
+                        td(style='color: red;') Nee
+                tr: td Toeschouwer
+                    if user.spectator
+                        td(style='color: green;') Ja
+                    else
+                        td(style='color: red;') Nee
+
+        p Klik op de onderstaande knop om terug te gaan naar het gebruikers overzicht, of maak direct een nieuwe gebruiker aan.
+
+        br
+        .button-list
+            a.ui-btn.ui-btn-raised.clr-primary(href='/game/' + game.id + '/players/create', title='Nieuwe gebruiker aanmaken', data-ajax='false') Nieuwe gebruiker aanmaken
+            a.ui-btn(href='/game/' + game.id + '/players', title='Gebruikersoverzicht', data-ajax='false') Gebruikersoverzicht
+            a.ui-btn(href='/game/' + game.id, title='Speloverzicht', data-ajax='false') Speloverzicht
+

@@ -22,9 +22,11 @@
 
 var crypto = require('crypto');
 
-var Core = require('../../../Core');
-var LayoutRenderer = require('../../layout/LayoutRenderer');
-var CallbackLatch = require('../../util/CallbackLatch');
+var Core = require('../../../../Core');
+var LayoutRenderer = require('../../../layout/LayoutRenderer');
+var CallbackLatch = require('../../../util/CallbackLatch');
+
+var pageCreate = require('./create');
 
 // Export the module
 module.exports = {
@@ -45,6 +47,9 @@ module.exports = {
         router.get('/:game/players/requested', (req, res, next) => self.listPage(req, res, next, 'requested'));
         router.get('/:game/players/participants', (req, res, next) => self.listPage(req, res, next, 'participants'));
         router.get('/:game/players/spectators', (req, res, next) => self.listPage(req, res, next, 'spectators'));
+
+        // Route the create page
+        pageCreate.route(router);
     },
 
     /**
@@ -59,8 +64,9 @@ module.exports = {
         if(!req.requireValidSession())
             return;
 
-        // Get the game
+        // Get the game and user
         const game = req.game;
+        const user = req.session.user;
 
         // Call back if the game is invalid
         if(game === undefined) {
@@ -69,9 +75,18 @@ module.exports = {
         }
 
         // Create a game object
-        var gameObject = {
-            users: {
-                category: null
+        var options = {
+            page: {
+                leftButton: 'back'
+            },
+            user: {
+                isAdmin: false
+            },
+            game: {
+                id: game.getIdHex(),
+                users: {
+                    category: null
+                }
             }
         };
 
@@ -93,7 +108,25 @@ module.exports = {
             }
 
             // Set the property
-            gameObject.name = name;
+            options.game.name = name;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Determine whether the user is administrator
+        latch.add();
+        user.isAdmin(function(err, isAdmin) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    next(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the result
+            options.user.isAdmin = isAdmin;
 
             // Resolve the latch
             latch.resolve();
@@ -111,7 +144,7 @@ module.exports = {
             }
 
             // Set the property
-            gameObject.users.count = usersCount;
+            options.game.users.count = usersCount;
 
             // Resolve the latch
             latch.resolve();
@@ -121,12 +154,7 @@ module.exports = {
         latch.then(function() {
             // Render the game page if we didn't call back yet
             if(!calledBack)
-                LayoutRenderer.renderAndShow(req, res, next, 'game/player', gameObject.name, {
-                    page: {
-                        leftButton: 'back'
-                    },
-                    game: gameObject
-                });
+                LayoutRenderer.renderAndShow(req, res, next, 'game/player/index', options.game.name, options);
         });
     },
 
@@ -167,7 +195,8 @@ module.exports = {
             },
             game: {},
             user: {
-                hasPermission: false
+                hasPermission: false,
+                isAdmin: false
             }
         };
 
@@ -184,6 +213,24 @@ module.exports = {
 
             // Set the result
             options.user.hasPermission = hasPermission;
+
+            // Resolve the latch
+            latch.resolve();
+        });
+
+        // Determine whether the user is administrator
+        latch.add();
+        user.isAdmin(function(err, isAdmin) {
+            // Call back errors
+            if(err !== null) {
+                if(!calledBack)
+                    next(err);
+                calledBack = true;
+                return;
+            }
+
+            // Set the result
+            options.user.isAdmin = isAdmin;
 
             // Resolve the latch
             latch.resolve();

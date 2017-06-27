@@ -1,9 +1,9 @@
-extends ../base/page
+extends ../../base/page
 
 block content
     - var fadeDelay = -0.1;
 
-    if game.users.category == null
+    if game.users.category === null
         ul(data-role='listview')
             if game.users.count.requested > 0
                 li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Wachtende gebruikers
@@ -16,7 +16,7 @@ block content
             li: a.wow.fadeInUp(href=page.url + '/spectators', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Toeschouwers...
                 span.ui-li-count()= game.users.count.spectators
 
-            if game.users.count.requested == 0
+            if game.users.count.requested === 0
                 li.wow.fadeInUp(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's') Wachtende gebruikers
                 li: a.wow.fadeInUp(href=page.url + '/requested', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's') Aanvragen...
                     span.ui-li-count()= game.users.count.requested
@@ -90,4 +90,16 @@ block content
         if game.users.users.length > 0
             br
             if user.hasPermission
-                a.ui-btn.ui-btn-raised.clr-primary.action-change-user-roles.wow.fadeInUp(href='#popupChangeUserRole', data-rel='popup', data-position-to='window', data-transition='pop', data-wow-delay=(fadeDelay += 0.1) + 's') Rol aanpassen
+                a.ui-btn.ui-btn-raised.clr-primary.action-change-user-roles.wow.fadeInUp(href='#popupChangeUserRole', data-rel='popup', data-position-to='window', data-transition='pop', data-wow-delay=(fadeDelay += 0.1) + 's')
+                    i.zmdi.zmdi-male-female.ui-pull-left
+                    | &nbsp;&nbsp;Rol aanpassen
+                br
+
+    .button-list
+        if user.isAdmin
+            a.ui-btn.wow.fadeInUp(href='/game/' + game.id + '/players/create', data-wow-delay=(fadeDelay += 0.1) + 's')
+                i.zmdi.zmdi-account-add.ui-pull-left
+                | &nbsp;&nbsp;Gebruiker aanmaken
+        a.ui-btn(href='/game/' + game.id, title='Speloverzicht', data-ajax='false')
+            i.zmdi.zmdi-home.ui-pull-left
+            | &nbsp;&nbsp;Speloverzicht
