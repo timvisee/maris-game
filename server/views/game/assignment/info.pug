@@ -6,7 +6,9 @@ block content
             tr: td Naam
                 td= assignment.name
             tr: td Opdracht
-                td= assignment.description
+                td
+        p(style='border: 1px darkgray solid; padding: 8px')= assignment.description
+        table.table-list.ui-responsive
             tr: td Pogingen
                 if assignment.retry
                     td Onbeperkt

@@ -6,10 +6,12 @@ block content
 
         form(method='POST', action=page.url + '/#')
             table.table-list.ui-responsive
-                tr: td Voor
+                tr: td Naam
                     td= submission.assignment.name
-                tr: td Beschrijving
-                    td= submission.assignment.description
+                tr: td Opdracht
+                    td
+            p(style='border: 1px darkgray solid; padding: 8px')= submission.assignment.description
+            table.table-list.ui-responsive
                 tr: td Ingezonden
                     td= submission.user.name
                 tr: td Punten

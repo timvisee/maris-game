@@ -14,7 +14,9 @@ block content
                 tr: td Naam
                     td= submission.assignment.name
                 tr: td Opdracht
-                    td= submission.assignment.description
+                    td
+            p(style='border: 1px darkgray solid; padding: 8px')= submission.assignment.description
+            table.table-list.ui-responsive
                 tr: td Punten
                     td= submission.assignment.points
                 unless submission.answer_text === null

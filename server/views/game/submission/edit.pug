@@ -10,7 +10,9 @@ block content
             tr: td Naam
                 td= submission.assignment.name
             tr: td Opdracht
-                td= submission.assignment.description
+                td
+        p(style='border: 1px darkgray solid; padding: 8px')= submission.assignment.description
+        table.table-list.ui-responsive
             tr: td Ingezonden
                 td= submission.user.name
             tr: td Punten
