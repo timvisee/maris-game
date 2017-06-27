@@ -46,7 +46,7 @@ router.get('/', function(req, res, next) {
         var pageOptions = {};
 
         // Set the next property if known
-        if(_.isString(req.param('next')))
+        if(_.isString(req.params.next))
             pageOptions.next = req.param('next');
 
         // Render the index page
