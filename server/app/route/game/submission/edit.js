@@ -488,18 +488,17 @@ module.exports = {
 
                 // Resolve the latch
                 latch.then(function() {
-                    // Process the text input
-                    if(allowText === null || allowText === undefined || !allowText || (_.isString(submissionText) && submissionText.trim().length <= 0))
+                    // Set the text and file values to null if they're not allowed
+                    if(submissionText === undefined || !allowText || (_.isString(submissionText) && submissionText.trim().length <= 0))
                         submissionText = null;
-                    if(allowFile === null || allowFile === undefined || !allowFile || (_.isString(submissionFile) && submissionFile.trim().length <= 0))
+                    if(submissionFile === undefined || !allowFile || (_.isString(submissionFile) && submissionFile.trim().length <= 0))
                         submissionFile = null;
 
                     // Show an error if both values are null
-                    if(allowText === null && allowFile === null) {
+                    if(submissionText === null && submissionFile === null) {
                         // Show an error page
                         LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
-                            message: 'Voer alstublieft een antwoord in om uw inzending aan te passen.\n\n' +
-                            'Ga alstublieft terug en vul een antwoord in.'
+                            message: 'Voer alstublieft een antwoord in om in te zenden.'
                         });
                         return;
                     }
