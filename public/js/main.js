@@ -3974,8 +3974,8 @@ function updateGameDataVisuals() {
 
         data.standings.forEach(function(entry) {
             tableHtml += '<tr>' +
-                '<td><span style="color: ' + (entry.ally ? 'green' : 'red') + ';">' + entry.name + '</span></td>' +
-                '<td>' + formatMoney(entry.money, false) + ' <span style="color: gray">' + NameConfig.currency.name + '</span></td>' +
+                '<td><span style="color: ' + (entry.me ? 'green' : 'red') + ';">' + entry.name + '</span></td>' +
+                '<td>' + entry.score + ' <span style="color: gray">punt' + (entry.score != 1 ? 'en' : '') + '</span></td>' +
                 '</tr>'
         });
 

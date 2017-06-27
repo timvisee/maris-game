@@ -753,6 +753,10 @@ GameModel.prototype.getStandings = function(currentUser, callback) {
 
         // Call back the standings
         latch.then(function() {
+            // Sort
+            standings.sort((a, b) => b.score - a.score);
+
+            // Call back
             callback(err, standings);
         });
     });

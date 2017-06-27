@@ -383,7 +383,6 @@ GameUserModel.prototype.getScore = function(callback) {
         });
     });
 
-
     latch.then(function() {
         // Create a score latch
         var scoreLatch = new CallbackLatch();
