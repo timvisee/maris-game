@@ -848,6 +848,12 @@ BaseModel.prototype.mongoGetField = function(field, callback) {
             return;
         }
 
+        // Call back if undefined
+        if(data === undefined || data === null) {
+            callback(null, null);
+            return;
+        }
+
         // Call back with the field value
         callback(null, data[field]);
     });

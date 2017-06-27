@@ -102,7 +102,7 @@ SubmissionModelManager.prototype.isValidSubmissionId = function(id, callback) {
             }
 
             // Resolve the latch if the result is undefined, null or zero
-            if(result === undefined || result === null || result == 0) {
+            if(result === undefined || result === null || result === 0) {
                 // Resolve the latch and return
                 latch.resolve();
                 return;
