@@ -230,7 +230,7 @@ var Maris = {
 			// Start error monitoring with Sentry
 			// TODO: Make this configurable
 			// TODO: Don't hardcode the DSN (url)
-			//Raven.config('').install();
+			Raven.config('https://ae2dfe7454334b889db57ba9b456cc44@sentry.io/184218').install();
 
             // TODO: Supply some user (session) context
 		},
@@ -3605,7 +3605,7 @@ function updatePointMarkers(points) {
                 message: dialogBody,
                 actions: [
                     {
-                        text: 'Punt beheren',
+                        text: 'Punt bneheren',
                         state: 'normal',
                         icon: 'zmdi zmdi-edit',
                         action: function() {

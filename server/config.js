@@ -430,7 +430,7 @@ config.game.spreadTicks = true;
  * Define whether Sentry error monitoring is enabled.
  * @type {boolean}
  */
-config.sentry.enable = false;
+config.sentry.enable = true;
 
 /**
  * The Sentry DSN to monitor to.
@@ -440,7 +440,7 @@ config.sentry.enable = false;
  *
  * @type {string|undefined}
  */
-config.sentry.dsn = 'https://********:********@sentry.io/000000';
+config.sentry.dsn = 'https://ae2dfe7454334b889db57ba9b456cc44:7e741ffd39714e8a834b32f95752e852@sentry.io/184218';
 
 
 // Export the configuration
