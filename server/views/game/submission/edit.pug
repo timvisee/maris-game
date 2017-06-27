@@ -4,14 +4,14 @@ block content
     div(align="center")
         p Pas hieronder de antwoorden aan, en klik op de knop om de verandering toe te passen.
         if submission.approve_state !== 0
-        p Na het aanpassen zal uw inzending opnieuw goedgekeurd moeten worden.
+            p Na het aanpassen zal uw inzending opnieuw goedgekeurd moeten worden.
 
         table.table-list.ui-responsive
             tr: td Naam
                 td= submission.assignment.name
             tr: td Opdracht
                 td
-        p(style='border: 1px darkgray solid; padding: 8px')= submission.assignment.description
+        p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.assignment.description
         table.table-list.ui-responsive
             tr: td Ingezonden
                 td= submission.user.name

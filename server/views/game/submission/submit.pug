@@ -11,7 +11,7 @@ block content
                     td= assignment.name
                 tr: td Opdracht
                     td
-            p(style='border: 1px darkgray solid; padding: 8px')= assignment.description
+            p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= assignment.description
             table.table-list.ui-responsive
                 tr: td Bereik
                     if point.inRange
@@ -54,13 +54,14 @@ block content
 
         div(align="center")
             table.table-list.ui-responsive
-                tr: td Opdracht
+                tr: td Naam
                     td= assignment.name
-                tr: td Beschrijving
-                    td= assignment.description
+                tr: td Opdracht
+                    td
+            p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= assignment.description
 
                 // Show text submissions
-                unless null == submission.text
+                unless null === submission.text
                     tr: td Inzending
                         td= submission.text
 
