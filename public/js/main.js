@@ -3003,9 +3003,6 @@ function initMap(element) {
         // Update the map size
         updateMapSize(true, true);
 
-        // Request the map data
-        requestMapData();
-
         // Use the last known player location when possible
         var latlng = [52.06387, 4.248329];
         if(Maris.state.geoPlayerPosition != null)
@@ -3131,6 +3128,9 @@ function initMap(element) {
 
         // Invalidate the map size, because the container size might be changed
         map.invalidateSize();
+
+        // Request the map data to update the map
+        requestMapData();
     }
 }
 
