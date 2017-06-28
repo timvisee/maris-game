@@ -30,7 +30,7 @@ block content
                         td 1x
 
         br
-        form(method='POST', action=page.url + '/#', enctype='multipart/form-data', data-ajax='false')
+        form(method='POST', action=page.url + '/#', enctype='multipart/form-data')
             if assignment.allow_text
                 label(for='field-submission-text') Tekst:
                 textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')

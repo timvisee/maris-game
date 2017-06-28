@@ -4981,3 +4981,30 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.GAME_SUBMISSION_CHANGE
     // Flush the submission pages
     Maris.utils.flushPages(new RegExp('^\\/game\\/' + Maris.utils.getGameId() + '\\/submission\\/' + packet.submission), false);
 });
+
+$(document).bind("pageinit", function() {
+    // Disable AJAX for file uploads
+    $(this).find('form').submit(function() {
+        // Determine whether the form has a file
+        var hasFile = false;
+
+        // Loop through all file elements
+        $(this).find('input[type=file]').each(function() {
+            if($(this).val().trim().length > 0)
+                hasFile = true;
+        });
+
+        // Configure the property
+        if(hasFile) {
+            console.log('Disabling AJAX for file upload...');
+            $(this).attr("data-ajax", "false");
+        } else
+            $(this).removeAttr("data-ajax");
+
+        // Show a loading indicator
+        $.mobile.loading( "show", {
+              text: "Bestand uploaden...",
+              textVisible: true
+        });
+    });
+});
