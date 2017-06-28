@@ -39,7 +39,8 @@ const IMAGE_EXTENSIONS = [
 const VIDEO_EXTENSIONS = [
     'mp4',
     'webm',
-    'ogg'
+    'ogg',
+    'mov'
 ];
 
 /**
