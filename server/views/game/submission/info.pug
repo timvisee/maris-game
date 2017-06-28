@@ -66,7 +66,8 @@ block content
         unless submission.answer_file === null
             div.content-box
                 if submission.answer_file.isImage
-                    img(src=submission.answer_file.url, alt='Afbeelding bestand')
+                    a(href=submission.answer_file.url, target='_blank', title='Bestand bekijken')
+                        img(src=submission.answer_file.url, alt='Afbeelding bestand')
                 else if submission.answer_file.isVideo
                     video(controls alt='Video bestand')
                         source(src=submission.answer_file.url)

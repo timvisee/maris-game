@@ -5006,5 +5006,7 @@ $(document).bind("pageinit", function() {
               text: "Bestand uploaden...",
               textVisible: true
         });
+
+        return true;
     });
 });
