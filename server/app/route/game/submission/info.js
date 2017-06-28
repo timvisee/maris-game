@@ -336,7 +336,7 @@ module.exports = {
 
             // Fetch the answer file
             latch.add();
-            submission.getAnswerFile(function(err, answerFile) {
+            submission.getAnswerFileObject(function(err, answerFileObject) {
                 // Call back errors
                 if(err !== null) {
                     if(!calledBack)
@@ -346,7 +346,7 @@ module.exports = {
                 }
 
                 // Set the property
-                options.submission.answer_file = answerFile;
+                options.submission.answer_file = answerFileObject;
 
                 // Resolve the latch
                 latch.resolve();

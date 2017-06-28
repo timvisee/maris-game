@@ -14,21 +14,35 @@ block content
                 tr: td Naam
                     td= submission.assignment.name
                 tr: td Opdracht
-                    td
-            p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.assignment.description
+                    td Tekst &#x21B4;
+            p.content-box= submission.assignment.description
             table.table-list.ui-responsive
                 tr: td Punten
                     td= submission.assignment.points
                 unless submission.answer_text === null
                     tr: td Antwoord
-                        td
+                        td Tekst &#x21B4;
             unless submission.answer_text === null
-                p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.answer_text
+                p.content-box= submission.answer_text
+                table.table-list.ui-responsive
 
-            table.table-list.ui-responsive
-                unless submission.answer_file === null
-                    tr: td Bestand
-                        td= submission.answer_file
+                    unless submission.answer_file === null
+                        tr: td Antwoord
+                            td Bestand &#x21B4;
+
+            unless submission.answer_file === null
+                div.content-box
+                    if submission.answer_file.isImage
+                        img(src=submission.answer_file.url, alt='Afbeelding bestand')
+                    else if submission.answer_file.isVideo
+                        video(controls alt='Video bestand')
+                            source(src=submission.answer_file.url)
+                    else
+                        p  Bestandstype onbekend.
+                        p  Klik op de knop om het bestand te openen.
+                    a.ui-btn(href=submission.answer_file.url, title='Bestand bekijken', target='_blank')
+                        i.zmdi.zmdi-search-in-file
+                        | &nbsp;&nbsp;Bestand bekijken
 
             br
             .button-list

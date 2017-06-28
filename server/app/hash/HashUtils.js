@@ -45,7 +45,7 @@ var HashUtils = function() {};
  * @return {string} Hash.
  */
 HashUtils.randomHash = function() {
-    var hash;
+    var hash = '';
 
     // Build the hath
     for(var i = 0; i < 64; i++)

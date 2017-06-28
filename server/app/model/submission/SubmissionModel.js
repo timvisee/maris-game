@@ -20,7 +20,10 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var _ = require('lodash');
 var util = require('util');
+
+var config = require('../../../config');
 
 var Core = require('../../../Core');
 var SubmissionDatabase = require('./SubmissionDatabase');
@@ -28,6 +31,7 @@ var BaseModel = require('../../database/BaseModel');
 var CallbackLatch = require('../../util/CallbackLatch');
 var Coordinate = require('../../coordinate/Coordinate');
 var ApprovalState = require("./ApprovalState.js");
+var FileUtils = require('../../util/FileUtils');
 
 /**
  * SubmissionModel class.
@@ -454,30 +458,48 @@ SubmissionModel.prototype.getAnswerFile = function(callback) {
  */
 
 /**
- * Get the file answer for the submission as URL.
+ * Get the file answer object that can be used in templating.
  *
  * @param {SubmissionModel~getAnswerFileUrlCallback} callback Called with file answer or when an error occurred.
  */
-SubmissionModel.prototype.getAnswerFileUrl = function(callback) {
+SubmissionModel.prototype.getAnswerFileObject = function(callback) {
     // Get the file
-    this.getAnswerFile(function(err, file) {
+    this.getAnswerFile(function(err, name) {
         // Call back errors
-        if(err !== null || file === null || file.trim().length === 0) {
+        if(err !== null || name === null || !_.isString(name) || name.trim().length === 0) {
             callback(err, null);
             return;
         }
 
-        // Get the base URL and append the file to it
-        callback(null, config.upload.publicPath + '/' + file.trim());
+        // Determine the URL
+        var url = config.upload.publicPath + '/' + name.trim();
+
+        // Build and call back the URL
+        callback(null, {
+            name,
+            url,
+            isImage: FileUtils.isImage(name),
+            isVideo: FileUtils.isVideo(name)
+        })
     });
 };
 
 /**
- * Called with the file answer as URL or when an error occurred.
+ * Called with the file answer object or when an error occurred.
  *
- * @callback SubmissionModel~getAnswerFileUrlCallback
+ * @callback SubmissionModel~getAnswerFileObjectCallback
  * @param {Error|null} Error instance if an error occurred, null otherwise.
- * @param {string|null} File answer as URL or null.
+ * @param {SubmissionModel~FileAnswerObject|null} File answer object or null.
+ */
+
+/**
+ * An object containing some file answer data.
+ *
+ * @typedef {SubmissionModel~FileAnswerObject}
+ * @param {string} name File name.
+ * @param {string} url Public URL.
+ * @param {boolean} isImage True if this file probably is an image, false if not.
+ * @param {boolean} isVideo True if this file probably is a video, false if not.
  */
 
 /**

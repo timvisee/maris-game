@@ -118,4 +118,22 @@ input[type=number] {
 .ui-slider-track {
   margin-left: 100px; }
 
+.content-box {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border: 1px #CCC solid;
+  padding: 8px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px; }
+
+p.content-box {
+  white-space: pre; }
+
+.content-box video,
+.content-box img {
+  margin-bottom: 10px;
+  max-width: 500px;
+  max-height: 500px; }
+
 /*# sourceMappingURL=style.css.map */

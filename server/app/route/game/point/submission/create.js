@@ -488,13 +488,13 @@ module.exports = {
                             }
 
                             // Show a status message
-                            console.log('File upload: File successfully moved! (size: \'' + Formatter.formatBytes(fs.statSync(filePath).size) + '\')');
+                            console.log('File upload: File successfully moved! (size: ' + Formatter.formatBytes(fs.statSync(filePath).size) + ')');
 
                             // Set the file name for the submission in the database
                             submissionFileName = fileName;
 
                             // Resolve the latch
-                            latch.resolve();
+                            fileLatch.resolve();
                         });
                     }
 
@@ -523,12 +523,30 @@ module.exports = {
                                 submission: {
                                     id: submissionModel.getIdHex(),
                                     text: submissionText,
-                                    file: submissionFile
+                                    file: null
                                 }
                             };
 
                             // Reset the latch to it's identity
                             latch.identity();
+
+                            // Get the answer file
+                            latch.add();
+                            submissionModel.getAnswerFileObject(function(err, fileObject) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        next(err);
+                                    calledBack = true;
+                                    return;
+                                }
+
+                                // Set the file object
+                                options.submission.file = fileObject;
+
+                                // Resolve the latch
+                                latch.resolve();
+                            });
 
                             // Get the assignment name
                             latch.add();

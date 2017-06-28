@@ -6,8 +6,8 @@ block content
             tr: td Naam
                 td= assignment.name
             tr: td Opdracht
-                td
-        p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= assignment.description
+                td Tekst &#x21B4;
+        p.content-box= assignment.description
         table.table-list.ui-responsive
             tr: td Pogingen
                 if assignment.retry
@@ -16,13 +16,13 @@ block content
                     td 1x
             tr: td Punten
                 td= assignment.points
-            tr: td Antwoord
+            tr: td Tekst antwoord
                 td
                     if assignment.answer_text
                         span(style='color: green;') Ja
                     else
                         span(style='color: red;') Nee
-            tr: td Bestand
+            tr: td Bestand antwoord
                 td
                     if assignment.answer_file
                         span(style='color: green;') Ja

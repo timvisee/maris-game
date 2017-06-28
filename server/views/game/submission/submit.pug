@@ -32,7 +32,7 @@ block content
         br
         form(method='POST', action=page.url + '/#', enctype='multipart/form-data', data-ajax='false')
             if assignment.allow_text
-                label(for='field-submission-text') Antwoord:
+                label(for='field-submission-text') Tekst:
                 textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')
 
             if assignment.allow_file
@@ -57,19 +57,33 @@ block content
                 tr: td Naam
                     td= assignment.name
                 tr: td Opdracht
-                    td
-            p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= assignment.description
+                    td Tekst &#x21B4;
+            p.content-box= assignment.description
             table.table-list.ui-responsive
-
-                // Show text submissions
-                unless null === submission.text
-                    tr: td Inzending
-                        td= submission.text
-
-                // Show file submissions
-                unless submission.file === null
+                unless submission.text === null
                     tr: td Antwoord
-                        td: i(style='color: gray;') Bestand
+                        td Tekst &#x21B4;
+            unless submission.text === null
+                p.content-box= submission.text
+                table.table-list.ui-responsive
+
+                    unless submission.file === null
+                        tr: td Antwoord
+                            td Bestand &#x21B4;
+
+            unless submission.file === null
+                div.content-box
+                    if submission.file.isImage
+                        img(src=submission.file.url, alt='Afbeelding bestand')
+                    else if submission.file.isVideo
+                        video(controls alt='Video bestand')
+                            source(src=submission.file.url)
+                    else
+                        p  Bestandstype onbekend.
+                        p  Klik op de knop om het bestand te openen.
+                    a.ui-btn(href=submission.file.url, title='Bestand bekijken', target='_blank')
+                        i.zmdi.zmdi-zoom-in
+                        | &nbsp;&nbsp;Bestand bekijken
 
         br
         p Klik op de onderstaande knop om terug te gaan naar het spel.

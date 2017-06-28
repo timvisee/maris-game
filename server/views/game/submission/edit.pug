@@ -10,8 +10,8 @@ block content
             tr: td Naam
                 td= submission.assignment.name
             tr: td Opdracht
-                td
-        p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= submission.assignment.description
+                td Tekst &#x21B4;
+        p.content-box= submission.assignment.description
         table.table-list.ui-responsive
             tr: td Ingezonden
                 td= submission.user.name
@@ -33,7 +33,7 @@ block content
                     if submission.approve_state === 0
                         i.zmdi.zmdi-puzzle-piece.ui-pull-left.
                             &nbsp;
-                        span(style='color: gray; font-style: italic;') In afwachting
+                        span In afwachting
                     else if submission.approve_state === 1
                         i.zmdi.zmdi-thumb-up.ui-pull-left(style='color: green;').
                             &nbsp;
@@ -46,7 +46,7 @@ block content
     br
     form(method='POST', action=page.url + '/#', enctype='multipart/form-data', data-ajax='false')
         if submission.assignment.allow_text
-            label(for='field-submission-text') Antwoord:
+            label(for='field-submission-text') Tekst:
                 textarea(name='field-submission-text', id='field-submission-text', data-clear-btn='true', data-randomize='true')
                     unless submission.answer_text === null
                         = submission.answer_text
@@ -57,7 +57,7 @@ block content
 
         br
         .button-list
-            button.ui-btn.ui-btn-raised.clr-primary(type='submit', data-ajax='false')
+            button.ui-btn.ui-btn-raised.clr-primary(type='submit')
                 i.zmdi.zmdi-edit
                 | &nbsp;&nbsp;Inzending aanpassen
             if submission.permissions.approve

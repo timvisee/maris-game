@@ -571,13 +571,13 @@ module.exports = {
                             }
 
                             // Show a status message
-                            console.log('File upload: File successfully moved! (size: \'' + Formatter.formatBytes(fs.statSync(filePath).size) + '\')');
+                            console.log('File upload: File successfully moved! (size: ' + Formatter.formatBytes(fs.statSync(filePath).size) + ')');
 
                             // Set the file name for the submission in the database
                             submissionFileName = fileName;
 
                             // Resolve the latch
-                            latch.resolve();
+                            fileLatch.resolve();
                         });
                     }
 
@@ -602,19 +602,21 @@ module.exports = {
                         });
 
                         // Set the file field
-                        applyLatch.add();
-                        submission.setAnswerFile(submissionFileName, function(err) {
-                            // Call back errors
-                            if(err !== null) {
-                                if(!calledBack)
-                                    next(err);
-                                calledBack = true;
-                                return;
-                            }
+                        if(submissionFileName !== null) {
+                            applyLatch.add();
+                            submission.setAnswerFile(submissionFileName, function(err) {
+                                // Call back errors
+                                if(err !== null) {
+                                    if(!calledBack)
+                                        next(err);
+                                    calledBack = true;
+                                    return;
+                                }
 
-                            // Resolve the latch
-                            applyLatch.resolve();
-                        });
+                                // Resolve the latch
+                                applyLatch.resolve();
+                            });
+                        }
 
                         // Set the approval state
                         applyLatch.add();
