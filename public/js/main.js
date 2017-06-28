@@ -4587,19 +4587,6 @@ Maris.realtime.packetProcessor.registerHandler(PacketType.APP_STATUS_UPDATE, fun
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 var pointSelectMap = null;
 var pointSelectMarker = null;
 var pointSelectCircle = null;

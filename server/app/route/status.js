@@ -37,7 +37,7 @@ router.get('/', function(req, res, next) {
         }
 
         // Render
-        LayoutRenderer.render(req, res, next, 'status', 'Application Status', {
+        LayoutRenderer.renderAndShow(req, res, next, 'status', 'Application Status', {
             status
         });
     });
