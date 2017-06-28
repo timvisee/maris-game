@@ -20,6 +20,8 @@
  * program. If not, see <http://opensource.org/licenses/MIT/>.                *
  ******************************************************************************/
 
+var Core = require('../../Core');
+
 /**
  * Constructor.
  *
@@ -33,6 +35,11 @@ var ObjectCache = function() {
      * @private
      */
     this._cache = new Map();
+
+    /**
+     * Number of queries executed.
+     */
+    this._queryCount = 0;
 };
 
 /**
@@ -43,6 +50,10 @@ var ObjectCache = function() {
  * @returns {boolean} True if this field is available, false if not.
  */
 ObjectCache.prototype.hasCache = function(field) {
+    // Increase the query count
+    this._increaseQueryCount();
+
+    // Return true if the field is cached
     return this._cache.has(field);
 };
 
@@ -53,6 +64,10 @@ ObjectCache.prototype.hasCache = function(field) {
  * @returns {*|undefined} Cached value, or undefined if the field is unknown.
  */
 ObjectCache.prototype.getCache = function(field) {
+    // Increase the query count
+    this._increaseQueryCount();
+
+    // Get the cached value
     return this._cache.get(field);
 };
 
@@ -62,6 +77,10 @@ ObjectCache.prototype.getCache = function(field) {
  * @returns {Number} Total number of cached fields.
  */
 ObjectCache.prototype.getCacheCount = function() {
+    // Increase the query count
+    this._increaseQueryCount();
+
+    // Return the size
     return this._cache.size;
 };
 
@@ -72,6 +91,10 @@ ObjectCache.prototype.getCacheCount = function() {
  * @param {*} value Value to cache.
  */
 ObjectCache.prototype.setCache = function(field, value) {
+    // Increase the query count
+    this._increaseQueryCount();
+
+    // Set the cache value
     this._cache.set(field, value);
 };
 
@@ -99,6 +122,9 @@ ObjectCache.prototype.setCacheMultiple = function(values) {
  * @param {Array|string} [fields] Array of fields or a specific field as a string to flush.
  */
 ObjectCache.prototype.flushCache = function(fields) {
+    // Increase the query count
+    this._increaseQueryCount();
+
     // Flush all if no field is given
     if(fields === undefined) {
         this._cache = new Map();
@@ -114,5 +140,16 @@ ObjectCache.prototype.flushCache = function(fields) {
         this._cache.delete(fields[i]);
 };
 
+/**
+ * Increase the query count by one.
+ *
+ * @private
+ */
+ObjectCache.prototype._increaseQueryCount = function() {
+    this._queryCount++;
+    Core.status.internalCache.queryCount++;
+};
+
 // Export the user class
 module.exports = ObjectCache;
+
