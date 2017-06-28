@@ -605,6 +605,10 @@ PointManager.prototype.updateUserPoints = function(user, callback) {
                     unusedAssignments.splice(randomIndex, 1);
                 }
 
+                // Skip if no assignments were selected
+                if(pointAssignments.length <= 0)
+                    return;
+
                 // Attach the assignments to the point
                 point.setUserAssignmentAssignments(user, pointAssignments, function(err) {
                     // Call back errors
