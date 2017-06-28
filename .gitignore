@@ -1,3 +1,6 @@
+# Project
+/public/uploads
+
 ### Vim
 # Vim swap files
 .*.swp

@@ -474,6 +474,7 @@ module.exports = {
                 // Check whether to allow text and file answers
                 var allowText = false;
                 var allowFile = false;
+                var hasFile = false;
 
                 // Check whether text answers are allowed
                 latch.add();
@@ -511,6 +512,24 @@ module.exports = {
                     latch.resolve();
                 });
 
+                // Check whether the answer already has a file
+                latch.add();
+                submission.hasAnswerFile(function(err, result) {
+                    // Call back errors
+                    if(err !== null) {
+                        if(!calledBack)
+                            next(err);
+                        calledBack = true;
+                        return;
+                    }
+
+                    // Set whether we have a file
+                    hasFile = result;
+
+                    // Resolve the latch
+                    latch.resolve();
+                });
+
                 // Resolve the latch
                 latch.then(function() {
                     // Set the text and file values to null if they're not allowed
@@ -520,7 +539,7 @@ module.exports = {
                         submissionFile = null;
 
                     // Show an error if both values are null
-                    if(submissionText === null && submissionFile === null) {
+                    if(submissionText === null && submissionFile === null && !hasFile) {
                         // Show an error page
                         LayoutRenderer.renderAndShow(req, res, next, 'error', 'Oeps!', {
                             message: 'Voer alstublieft een antwoord in om in te zenden.'
