@@ -158,6 +158,10 @@ p.content-box {
 .content-box video,
 .content-box img {
   margin-bottom: 10px;
-  max-width: 500px;
+  display: inline-block;
+  max-width: 100%;
   max-height: 500px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
