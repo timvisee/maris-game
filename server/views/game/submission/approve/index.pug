@@ -30,9 +30,9 @@ block content
             p.content-box= submission.answer_text
             table.table-list.ui-responsive
 
-                unless submission.answer_file === null
-                    tr: td Antwoord
-                        td Bestand &#x21B4;
+            unless submission.answer_file === null
+                tr: td Antwoord
+                    td Bestand &#x21B4;
 
         unless submission.answer_file === null
             div.content-box
