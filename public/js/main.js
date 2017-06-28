@@ -818,7 +818,10 @@ var Maris = {
             // Show an error dialog for Chrome users
             if(Maris.utils.isChrome(true)) {
                 // Add the refresh meta to the page
-                $(body).append('<meta http-equiv="refresh" content="0; url=' + targetUrl + '">');
+                if(body !== undefined)
+                    $(body).append('<meta http-equiv="refresh" content="0; url=' + targetUrl + '">');
+                else if(document !== undefined)
+                    $(document).append('<meta http-equiv="refresh" content="0; url=' + targetUrl + '">');
 
                 // Show a dialog after half a second
                 setTimeout(function() {
