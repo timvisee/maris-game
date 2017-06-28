@@ -65,11 +65,11 @@ block content
                         td Tekst &#x21B4;
             unless submission.text === null
                 p.content-box= submission.text
-                table.table-list.ui-responsive
 
             unless submission.file === null
-                tr: td Antwoord
-                    td Bestand &#x21B4;
+                table.table-list.ui-responsive
+                    tr: td Antwoord
+                        td Bestand &#x21B4;
 
             unless submission.file === null
                 div.content-box

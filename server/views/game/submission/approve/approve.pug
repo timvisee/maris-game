@@ -24,11 +24,11 @@ block content
                         td Tekst &#x21B4;
             unless submission.answer_text === null
                 p.content-box= submission.answer_text
-                table.table-list.ui-responsive
 
             unless submission.answer_file === null
-                tr: td Antwoord
-                    td Bestand &#x21B4;
+                table.table-list.ui-responsive
+                    tr: td Antwoord
+                        td Bestand &#x21B4;
 
             unless submission.answer_file === null
                 div.content-box
