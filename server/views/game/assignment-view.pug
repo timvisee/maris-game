@@ -1,8 +1,8 @@
 // Mixin for the available list
 mixin availableList
-    li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beschikbaar  ·  ' + submissions.available.length
+    li.wow.fadeInUp.game-assignments-group-available(data-role='list-divider')= 'Beschikbaar  ·  ' + submissions.available.length
         if submissions.available.length === 0
-            p.wow.fadeInUp.game-data-load-label(style='font-style: italic;', data-wow-delay=(fadeDelay += 0.1) + 's')
+            p.wow.fadeInUp.game-data-load-label(style='font-style: italic;')
                 if submissions.game.stage === 1
                     span.
                         Hier geen opdrachten beschikbaar...#[br]
@@ -15,7 +15,7 @@ mixin availableList
 
     if submissions.available.length > 0
         each assignment in submissions.available
-            li: a.wow.fadeInUp(href='/game/' + game.id + '/assignment/' + assignment.id + '/submit', data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')= assignment.name
+            li: a.wow.fadeInUp(href='/game/' + game.id + '/assignment/' + assignment.id + '/submit', data-transition='slide')= assignment.name
                 span.ui-li-count
                     i.zmdi.zmdi-puzzle-piece.ui-pull-left.
                         &nbsp;&nbsp;
@@ -23,9 +23,9 @@ mixin availableList
 
 // Mixin for the pending list
 mixin pendingList
-    li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'In afwachting  ·  ' + submissions.pending.length
+    li.wow.fadeInUp.game-assignments-group-pending(data-role='list-divider')= 'In afwachting  ·  ' + submissions.pending.length
     each submission in submissions.pending
-        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
+        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide')
             = submission.name
             if submissions.user.id !== submission.user.id
                 span(style="color: gray;")= '  ·  ' + submission.user.name
@@ -42,9 +42,9 @@ mixin pendingList
 
 // Mixin for the rated list
 mixin ratedList
-    li.wow.fadeInUp.game-assignments-rated(data-role='list-divider', data-wow-delay=(fadeDelay += 0.1) + 's')= 'Beoordeeld  ·  ' + submissions.rated.length
+    li.wow.fadeInUp.game-assignments-rated(data-role='list-divider')= 'Beoordeeld  ·  ' + submissions.rated.length
     each submission in submissions.rated
-        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide', data-wow-delay=(fadeDelay += 0.1) + 's')
+        li: a.wow.fadeInUp(href='/game/' + game.id + '/submission/' + submission.id, data-transition='slide')
             = submission.name
             if submissions.user.id !== submission.user.id
                 span(style="color: gray;")= '  ·  ' + submission.user.name
