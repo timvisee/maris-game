@@ -3000,6 +3000,9 @@ function initMap(element) {
             map = null;
         }
 
+        // Request the map data to update the map
+        requestMapData(undefined, false);
+
         // Update the map size
         updateMapSize(true, true);
 
@@ -3129,8 +3132,10 @@ function initMap(element) {
         // Invalidate the map size, because the container size might be changed
         map.invalidateSize();
 
-        // Request the map data to update the map
-        requestMapData();
+        // Request the map data to update the map after two seconds
+        setTimeout(function() {
+            requestMapData(undefined, false);
+        }, 1500);
     }
 }
 
@@ -3178,11 +3183,14 @@ $(window).resize(function() {
  * Refresh the location data for the map.
  *
  * @param {string} [game] ID of the game to request the location data for, or null to use the current game.
+ * @param {boolean} [notify=true] True to notify, false if not.
  */
-function requestMapData(game) {
-    // Parse the game parameter
+function requestMapData(game, notify) {
+    // Parse the game and notify parameter
     if(game == undefined)
         game = Maris.state.activeGame;
+    if(notify == undefined)
+        notify = true;
 
     // Don't request if we aren't authenticated yet
     if(!Maris.state.loggedIn)
@@ -3193,7 +3201,8 @@ function requestMapData(game) {
         return;
 
     // Show a status message
-    showNotification('Kaart verversen...');
+    if(notify)
+        showNotification('Kaart verversen...');
 
     // Request the map data
     Maris.realtime.packetProcessor.sendPacket(PacketType.GAME_LOCATIONS_REQUEST, {
