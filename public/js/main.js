@@ -4991,17 +4991,21 @@ $(document).bind("pageinit", function() {
         });
 
         // Configure the property
-        if(hasFile) {
-            console.log('Disabling AJAX for file upload...');
+        if(hasFile)
             $(this).attr("data-ajax", "false");
-        } else
+        else
             $(this).removeAttr("data-ajax");
 
-        // Show a loading indicator
-        $.mobile.loading( "show", {
-              text: "Bestand uploaden...",
-              textVisible: true
-        });
+        // Show a loading indicator when uploading
+        if(hasFile) {
+            console.log('Disabling AJAX for file upload...');
+
+            // Show a loading indicator
+            $.mobile.loading( "show", {
+                text: "Bestand uploaden...",
+                textVisible: true
+            });
+        }
 
         return true;
     });
