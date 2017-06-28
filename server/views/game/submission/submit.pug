@@ -10,8 +10,8 @@ block content
                 tr: td Naam
                     td= assignment.name
                 tr: td Opdracht
-                    td
-            p(style='border: 1px darkgray solid; padding: 8px; white-space: pre;')= assignment.description
+                    td Tekst &#x21B4;
+            p.content-box= assignment.description
             table.table-list.ui-responsive
                 tr: td Bereik
                     if point.inRange
@@ -74,7 +74,8 @@ block content
             unless submission.file === null
                 div.content-box
                     if submission.file.isImage
-                        img(src=submission.file.url, alt='Afbeelding bestand')
+                        a(href=submission.file.url, target='_blank', title='Bestand bekijken')
+                            img(src=submission.file.url, alt='Afbeelding bestand')
                     else if submission.file.isVideo
                         video(controls alt='Video bestand')
                             source(src=submission.file.url)
