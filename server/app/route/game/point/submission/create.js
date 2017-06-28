@@ -607,24 +607,41 @@ module.exports = {
                                         return;
                                     }
 
+                                    // Define the delay value in milliseconds
+                                    var scheduleTime = Math.min(managers.length * 1000, 5000);
+                                    var delay = 0;
+
                                     // Send the change to the managers
                                     managers.forEach(function(manageUser) {
-                                        // Send the packet
-                                        Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
-                                            submission: submissionModel.getIdHex(),
-                                            name: options.submission.name,
-                                            state: 'create',
-                                            own: false
-                                        }, manageUser);
+                                        // Do the update
+                                        var doUpdate = function() {
+                                            // Send the packet
+                                            Core.realTime.packetProcessor.sendPacketUser(PacketType.GAME_SUBMISSION_CHANGE, {
+                                                submission: submissionModel.getIdHex(),
+                                                name: options.submission.name,
+                                                state: 'create',
+                                                own: false
+                                            }, manageUser);
 
-                                        // Resend the game location data
-                                        Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
-                                            // Call back errors
-                                            if(err !== null) {
-                                                console.error('Failed to broadcast location data to user, ignoring.');
-                                                console.error(err);
-                                            }
-                                        });
+                                            // Resend the game location data
+                                            Core.gameManager.broadcastLocationData(0, game, manageUser, true, undefined, function(err) {
+                                                // Call back errors
+                                                if(err !== null) {
+                                                    console.error('Failed to broadcast location data to user, ignoring.');
+                                                    console.error(err);
+                                                }
+                                            });
+                                        };
+
+                                        // Run tasks with a delay of zero immediately and schedule delayed tasks
+                                        if(delay === 0)
+                                            doUpdate();
+                                        else
+                                            setTimeout(doUpdate, parseInt(delay));
+
+                                        // Increase the delay
+                                        if(config.game.spreadTicks && scheduleTime !== 0)
+                                            delay += scheduleTime / managers.length;
                                     });
                                 });
                             });
