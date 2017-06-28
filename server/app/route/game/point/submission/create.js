@@ -305,7 +305,7 @@ module.exports = {
     post: (req, res, next) => {
         // Get the login field values
         var submissionText = req.body['field-submission-text'];
-        var submissionFile = req.body['field-submission-file'];
+        var submissionFile = req.files !== null ? req.files['field-submission-file'] : null;
 
         // Make sure the user has a valid session
         if(!req.requireValidSession())
