@@ -10,6 +10,16 @@ assignments, and approve returned answers.
 
 This project is commissioned by Maris college.
 
+## Screenshots
+These are some screenshots of the game (in Dutch).  
+View a more extensive list of screenshots here: [[Screenshots]](/res/screenshots)
+
+![Points overview when the game is finished](/res/screenshots/points-all.png)
+![In-range point while the game is running](/res/screenshots/point-in-range.png)
+![Video submission](/res/screenshots/submission-video.png)
+![Editing an assignment](/res/screenshots/assignment-edit.png)
+![Assignment overview with possible submissions](/res/screenshots/assignment-overview-submit.png)
+
 ## Development progress
 An overview of the development progress is available at:  
 https://trello.com/b/7nCavUIK/ (currently private)
