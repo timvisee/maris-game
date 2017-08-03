@@ -45,8 +45,8 @@ module.exports = {
         const self = module.exports;
 
         // Route the assignments creation page
-        router.get('/:game/players/create', (req, res, next) => self.get(req, res, next));
-        router.post('/:game/players/create', (req, res, next) => self.post(req, res, next));
+        router.get('/:game/player/create', (req, res, next) => self.get(req, res, next));
+        router.post('/:game/player/create', (req, res, next) => self.post(req, res, next));
     },
 
     /**

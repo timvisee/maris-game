@@ -97,7 +97,7 @@ block content
 
     .button-list
         if user.isAdmin
-            a.ui-btn.wow.fadeInUp(href='/game/' + game.id + '/players/create', data-wow-delay=(fadeDelay += 0.1) + 's')
+            a.ui-btn.wow.fadeInUp(href='/game/' + game.id + '/player/create', data-wow-delay=(fadeDelay += 0.1) + 's')
                 i.zmdi.zmdi-account-add.ui-pull-left
                 | &nbsp;&nbsp;Gebruiker aanmaken
         a.ui-btn(href='/game/' + game.id, title='Speloverzicht', data-ajax='false')

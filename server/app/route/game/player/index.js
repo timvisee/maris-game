@@ -41,12 +41,12 @@ module.exports = {
         const self = module.exports;
 
         // Route the pages
-        router.get('/:game/players', self.get);
+        router.get('/:game/player', self.get);
 
         // Route the list pages
-        router.get('/:game/players/requested', (req, res, next) => self.listPage(req, res, next, 'requested'));
-        router.get('/:game/players/participants', (req, res, next) => self.listPage(req, res, next, 'participants'));
-        router.get('/:game/players/spectators', (req, res, next) => self.listPage(req, res, next, 'spectators'));
+        router.get('/:game/player/requested', (req, res, next) => self.listPage(req, res, next, 'requested'));
+        router.get('/:game/player/participants', (req, res, next) => self.listPage(req, res, next, 'participants'));
+        router.get('/:game/player/spectators', (req, res, next) => self.listPage(req, res, next, 'spectators'));
 
         // Route the create page
         pageCreate.route(router);

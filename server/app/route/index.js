@@ -25,9 +25,9 @@ var router = express.Router();
 var _ = require("lodash");
 
 var ajax = require('./ajax/index');
-var login = require('./login');
-var logout = require('./logout');
-var register = require('./register');
+var login = require('./account/login');
+var logout = require('./account/logout');
+var register = require('./account/register');
 var games = require('./games');
 var game = require('./game/index');
 var about = require('./about');
