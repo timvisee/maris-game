@@ -153,8 +153,14 @@ LayoutRenderer.renderAndShow = function(req, res, next, pugName, pageTitle, opti
             return;
         }
 
+        // TODO: Remove after debugging
+        console.time('render-pug');
+
         // Render and show the page
         res.render(pugName, pageConfig);
+
+        // TODO: Remove after debugging
+        console.timeEnd('render-pug');
     });
 };
 
@@ -178,8 +184,14 @@ LayoutRenderer.render = function(req, res, next, pugName, pageTitle, options, ca
             return;
         }
 
+        // TODO: Remove after debugging
+        console.time('render-pug');
+
         // Render and show the page
         Core.expressApp.render(pugName, pageConfig, function(err, source) {
+            // TODO: Remove after debugging
+            console.timeEnd('render-pug');
+
             // Parse undefined errors
             if(err === undefined)
                 err = null;
