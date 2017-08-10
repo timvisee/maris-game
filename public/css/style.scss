@@ -125,6 +125,10 @@ h3.table-list,
   height: 100%;
 }
 
+#map {
+  margin: 0 -16px;
+}
+
 // Point selection map container
 #point-map-container {
   display: inline-block;

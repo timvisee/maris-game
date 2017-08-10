@@ -2998,9 +2998,21 @@ function initMap(element) {
     // Check whether there's a map container on the new page
     if(mapContainer.length > 0) {
         // Make sure any map is available inside the container
-        if(mapContainer.find("div.leaflet-map-pane").length <= 0) {
+        if(mapContainer.find("#map div.leaflet-map-pane").length <= 0) {
             // Reset the map instance, to cause it to be created again
+            console.log('Destroying the old map container...');
+            $('#map').html('');
+            $('#map-container').empty();
             map = null;
+
+            // Reset the existing markers
+            playerMarker = null;
+            playersMarkers = [];
+            pointMarkers = [];
+
+            // Build the new map container
+            console.log('Build the new map contaier...');
+            element.find('#map-container').append('<div id="map"></div>');
         }
 
         // Request the map data to update the map
@@ -3031,7 +3043,7 @@ function initMap(element) {
             }
 
             // Create the map
-            map = L.map('map-container', mapOptions).setView(latlng, 18);
+            map = L.map('map', mapOptions).setView(latlng, 18);
 
             // Set up the tile layers
             L.tileLayer('https://api.mapbox.com/styles/v1/timvisee/cirawmn8f001ch4m27llnb45d/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidGltdmlzZWUiLCJhIjoiY2lyZXY5cDhzMDAxM2lsbTNicGViaTZkYyJ9.RqbUkoWLWeh_WZoyoxxt-Q', {
@@ -3151,7 +3163,7 @@ function initMap(element) {
 function updateMapSize(invalidateSize, updateDiv) {
     // Update the map container size
     if(updateDiv)
-        $('#map-container').height($(window).height() - getActivePage().find('.ui-header').height());
+        $('#map').height($(window).height() - getActivePage().find('.ui-header').height());
 
     // Make sure we've a map we know about
     if(map == null)
